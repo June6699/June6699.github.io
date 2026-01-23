@@ -40,7 +40,7 @@ kramdown:
   input: GFM
 
 # 评论系统
-# Disqus（https://disqus.com/）
+Disqus（https://disqus.com/）
 disqus_username: June6699
 
 # Gitalk
