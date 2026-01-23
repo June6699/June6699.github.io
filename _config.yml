@@ -56,7 +56,7 @@ kramdown:
 
 
 # 评论系统
-# Disqus（https://disqus.com/）
+Disqus（https://disqus.com/）
 disqus_username: June6699
 
 # Gitalk
@@ -64,7 +64,7 @@ gitalk:
   enable: true    #是否开启Gitalk评论
   clientID: Ov23lip1sLnFPYK622n1                            #生成的clientID
   clientSecret: 66b4d7a3fa6cf24bb721f85072a93fddc0d80229    #生成的clientSecret
-  repo: june6699.github.io    #仓库名称
+  repo: June6699.github.io    #仓库名称
   owner: June6699    #github用户名
   admin: June6699
   distractionFreeMode: true #是否启用类似FB的阴影遮罩
