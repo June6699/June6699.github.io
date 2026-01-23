@@ -1,15 +1,14 @@
 ---
-layout: post
-title: "测试文章 - 我的第一篇博客"
-subtitle: "这是一个测试文章，用来验证博客功能"
-date: 2026-01-23 12:00:00
-author: "June"
-header-img: "img/post-bg-desk.jpg"
-header-mask: 0.3
-catalog: true
+layout:     post
+title:      测试文章 - 我的第一篇博客
+subtitle:   这是一个测试文章，用来验证博客功能
+date:       2026-01-23
+author:     June
+header-img: img/post-bg-desk.jpg
+catalog: 	 true
 tags:
-  - 测试
-  - 博客
+    - 测试
+    - 博客
 img-prefix: img/test/
 ---
 
@@ -22,10 +21,34 @@ img-prefix: img/test/
 #### 1. 代码高亮测试
 
 下面是一段Python代码示例：
-thon
+
 def hello_world():
     print("Hello, World!")
     return "欢迎来到我的博客"
 
 if __name__ == "__main__":
     hello_world()
+
+2. 列表测试
+这是一个无序列表项
+这是另一个列表项
+支持多级嵌套
+嵌套项1
+嵌套项2
+3. 引用测试
+> 这是一段引用文字
+> 可以用来强调重要内容
+> 或者引用他人的话语
+4. 链接和图片测试
+这是一个链接示例。
+如果你有图片，可以放在 img/test/ 文件夹下，然后使用以下方式引用：
+![图片描述](图片名称.jpg)
+关于这个博客
+这个博客使用Jekyll构建，托管在GitHub Pages上。主要特点包括：
+响应式设计 - 支持各种设备访问
+代码高亮 - 支持多种编程语言
+评论系统 - 使用Gitalk进行评论
+标签分类 - 方便文章分类管理
+总结
+希望这个博客能够记录我的学习历程和技术分享。如果你有任何问题或建议，欢迎在评论区留言！
+最后更新时间：2026年1月23日

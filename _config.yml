@@ -5,16 +5,14 @@ header-img: img/post-bg-desk.jpg
 email: 3439394104@qq.com
 description: "Who Changes? Who Benifits!"
 keyword: "徐子昂的博客, Ziang, Python, Bio, Gaming"
-url: "https://June6699.github.io"          # your host, for absolute URL
-baseurl: ""      # for example, '/blog' if your blog hosted on 'host/blog'
-github_repo: "https://github.com/June6699/June6699.github.io.git" # you code repository
+url: "https://June6699.github.io"
+baseurl: ""
+github_repo: "https://github.com/June6699/June6699.github.io.git"
 
 # Sidebar settings
-sidebar: true                           # whether or not using Sidebar.
+sidebar: true
 sidebar-about-description: "此子心性甚佳"
-sidebar-avatar: /img/底特律·变包.png      # use absolute URL, seeing it's used in both `/` and `/about/`
-
-
+sidebar-avatar: /img/底特律·变包.png
 
 # SNS settings
 RSS: false
@@ -25,76 +23,51 @@ github_username:
 facebook_username:  
 jianshu_username:	
 
-
-
-
 # Build settings
-# from 2016, 'pygments' is unsupported on GitHub Pages. Use 'rouge' for highlighting instead.
 permalink: pretty
 paginate: 10
 exclude: ["less","node_modules","Gruntfile.js","package.json","README.md"]
-anchorjs: true                          # if you want to customize anchor. check out line:181 of `post.html`
-
-
+anchorjs: true
 
 # Gems
-# from PR#40, to support local preview for Jekyll 3.0
 gems: [jekyll-paginate]
 
-
-
-
 # Markdown settings
-# replace redcarpet to kramdown,
-# although redcarpet can auto highlight code, the lack of header-id make the catalog impossible, so I switch to kramdown
-# document: http://jekyllrb.com/docs/configuration/#kramdown
 markdown: kramdown
 highlighter: rouge
 kramdown:
-  input: GFM                            # use Github Flavored Markdown !important
-
-
+  input: GFM
 
 # 评论系统
-Disqus（https://disqus.com/）
+# Disqus（https://disqus.com/）
 disqus_username: June6699
 
 # Gitalk
 gitalk:
-  enable: true    #是否开启Gitalk评论
-  clientID: Ov23lip1sLnFPYK622n1                            #生成的clientID
-  clientSecret: 66b4d7a3fa6cf24bb721f85072a93fddc0d80229    #生成的clientSecret
-  repo: June6699.github.io    #仓库名称
-  owner: June6699    #github用户名
+  enable: true
+  clientID: Ov23lip1sLnFPYK622n1
+  clientSecret: 66b4d7a3fa6cf24bb721f85072a93fddc0d80229
+  repo: June6699.github.io
+  owner: June6699
   admin: June6699
-  distractionFreeMode: true #是否启用类似FB的阴影遮罩
-
+  distractionFreeMode: true
 
 # 统计
-
 # Analytics settings
 # Baidu Analytics
 ba_track_id: 6a0eceeee843ef6235b91843cc1a936e
 
 # Google Analytics
-ga_track_id: 'G-S7DXV0QV58'            # Format: UA-xxxxxx-xx
-ga_domain: auto               # 默认的是 auto, 这里我是自定义了的域名，你如果没有自己的域名，需要改成auto
-
-
-
-
+ga_track_id: 'G-S7DXV0QV58'
+ga_domain: auto
 
 # Featured Tags
-featured-tags: true                     # 是否使用首页标签
-featured-condition-size: 1              # 相同标签数量大于这个数，才会出现在首页
-
-
+featured-tags: true
+featured-condition-size: 1
 
 # Progressive Web Apps
 chrome-tab-theme-color: "#000000"
 service-worker: true
-
-
 
 # Friends
 friends: [
