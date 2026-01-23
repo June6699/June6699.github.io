@@ -5,7 +5,7 @@ header-img: img/post-bg-desk.jpg
 email: 3439394104@qq.com
 description: "Who Changes? Who Benifits!"
 keyword: "徐子昂的博客, Ziang, Python, Bio, Gaming"
-url: "http://June6699.github.io"          # your host, for absolute URL
+url: "https://June6699.github.io"          # your host, for absolute URL
 baseurl: ""      # for example, '/blog' if your blog hosted on 'host/blog'
 github_repo: "https://github.com/June6699/June6699.github.io.git" # you code repository
 
@@ -62,8 +62,8 @@ disqus_username: June6699
 # Gitalk
 gitalk:
   enable: true    #是否开启Gitalk评论
-  clientID: f2c84e7629bb1446c1a4                            #生成的clientID
-  clientSecret: ca6d6139d1e1b8c43f8b2e19492ddcac8b322d0d    #生成的clientSecret
+  clientID: Ov23lip1sLnFPYK622n1                            #生成的clientID
+  clientSecret: 66b4d7a3fa6cf24bb721f85072a93fddc0d80229    #生成的clientSecret
   repo: june6699.github.io    #仓库名称
   owner: June6699    #github用户名
   admin: June6699
