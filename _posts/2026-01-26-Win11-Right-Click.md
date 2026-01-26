@@ -127,7 +127,7 @@ pause
 ```reg
 Windows Registry Editor Version 5.00
 
-; --- 在文件夹背景空白处右键 ---
+# 在文件夹背景空白处右键
 [HKEY_CLASSES_ROOT\Directory\Background\shell\OpenCMDHere]
 @="在此处打开命令窗口(&W)"
 "Icon"="cmd.exe"
@@ -135,7 +135,7 @@ Windows Registry Editor Version 5.00
 [HKEY_CLASSES_ROOT\Directory\Background\shell\OpenCMDHere\command]
 @="cmd.exe /s /k pushd \"%V\""
 
-; --- 在文件夹图标上右键 ---
+# 在文件夹图标上右键
 [HKEY_CLASSES_ROOT\Directory\shell\OpenCMDHere]
 @="在此处打开命令窗口(&W)"
 "Icon"="cmd.exe"
@@ -160,11 +160,11 @@ Windows Registry Editor Version 5.00
 ```reg
 Windows Registry Editor Version 5.00
 
-; 请将下面的 VSCODE_PATH 替换为您的 VSCode 实际安装路径
-; 例如：C:\\Program Files\\Microsoft VS Code\\Code.exe
-; 注意：路径中的反斜杠需要使用双反斜杠 \\ 转义
+# 请将下面的 VSCODE_PATH 替换为您的 VSCode 实际安装路径
+# 例如：C:\\Program Files\\Microsoft VS Code\\Code.exe
+# 注意：路径中的反斜杠需要使用双反斜杠 \\ 转义
 
-; --- 文件右键 ---
+# 文件右键
 [HKEY_CLASSES_ROOT\*\shell\VSCode]
 @="Open with Code"
 "Icon"="\"VSCODE_PATH\""
@@ -172,7 +172,7 @@ Windows Registry Editor Version 5.00
 [HKEY_CLASSES_ROOT\*\shell\VSCode\command]
 @="\"VSCODE_PATH\" \"%1\""
 
-; --- 文件夹右键 ---
+# 文件夹右键
 [HKEY_CLASSES_ROOT\Directory\shell\VSCode]
 @="Open with Code"
 "Icon"="\"VSCODE_PATH\""
@@ -180,7 +180,7 @@ Windows Registry Editor Version 5.00
 [HKEY_CLASSES_ROOT\Directory\shell\VSCode\command]
 @="\"VSCODE_PATH\" \"%V\""
 
-; --- 文件夹背景右键 ---
+# 文件夹背景右键
 [HKEY_CLASSES_ROOT\Directory\Background\shell\VSCode]
 @="Open with Code"
 "Icon"="\"VSCODE_PATH\""
