@@ -38,7 +38,7 @@ Win11 的新版右键菜单采用了**二级菜单设计**（"显示更多选项
 
 以下为脚本完整内容，您可以选择**下载文件**或**复制代码**：
 
-```
+```bat
 @echo off
 >nul 2>&1 "%SYSTEMROOT%\system32\cacls.exe" "%SYSTEMROOT%\system32\config\system"
 if '%errorlevel%' NEQ '0' (
@@ -84,6 +84,7 @@ pause
 ```
 
 **使用说明：**
+
 1. 下载文件后，将文件后缀从 `.txt` 改为 `.bat`
 2. 右键以管理员身份运行
 3. 选择 `1` 切换到 Win10 传统右键菜单
@@ -103,7 +104,7 @@ pause
 
 放到火绒安全的 `bin` 文件夹下点击执行即可：
 
-```
+```bat
 @echo off
 cd /d "%~dp0"
 regsvr32 /s HrShredShell.dll
@@ -124,7 +125,7 @@ pause
 
 在文件夹右键菜单中添加"在此处打开命令窗口"选项：
 
-```reg
+```bat
 Windows Registry Editor Version 5.00
 
 # 在文件夹背景空白处右键
