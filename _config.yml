@@ -1,7 +1,7 @@
 # Site settings
 title: June Blog
 SEOTitle: 徐子昂的博客 | Github.io
-header-img: img/post-bg-desk.jpg
+header-img: img/flowers/header.jpg
 email: 3439394104@qq.com
 description: "Who Changes? Who Benifits!"
 keyword: "徐子昂的博客, Ziang, Python, Bio, Gaming"
@@ -73,16 +73,7 @@ service-worker: true
 # Friends
 friends: [
     {
-        title: "WY",
-        href: "http://zhengwuyang.com"
-    },{
-        title: "简书·BY",
-        href: "http://www.jianshu.com/u/e71990ada2fd"
-    },{
-        title: "Apple",
-        href: "https://apple.com"
-    },{
-        title: "Apple Developer",
-        href: "https://developer.apple.com/"
+        title: "tian",
+        href: "https://www.douyin.com/user/MS4wLjABAAAAU32PdTDjuZVGqqn1OC-x5oWSkqsNrpvXKzhIZVryos8?from_tab_name=main"
     }
 ]
