@@ -4,10 +4,10 @@ title:      如何解决Win11右键菜单冗余的问题
 subtitle:   Win11右键菜单经常会出现`正在加载中`的问题，本文一站式解决
 date:       2026-01-26
 author:     June
-header-img: img/post-bg-desk.jpg
+header-img: img/flowers/flower-7958117_1920.jpg
 catalog: 	 true
 tags:
-    - 玩转电脑
+    - mess
 img-prefix: img/Win11_right_click/
 ---
 
@@ -158,7 +158,7 @@ Windows Registry Editor Version 5.00
 
 > **📝 使用前请先设置 VSCode 路径**：将下面的 `VSCODE_PATH` 变量替换为您实际的 VSCode 安装路径（例如：`C:\\Program Files\\Microsoft VS Code\\Code.exe`）
 
-```reg
+```sh
 Windows Registry Editor Version 5.00
 
 # 请将下面的 VSCODE_PATH 替换为您的 VSCode 实际安装路径
