@@ -44,7 +44,7 @@ header-img: "img/flowers/tags.jpg"
 				</div>
 			</nav>
 		</aside>
-		<div class="col-lg-9 col-md-8 tag-main">
+		<div class="col-lg-7 col-md-6 tag-main">
 			<div id="tag_cloud" class="tags tag-cloud-chips">
 				{% assign article_pages = site.posts %}
 				{% for tag_name in site.tag_list %}
@@ -78,6 +78,16 @@ header-img: "img/flowers/tags.jpg"
 			</div>
 			{% endfor %}
 		</div>
+		<aside class="col-lg-2 col-md-3 tag-catalog-wrap">
+			<nav class="tag-catalog-card">
+				<div class="tag-catalog-title">标题快捷访问</div>
+				<div class="tag-catalog-inner">
+					{% for tag_name in site.tag_list %}
+					<a href="#tag-{{ forloop.index }}" class="tag-catalog-link">{{ tag_name }}</a>
+					{% endfor %}
+				</div>
+			</nav>
+		</aside>
 	</div>
 </div>
 

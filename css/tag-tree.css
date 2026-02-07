@@ -1,10 +1,13 @@
 .tag-page-container {
   padding-top: 20px;
-  overflow-anchor: none;
+  overflow-anchor: auto;
 }
 .tag-main {
   touch-action: pan-y;
   overflow-x: hidden;
+}
+.one-tag-list {
+  scroll-margin-top: 70px;
 }
 .tag-tree-wrap {
   position: sticky;
@@ -35,9 +38,6 @@
 }
 .tag-tree-inner {
   padding: 14px 10px 18px 14px;
-  max-height: calc(100vh - 180px);
-  overflow-y: auto;
-  overscroll-behavior: contain;
 }
 .tag-tree-group { margin-bottom: 10px; }
 .tag-tree-top {
@@ -112,6 +112,56 @@
   color: #0085a1 !important;
   background: rgba(0, 133, 161, 0.08) !important;
 }
+
+/* Right sidebar: 标题快捷访问 */
+.tag-catalog-wrap {
+  position: sticky;
+  top: 60px;
+  max-height: calc(100vh - 80px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-y;
+}
+.tag-catalog-wrap:focus {
+  outline: none;
+}
+.tag-catalog-card {
+  font-size: 13px;
+  background: #fafbfc;
+  border: 1px solid #e8ecef;
+  border-radius: 10px;
+  overflow: hidden;
+}
+.tag-catalog-title {
+  padding: 14px 18px;
+  font-size: 15px;
+  font-weight: 700;
+  color: #fff;
+  background: linear-gradient(135deg, #0085a1 0%, #006b82 100%);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+.tag-catalog-inner {
+  padding: 14px 10px 18px 14px;
+}
+.tag-catalog-link {
+  display: block;
+  padding: 8px 12px 8px 14px;
+  margin: 4px 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: #0a5f75 !important;
+  text-decoration: none !important;
+  border-radius: 6px;
+  line-height: 1.4;
+  background: #e0f2f6 !important;
+  border-left: 4px solid #2d9db5;
+}
+.tag-catalog-link:hover {
+  background: #c5e8ef !important;
+  color: #006b82 !important;
+}
+
 @media only screen and (max-width: 991px) {
   .tag-tree-wrap {
     position: static;
@@ -119,4 +169,9 @@
     margin-bottom: 24px;
   }
   .tag-tree-inner { max-height: none; }
+  .tag-catalog-wrap {
+    position: static;
+    max-height: none;
+    margin-top: 24px;
+  }
 }
