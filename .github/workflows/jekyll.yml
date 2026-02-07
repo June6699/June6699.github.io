@@ -32,6 +32,12 @@ jobs:
         env:
           JEKYLL_ENV: production
 
+      - name: Copy article assets into _site
+        run: |
+          mkdir -p _site/_articles/hicplot _site/_articles/win11-right-click
+          cp -r _articles/HiCPlot.assets _site/_articles/hicplot/ 2>/dev/null || true
+          cp -r _articles/Win11_right_click.assets _site/_articles/win11-right-click/ 2>/dev/null || true
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
