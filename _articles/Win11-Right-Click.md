@@ -8,7 +8,7 @@ header-img: img/flowers/flower-7958117_1920.jpg
 catalog:    true
 tags:
     - Windows
-asset-dir:  Win11_right_click
+asset-dir:  Win11_right_click.assets
 ---
 
 ## 问题描述
