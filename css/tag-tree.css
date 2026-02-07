@@ -8,9 +8,8 @@
 .tag-tree-card {
   font-size: 13px;
   background: #fafbfc;
-  border: 1px solid #e0e6e9;
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  border: 1px solid #e8ecef;
+  border-radius: 10px;
   overflow: hidden;
 }
 .tag-tree-title {
@@ -51,6 +50,9 @@
   margin-left: 0;
   padding-left: 28px;
   border-left: none;
+}
+.tag-tree-node-flat {
+  padding-left: 10px;
 }
 .tag-tree-node .tag-tree-tag {
   display: block;

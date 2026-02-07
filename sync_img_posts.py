@@ -5,6 +5,7 @@ Post 和图片文件夹同步脚本
 功能：
 1. 根据 md 中的 img-prefix 自动重命名 img 下对应文件夹（每个 md 对应单独 img 文件夹）
 2. 将 _posts/assets 移动到 img/<img-prefix> 并更新 md 内图片路径
+3. 将 _posts/<stem>.assets 或 _posts/<asset-dir> 复制到 img/<img-prefix 文件夹>，供 Jekyll 构建后 HTML 显示图片
 """
 import os
 import re
@@ -154,19 +155,52 @@ def cmd_move_assets_and_update_md():
         print("已删除空文件夹 _posts/assets")
 
 
+def cmd_copy_post_assets_to_img():
+    """
+    将 _posts/<stem>.assets 或 _posts/<asset-dir> 复制到 img/<img-prefix 文件夹>，
+    这样 Jekyll 构建后 HTML 里通过 layout 替换成的 /img/xxx/ 路径能访问到图片。
+    md 内仍保留 ./stem.assets/ 或 ./asset-dir/，Typora 本地可正常显示。
+    """
+    for md_file in sorted(POSTS_DIR.glob('*.md')):
+        if not md_file.is_file():
+            continue
+        fm, _ = read_front_matter(md_file)
+        prefix_value = fm.get('img-prefix') or fm.get('img_prefix')
+        folder_name = get_img_prefix_folder(prefix_value)
+        if not folder_name:
+            continue
+        stem = md_file.stem
+        asset_dir_name = fm.get('asset-dir') or fm.get('asset_dir') or (stem + '.assets')
+        assets_dir = POSTS_DIR / asset_dir_name
+        if not assets_dir.is_dir():
+            continue
+        target_dir = IMG_DIR / folder_name
+        target_dir.mkdir(parents=True, exist_ok=True)
+        for f in assets_dir.iterdir():
+            if f.is_file():
+                dest = target_dir / f.name
+                if not dest.exists() or dest.stat().st_mtime < f.stat().st_mtime:
+                    shutil.copy2(str(f), str(dest))
+                    print(f"复制: {f.name} -> {target_dir}/")
+    print("post assets 已同步到 img，可执行 Jekyll 构建。")
+
+
 def main():
     if len(sys.argv) < 2:
-        print("用法: sync_img_posts.py <1|2>")
+        print("用法: sync_img_posts.py <1|2|3>")
         print("  1 = 根据 img-prefix 重命名 img 文件夹并更新 md 内路径")
         print("  2 = 将 assets 移到 img 对应 prefix 并更新 md 内图片路径")
+        print("  3 = 将 _posts/*.assets 复制到 img（供 HTML 显示），md 仍用同级 .assets（Typora 可见）")
         return
     cmd = sys.argv[1].strip()
     if cmd == '1':
         cmd_rename_img_by_prefix()
     elif cmd == '2':
         cmd_move_assets_and_update_md()
+    elif cmd == '3':
+        cmd_copy_post_assets_to_img()
     else:
-        print("请使用 1 或 2")
+        print("请使用 1、2 或 3")
         sys.exit(1)
 
 

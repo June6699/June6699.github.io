@@ -30,19 +30,20 @@ header-img: "img/flowers/tags.jpg"
 					{% assign tag_name = tag[0] %}
 					{% assign parts = tag_name | split: "/" %}
 					{% assign top = parts[0] %}
-					{% if top != current_top %}
-						{% if current_top != "" %}</div>{% endif %}
-						<div class="tag-tree-group {% if current_top == "" %}open{% endif %}">
-							<div class="tag-tree-top">{{ top }}</div>
-						{% assign current_top = top %}
-					{% endif %}
 					{% if tag_name contains "/" %}
+						{% if top != current_top %}
+							{% if current_top != "" %}</div>{% endif %}
+							<div class="tag-tree-group {% if current_top == "" %}open{% endif %}">
+								<div class="tag-tree-top">{{ top }}</div>
+							{% assign current_top = top %}
+						{% endif %}
 						{% assign segs = tag_name | split: "/" %}
 						{% assign display_name = segs | last %}
 					{% else %}
+						{% if current_top != "" %}</div>{% assign current_top = "" %}{% endif %}
 						{% assign display_name = tag_name %}
 					{% endif %}
-					<div class="tag-tree-node" data-target="tag-{{ forloop.index }}">
+					<div class="tag-tree-node {% unless tag_name contains '/' %}tag-tree-node-flat{% endunless %}" data-target="tag-{{ forloop.index }}">
 						<a href="#tag-{{ forloop.index }}" class="tag-tree-tag" title="{{ tag_name }}">{{ display_name }} ({{ tag[1].size }})</a>
 						<div class="tag-tree-posts">
 							{% for post in tag[1] %}

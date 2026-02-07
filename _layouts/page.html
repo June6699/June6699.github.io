@@ -49,8 +49,8 @@ layout: default
                 </section>
                 {% endif %}
 
-                <!-- Friends Blog -->
-                {% if site.friends %}
+                <!-- Friends 仅首页与 About 显示 -->
+                {% if site.friends and page.url == "/" or site.friends and page.url == "/index.html" or site.friends and page.url contains "about" %}
                 <hr>
                 <h5>FRIENDS</h5>
                 <ul class="list-inline">
@@ -190,8 +190,8 @@ layout: default
                         {% endif %}
                     </div>
                 </section>
-                <!-- Friends Blog -->
-                {% if site.friends %}
+                <!-- Friends 仅首页与 About 显示 -->
+                {% if site.friends and page.url == "/" or site.friends and page.url == "/index.html" or site.friends and page.url contains "about" %}
                 <hr>
                 <h5>FRIENDS</h5>
                 <ul class="list-inline">

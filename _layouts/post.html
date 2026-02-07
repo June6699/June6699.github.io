@@ -58,7 +58,21 @@ layout: default
                 col-md-10 col-md-offset-1
                 post-container">
 
-				{{ content }}
+				{% comment %} 将 md 内 ./filename.assets/ 或 ./asset-dir/ 替换为站内 img 路径，以便 HTML 能显示；本地 Typora 仍用同级 .assets 路径 {% endcomment %}
+				{% if page.img-prefix %}
+					{% assign path_parts = page.path | split: '/' %}
+					{% assign filename = path_parts | last %}
+					{% assign stem = filename | replace: '.md', '' %}
+					{% if page.asset-dir %}
+						{% capture old_asset %}./{{ page.asset-dir }}/{% endcapture %}
+					{% else %}
+						{% capture old_asset %}./{{ stem }}.assets/{% endcapture %}
+					{% endif %}
+					{% capture new_asset %}{{ site.baseurl }}/{{ page.img-prefix }}/{% endcapture %}
+					{{ content | replace: old_asset, new_asset | replace: '//', '/' | replace: '^o^', '<sup>o</sup>' }}
+				{% else %}
+					{{ content | replace: '^o^', '<sup>o</sup>' }}
+				{% endif %}
 
                 <hr style="visibility: hidden;">
 
@@ -156,16 +170,7 @@ layout: default
                 </section>
                 {% endif %}
 
-                <!-- Friends Blog -->
-                {% if site.friends %}
-                <hr>
-                <h5>FRIENDS</h5>
-                <ul class="list-inline">
-                    {% for friend in site.friends %}
-                        <li><a href="{{friend.href}}">{{friend.title}}</a></li>
-                    {% endfor %}
-                </ul>
-                {% endif %}
+                <!-- Friends 仅首页与 About 显示，此处不展示 -->
             </div>
         </div>
     </div>
