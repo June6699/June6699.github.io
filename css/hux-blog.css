@@ -487,6 +487,25 @@ pre code {
     -o-transform: translate3d(0, 100%, 0);
     transform: translate3d(0, 100%, 0);
   }
+  /* 上滑时显示的大导航栏：保证与底色对比清晰，不白字白底 */
+  .navbar-custom.is-fixed.is-visible {
+    background-color: #e8ecef;
+    border-bottom-color: #dee2e6;
+  }
+  .navbar-custom.is-fixed.is-visible .navbar-brand {
+    color: #1a1a1a;
+  }
+  .navbar-custom.is-fixed.is-visible .navbar-brand:hover,
+  .navbar-custom.is-fixed.is-visible .navbar-brand:focus {
+    color: #0085a1;
+  }
+  .navbar-custom.is-fixed.is-visible .nav li a {
+    color: #1a1a1a;
+  }
+  .navbar-custom.is-fixed.is-visible .nav li a:hover,
+  .navbar-custom.is-fixed.is-visible .nav li a:focus {
+    color: #0085a1;
+  }
 }
 .intro-header {
   background: no-repeat center center;
@@ -890,8 +909,8 @@ img::-moz-selection {
 }
 .tag-tree-wrap {
   position: sticky;
-  top: 60px;
-  max-height: calc(100vh - 80px);
+  top: 88px;
+  max-height: calc(100vh - 108px);
   overflow-y: auto;
 }
 .tag-tree-card {

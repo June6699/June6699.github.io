@@ -15,6 +15,7 @@
     if (headings.length === 0) return;
     var usedIds = {};
     var fragment = document.createDocumentFragment();
+    var minLevel = 6;
     headings.forEach(function (h) {
       var id = h.id;
       if (!id) {
@@ -28,6 +29,8 @@
         h.id = id;
       }
       var tag = h.tagName.toLowerCase();
+      var level = parseInt(tag.charAt(1), 10);
+      if (level < minLevel) minLevel = level;
       var li = document.createElement('li');
       li.className = tag + '_nav';
       var a = document.createElement('a');
@@ -42,6 +45,11 @@
       fragment.appendChild(li);
     });
     body.appendChild(fragment);
+    var catalog = document.getElementById('side-catalog');
+    if (catalog) {
+      for (var i = 1; i <= 6; i++) catalog.classList.remove('catalog-has-min-' + i);
+      catalog.classList.add('catalog-has-min-' + minLevel);
+    }
   }
 
   function initTagTreeToggle() {

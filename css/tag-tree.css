@@ -9,11 +9,11 @@
 .one-tag-list {
   scroll-margin-top: 70px;
 }
-/* 左右侧栏统一：随页面滑动保持可见，顶部对齐 */
+/* 左右侧栏统一：随页面滑动保持可见，顶部留出大导航栏高度，避免上滑时遮挡 */
 .sidebar-sticky-top {
   position: sticky;
-  top: 70px;
-  max-height: calc(100vh - 90px);
+  top: 88px;
+  max-height: calc(100vh - 108px);
   overflow-y: auto;
   overscroll-behavior: contain;
   -webkit-overflow-scrolling: touch;
@@ -21,8 +21,8 @@
 }
 .tag-tree-wrap {
   position: sticky;
-  top: 70px;
-  max-height: calc(100vh - 90px);
+  top: 88px;
+  max-height: calc(100vh - 108px);
   overflow-y: auto;
   overscroll-behavior: contain;
   -webkit-overflow-scrolling: touch;
@@ -156,8 +156,8 @@
 }
 .post-page-container .catalog-aside-wrap {
   position: sticky;
-  top: 70px;
-  max-height: calc(100vh - 90px);
+  top: 88px;
+  max-height: calc(100vh - 108px);
   overflow-y: auto;
   overscroll-behavior: contain;
   -webkit-overflow-scrolling: touch;
@@ -196,13 +196,21 @@
 .catalog-title-row .nav-toggle-btn:hover {
   color: #fff;
 }
-/* 折叠=只保留一级标题（h1、h2），隐藏 h3 及以下 */
+/* 折叠=只保留层级最高的那一级（与左侧标签导航一致），按实际最小层级显示 */
+.side-catalog.catalog-fold-sub .catalog-body .h1_nav,
+.side-catalog.catalog-fold-sub .catalog-body .h2_nav,
 .side-catalog.catalog-fold-sub .catalog-body .h3_nav,
 .side-catalog.catalog-fold-sub .catalog-body .h4_nav,
 .side-catalog.catalog-fold-sub .catalog-body .h5_nav,
 .side-catalog.catalog-fold-sub .catalog-body .h6_nav {
   display: none;
 }
+.side-catalog.catalog-fold-sub.catalog-has-min-1 .catalog-body .h1_nav { display: list-item; }
+.side-catalog.catalog-fold-sub.catalog-has-min-2 .catalog-body .h2_nav { display: list-item; }
+.side-catalog.catalog-fold-sub.catalog-has-min-3 .catalog-body .h3_nav { display: list-item; }
+.side-catalog.catalog-fold-sub.catalog-has-min-4 .catalog-body .h4_nav { display: list-item; }
+.side-catalog.catalog-fold-sub.catalog-has-min-5 .catalog-body .h5_nav { display: list-item; }
+.side-catalog.catalog-fold-sub.catalog-has-min-6 .catalog-body .h6_nav { display: list-item; }
 
 @media only screen and (max-width: 991px) {
   .tag-tree-wrap {
