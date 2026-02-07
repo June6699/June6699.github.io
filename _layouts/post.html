@@ -58,33 +58,15 @@ layout: default
                 col-md-10 col-md-offset-1
                 post-container">
 
-				{% comment %}
-				  md 与图同级（Typora 要求）。有 asset-dir 时：正文 ./asset-dir/ 替换为 baseurl/assets/asset-dir/；构建前需运行 sync_img_posts.py 3（从 _articles 复制到 assets/）。
-				{% endcomment %}
-				{% if page.asset-dir %}
-					{% capture old_asset %}./{{ page.asset-dir }}/{% endcapture %}
-					{% capture new_asset %}{{ site.baseurl }}/assets/{{ page.asset-dir }}/{% endcapture %}
-					{{ content | replace: old_asset, new_asset | replace: '//', '/' | replace: '^o^', '<sup>o</sup>' }}
-				{% elsif page.img-prefix %}
-					{% assign path_parts = page.path | split: '/' %}
-					{% assign filename = path_parts | last %}
-					{% assign stem = filename | replace: '.md', '' %}
-					{% assign img_folder = page.img-prefix | split: '/' | last %}
-					{% capture new_asset %}{{ site.baseurl }}/{{ page.img-prefix }}/{% endcapture %}
-					{% capture old_stem %}./{{ stem }}.assets/{% endcapture %}
-					{% capture old_folder %}./{{ img_folder }}/{% endcapture %}
-					{{ content | replace: old_stem, new_asset | replace: old_folder, new_asset | replace: '//', '/' | replace: '^o^', '<sup>o</sup>' }}
-				{% else %}
-					{{ content | replace: '^o^', '<sup>o</sup>' }}
-				{% endif %}
+				{% comment %} md 与图同级，构建时插件会复制到输出，正文相对路径 ./asset-dir/ 即可 {% endcomment %}
+				{{ content | replace: '^o^', '<sup>o</sup>' }}
 
                 <hr style="visibility: hidden;">
 
-                {% comment %} collection 文章无 page.previous/next，用 site.articles 按日期算上一篇/下一篇 {% endcomment %}
                 {% assign sorted_articles = site.articles | sort: 'date' | reverse %}
                 {% assign prev_url = "" %}{% assign prev_title = "" %}{% assign next_url = "" %}{% assign next_title = "" %}{% assign found = false %}
                 {% for doc in sorted_articles %}
-                    {% if doc.url == page.url %}
+                    {% if doc.id == page.id %}
                         {% assign found = true %}
                     {% elsif found %}
                         {% assign next_url = doc.url %}{% assign next_title = doc.title %}{% assign found = false %}
@@ -93,14 +75,7 @@ layout: default
                     {% endif %}
                 {% endfor %}
                 <ul class="pager">
-                    {% if page.previous.url %}
-                    <li class="previous">
-                        <a href="{{ page.previous.url | prepend: site.baseurl | replace: '//', '/' }}" data-toggle="tooltip" data-placement="top" title="{{page.previous.title}}">
-                        Previous<br>
-                        <span>{{page.previous.title}}</span>
-                        </a>
-                    </li>
-                    {% elsif prev_url != "" %}
+                    {% if prev_url != "" %}
                     <li class="previous">
                         <a href="{{ prev_url | prepend: site.baseurl | replace: '//', '/' }}" data-toggle="tooltip" data-placement="top" title="{{ prev_title }}">
                         Previous<br>
@@ -108,14 +83,7 @@ layout: default
                         </a>
                     </li>
                     {% endif %}
-                    {% if page.next.url %}
-                    <li class="next">
-                        <a href="{{ page.next.url | prepend: site.baseurl | replace: '//', '/' }}" data-toggle="tooltip" data-placement="top" title="{{page.next.title}}">
-                        Next<br>
-                        <span>{{page.next.title}}</span>
-                        </a>
-                    </li>
-                    {% elsif next_url != "" %}
+                    {% if next_url != "" %}
                     <li class="next">
                         <a href="{{ next_url | prepend: site.baseurl | replace: '//', '/' }}" data-toggle="tooltip" data-placement="top" title="{{ next_title }}">
                         Next<br>
