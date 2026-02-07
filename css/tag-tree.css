@@ -9,10 +9,20 @@
 .one-tag-list {
   scroll-margin-top: 70px;
 }
+/* 左右侧栏统一：随页面滑动保持可见，顶部对齐 */
+.sidebar-sticky-top {
+  position: sticky;
+  top: 70px;
+  max-height: calc(100vh - 90px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-y;
+}
 .tag-tree-wrap {
   position: sticky;
-  top: 60px;
-  max-height: calc(100vh - 80px);
+  top: 70px;
+  max-height: calc(100vh - 90px);
   overflow-y: auto;
   overscroll-behavior: contain;
   -webkit-overflow-scrolling: touch;
@@ -55,9 +65,6 @@
 }
 .tag-tree-inner {
   padding: 14px 10px 18px 14px;
-}
-.tag-tree-card.sidebar-collapsed .tag-tree-inner {
-  display: none;
 }
 .tag-tree-node-active .tag-tree-tag {
   background: #b8e0e8 !important;
@@ -138,93 +145,63 @@
   background: rgba(0, 133, 161, 0.08) !important;
 }
 
-/* Right sidebar: 标题快捷访问 */
-.tag-catalog-wrap {
+/* 文章页右侧：原 theme side-catalog，始终显示且 sticky */
+.post-container h1,
+.post-container h2,
+.post-container h3,
+.post-container h4,
+.post-container h5,
+.post-container h6 {
+  scroll-margin-top: 75px;
+}
+.post-page-container .catalog-aside-wrap {
   position: sticky;
-  top: 60px;
-  max-height: calc(100vh - 80px);
+  top: 70px;
+  max-height: calc(100vh - 90px);
   overflow-y: auto;
   overscroll-behavior: contain;
   -webkit-overflow-scrolling: touch;
   touch-action: pan-y;
 }
-.tag-catalog-wrap:focus {
-  outline: none;
+.post-page-container .catalog-aside-wrap .catalog-container {
+  padding: 0;
 }
-.tag-catalog-card {
-  font-size: 13px;
-  background: #fafbfc;
-  border: 1px solid #e8ecef;
-  border-radius: 10px;
-  overflow: hidden;
+.post-page-container .catalog-aside-wrap .side-catalog {
+  display: block !important;
+  width: 100%;
+  padding-bottom: 40px;
 }
-.tag-catalog-title {
+.catalog-title-row {
   padding: 14px 18px;
   font-size: 15px;
   font-weight: 700;
   color: #fff;
   background: linear-gradient(135deg, #0085a1 0%, #006b82 100%);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  border-bottom: 1px solid rgba(255,255,255,0.2);
   display: flex;
   align-items: center;
   justify-content: space-between;
   flex-wrap: wrap;
   gap: 8px;
 }
-.tag-catalog-title .nav-toggle {
+.catalog-title-row .nav-toggle {
   font-size: 12px;
   font-weight: 400;
 }
-.tag-catalog-title .nav-toggle-btn {
+.catalog-title-row .nav-toggle-btn {
   color: rgba(255,255,255,0.9);
   text-decoration: none;
   margin-left: 6px;
 }
-.tag-catalog-title .nav-toggle-btn:hover {
+.catalog-title-row .nav-toggle-btn:hover {
   color: #fff;
 }
-.tag-catalog-card.sidebar-collapsed .tag-catalog-inner {
+/* 折叠=只保留一级标题（h1、h2），隐藏 h3 及以下 */
+.side-catalog.catalog-fold-sub .catalog-body .h3_nav,
+.side-catalog.catalog-fold-sub .catalog-body .h4_nav,
+.side-catalog.catalog-fold-sub .catalog-body .h5_nav,
+.side-catalog.catalog-fold-sub .catalog-body .h6_nav {
   display: none;
-}
-.tag-catalog-inner {
-  padding: 14px 10px 18px 14px;
-}
-/* 文章页右侧标题 TOC */
-.side-toc-wrap {
-  position: sticky;
-  top: 60px;
-  max-height: calc(100vh - 80px);
-  overflow-y: auto;
-  overscroll-behavior: contain;
-  -webkit-overflow-scrolling: touch;
-  touch-action: pan-y;
-}
-.tag-catalog-link.toc-h2 {
-  padding-left: 14px;
-  border-left-width: 4px;
-}
-.tag-catalog-link.toc-h3 {
-  padding-left: 24px;
-  margin-left: 8px;
-  border-left-width: 2px;
-  font-size: 12px;
-}
-.tag-catalog-link {
-  display: block;
-  padding: 8px 12px 8px 14px;
-  margin: 4px 0;
-  font-size: 13px;
-  font-weight: 600;
-  color: #0a5f75 !important;
-  text-decoration: none !important;
-  border-radius: 6px;
-  line-height: 1.4;
-  background: #e0f2f6 !important;
-  border-left: 4px solid #2d9db5;
-}
-.tag-catalog-link:hover {
-  background: #c5e8ef !important;
-  color: #006b82 !important;
 }
 
 @media only screen and (max-width: 991px) {
@@ -234,10 +211,14 @@
     margin-bottom: 24px;
   }
   .tag-tree-inner { max-height: none; }
-  .tag-catalog-wrap,
-  .side-toc-wrap {
+  .post-page-container .catalog-aside-wrap {
     position: static;
     max-height: none;
     margin-top: 24px;
+  }
+}
+@media only screen and (max-width: 1200px) {
+  .post-page-container .catalog-aside-wrap .side-catalog {
+    display: block !important;
   }
 }
