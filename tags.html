@@ -24,7 +24,7 @@ header-img: "img/flowers/tags.jpg"
 			<nav class="tag-tree-card" id="tag-tree">
 				<div class="tag-tree-title">标签导航</div>
 				<div class="tag-tree-inner">
-				{% assign article_pages = site.pages | where: "article", true | sort: 'date' | reverse %}
+				{% assign article_pages = site.collections["articles"].docs | sort: 'date' | reverse %}
 				{% for tag_name in site.tag_list %}
 					{% assign count = 0 %}
 					{% for a in article_pages %}
@@ -46,7 +46,7 @@ header-img: "img/flowers/tags.jpg"
 		</aside>
 		<div class="col-lg-9 col-md-8 tag-main">
 			<div id="tag_cloud" class="tags tag-cloud-chips">
-				{% assign article_pages = site.pages | where: "article", true | sort: 'date' | reverse %}
+				{% assign article_pages = site.collections["articles"].docs | sort: 'date' | reverse %}
 				{% for tag_name in site.tag_list %}
 					{% assign count = 0 %}
 					{% for a in article_pages %}{% if a.tags contains tag_name %}{% assign count = count | plus: 1 %}{% endif %}{% endfor %}

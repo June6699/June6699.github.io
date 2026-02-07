@@ -25,26 +25,5 @@
 
     <link href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" type="text/css">
 
-
-    {% if site.ga_track_id %}
-    <script async src="https://www.googletagmanager.com/gtag/js?id={{ site.ga_track_id }}"></script>
-    <script>
-        window.dataLayer = window.dataLayer || [];
-        function gtag(){dataLayer.push(arguments);}
-        gtag('js', new Date());
-        gtag('config', '{{ site.ga_track_id }}');
-    </script>
-    {% endif %}
-    
-    {% if site.ba_track_id %}
-    <script>
-        var _hmt = _hmt || [];
-        (function() {
-          var hm = document.createElement("script");
-          hm.src = "//hm.baidu.com/hm.js?{{ site.ba_track_id }}";
-          var s = document.getElementsByTagName("script")[0]; 
-          s.parentNode.insertBefore(hm, s);
-        })();
-    </script>
-    {% endif %}
+    <!-- Analytics loaded deferred in footer (requestIdleCallback) to avoid blocking -->
 </head>

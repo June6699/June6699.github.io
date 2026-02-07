@@ -3,7 +3,7 @@ layout: page
 description: "Who changes? Who benifits!"
 ---
 
-{% assign sorted_articles = site.pages | where: "article", true | sort: 'date' | reverse %}
+{% assign sorted_articles = site.collections["articles"].docs | sort: 'date' | reverse %}
 {% for post in sorted_articles limit: 10 %}
 <div class="post-preview">
     <a href="{{ post.url | prepend: site.baseurl }}">
