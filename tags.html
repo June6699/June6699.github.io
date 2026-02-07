@@ -20,30 +20,7 @@ header-img: "img/flowers/tags.jpg"
 
 <div class="container tag-page-container">
 	<div class="row">
-		<aside class="col-lg-3 col-md-4 tag-tree-wrap">
-			<nav class="tag-tree-card" id="tag-tree">
-				<div class="tag-tree-title">标签导航</div>
-				<div class="tag-tree-inner">
-				{% assign article_pages = site.posts %}
-				{% for tag_name in site.tag_list %}
-					{% assign count = 0 %}
-					{% for a in article_pages %}
-						{% if a.tags contains tag_name %}{% assign count = count | plus: 1 %}{% endif %}
-					{% endfor %}
-					<div class="tag-tree-node tag-tree-node-flat" data-target="tag-{{ forloop.index }}">
-						<a href="#tag-{{ forloop.index }}" class="tag-tree-tag" title="{{ tag_name }}">{{ tag_name }} ({{ count }})</a>
-						<div class="tag-tree-posts">
-							{% for a in article_pages %}
-								{% if a.tags contains tag_name %}
-								<a href="{{ a.url | prepend: site.baseurl }}" class="tag-tree-post">{{ a.title }}</a>
-								{% endif %}
-							{% endfor %}
-						</div>
-					</div>
-				{% endfor %}
-				</div>
-			</nav>
-		</aside>
+		{% include tag-tree-nav.html %}
 		<div class="col-lg-7 col-md-6 tag-main">
 			<div id="tag_cloud" class="tags tag-cloud-chips">
 				{% assign article_pages = site.posts %}
@@ -80,7 +57,13 @@ header-img: "img/flowers/tags.jpg"
 		</div>
 		<aside class="col-lg-2 col-md-3 tag-catalog-wrap">
 			<nav class="tag-catalog-card">
-				<div class="tag-catalog-title">标题快捷访问</div>
+				<div class="tag-catalog-title">
+					标题快捷访问
+					<span class="nav-toggle">
+						<a href="javascript:void(0)" class="nav-toggle-btn" data-action="collapse" title="一键折叠">折叠</a>
+						<a href="javascript:void(0)" class="nav-toggle-btn" data-action="expand" title="一键展开">展开</a>
+					</span>
+				</div>
 				<div class="tag-catalog-inner">
 					{% for tag_name in site.tag_list %}
 					<a href="#tag-{{ forloop.index }}" class="tag-catalog-link">{{ tag_name }}</a>
@@ -90,33 +73,3 @@ header-img: "img/flowers/tags.jpg"
 		</aside>
 	</div>
 </div>
-
-<script>
-(function(){
-	var tree = document.getElementById('tag-tree');
-	if (!tree) return;
-	var tops = tree.querySelectorAll('.tag-tree-top');
-	var nodes = tree.querySelectorAll('.tag-tree-node');
-	tops.forEach(function(el){
-		el.addEventListener('click', function(){
-			var group = el.parentNode;
-			var open = group.classList.toggle('open');
-			group.querySelectorAll('.tag-tree-node').forEach(function(n){ n.classList.toggle('open', open); });
-		});
-	});
-	nodes.forEach(function(el){
-		var tagLink = el.querySelector('.tag-tree-tag');
-		var posts = el.querySelector('.tag-tree-posts');
-		if (!tagLink || !posts || !posts.children.length) return;
-		tagLink.addEventListener('click', function(e){
-			e.preventDefault();
-			var open = el.classList.toggle('open');
-			var id = el.getAttribute('data-target');
-			if (id) {
-				var section = document.getElementById(id);
-				if (section) section.scrollIntoView({ behavior: 'smooth', block: 'start' });
-			}
-		});
-	});
-})();
-</script>

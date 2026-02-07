@@ -49,13 +49,21 @@ layout: default
 
 <!-- Post Content -->
 <article>
-    <div class="container">
+    <div class="container post-page-container">
         <div class="row">
+            {% assign tag_tree_active_index = nil %}
+            {% for tag_name in site.tag_list %}
+                {% if page.tags contains tag_name %}
+                    {% assign tag_tree_active_index = forloop.index %}
+                    {% break %}
+                {% endif %}
+            {% endfor %}
+            {% assign tag_tree_is_post = true %}
+            {% include tag-tree-nav.html %}
 
     <!-- Post Container -->
             <div class="
-                col-lg-8 col-lg-offset-2
-                col-md-10 col-md-offset-1
+                col-lg-6 col-md-6
                 post-container">
 
 				{{ content | replace: '^o^', '<sup>o</sup>' }}
@@ -111,29 +119,21 @@ layout: default
                 <!-- disqus 评论框 end -->
                 {% endif %}
 
-            </div>  
-
-    <!-- Sidebar Container -->
-            <div class="
-                col-lg-8 col-lg-offset-2
-                col-md-10 col-md-offset-1
-                sidebar-container">
-
-                <!-- Featured Tags -->
-                {% if site.featured-tags %}
-                <section>
-                    <hr class="hidden-sm hidden-xs">
-                    <h5><a href="/tags/">FEATURED TAGS</a></h5>
-                    <div class="tags">
-        				{% for tag in site.tag_list %}
-                				<a href="/tags/#tag-{{ forloop.index }}" title="{{ tag }}" rel="1">{{ tag }}</a>
-        				{% endfor %}
-        			</div>
-                </section>
-                {% endif %}
-
-                <!-- Friends 仅首页与 About 显示，此处不展示 -->
             </div>
+
+    <!-- Right: 文章标题导航 (TOC) -->
+            <aside class="col-lg-3 col-md-3 side-toc-wrap">
+                <nav class="tag-catalog-card" id="side-toc-card">
+                    <div class="tag-catalog-title">
+                        标题导航
+                        <span class="nav-toggle">
+                            <a href="javascript:void(0)" class="nav-toggle-btn toc-collapse" title="一键折叠">折叠</a>
+                            <a href="javascript:void(0)" class="nav-toggle-btn toc-expand" title="一键展开">展开</a>
+                        </span>
+                    </div>
+                    <div class="tag-catalog-inner" id="side-toc-inner"></div>
+                </nav>
+            </aside>
         </div>
     </div>
 </article>

@@ -35,9 +35,34 @@
   color: #fff;
   background: linear-gradient(135deg, #0085a1 0%, #006b82 100%);
   border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.tag-tree-title .nav-toggle {
+  font-size: 12px;
+  font-weight: 400;
+}
+.tag-tree-title .nav-toggle-btn {
+  color: rgba(255,255,255,0.9);
+  text-decoration: none;
+  margin-left: 6px;
+}
+.tag-tree-title .nav-toggle-btn:hover {
+  color: #fff;
 }
 .tag-tree-inner {
   padding: 14px 10px 18px 14px;
+}
+.tag-tree-card.sidebar-collapsed .tag-tree-inner {
+  display: none;
+}
+.tag-tree-node-active .tag-tree-tag {
+  background: #b8e0e8 !important;
+  border-left-color: #0085a1;
+  color: #006b82 !important;
 }
 .tag-tree-group { margin-bottom: 10px; }
 .tag-tree-top {
@@ -140,9 +165,49 @@
   color: #fff;
   background: linear-gradient(135deg, #0085a1 0%, #006b82 100%);
   border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.tag-catalog-title .nav-toggle {
+  font-size: 12px;
+  font-weight: 400;
+}
+.tag-catalog-title .nav-toggle-btn {
+  color: rgba(255,255,255,0.9);
+  text-decoration: none;
+  margin-left: 6px;
+}
+.tag-catalog-title .nav-toggle-btn:hover {
+  color: #fff;
+}
+.tag-catalog-card.sidebar-collapsed .tag-catalog-inner {
+  display: none;
 }
 .tag-catalog-inner {
   padding: 14px 10px 18px 14px;
+}
+/* 文章页右侧标题 TOC */
+.side-toc-wrap {
+  position: sticky;
+  top: 60px;
+  max-height: calc(100vh - 80px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-y;
+}
+.tag-catalog-link.toc-h2 {
+  padding-left: 14px;
+  border-left-width: 4px;
+}
+.tag-catalog-link.toc-h3 {
+  padding-left: 24px;
+  margin-left: 8px;
+  border-left-width: 2px;
+  font-size: 12px;
 }
 .tag-catalog-link {
   display: block;
@@ -169,7 +234,8 @@
     margin-bottom: 24px;
   }
   .tag-tree-inner { max-height: none; }
-  .tag-catalog-wrap {
+  .tag-catalog-wrap,
+  .side-toc-wrap {
     position: static;
     max-height: none;
     margin-top: 24px;

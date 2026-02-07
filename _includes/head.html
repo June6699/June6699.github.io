@@ -18,7 +18,7 @@
     <link rel="stylesheet" href="{{ "/css/bootstrap.min.css" | prepend: site.baseurl }}">
 
     <link rel="stylesheet" href="{{ "/css/hux-blog.min.css" | prepend: site.baseurl }}">
-    {% if page.title == "Tags" %}
+    {% if page.layout == "post" or page.title == "Tags" %}
     <link rel="stylesheet" href="{{ "/css/tag-tree.css" | prepend: site.baseurl }}">
     {% endif %}
     <link rel="stylesheet" href="{{ "/css/syntax.css" | prepend: site.baseurl }}">
