@@ -5,6 +5,7 @@ subtitle:   Win11右键菜单经常会出现`正在加载中`的问题，本文�
 date:       2026-01-26
 author:     June
 header-img: img/flowers/flower-7958117_1920.jpg
+assets_folder: Win11_right_click.assets
 tags:
     - Windows
 article: true
