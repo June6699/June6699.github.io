@@ -160,6 +160,30 @@
 -->
 
 
+<script>
+(function(){
+    function fixCodeBlockNewlines(block){
+        var code = block.querySelector('code');
+        if(!code || code.getAttribute('data-fixed-newlines')) return;
+        if((code.textContent||'').indexOf('\n')>=0) return;
+        function walk(n){
+            if(n.nodeType===3){
+                var t=n.textContent;
+                if(/\s+\[\s*\d+\s*\]/.test(t)){
+                    n.textContent=t.replace(/\s+\[\s*(\d+)\s*\]/g,'\n [$1]');
+                }
+            }else if(n.nodeType===1)
+                for(var i=0;i<n.childNodes.length;i++) walk(n.childNodes[i]);
+        }
+        walk(code);
+        code.setAttribute('data-fixed-newlines','1');
+    }
+    document.addEventListener('DOMContentLoaded',function(){
+        document.querySelectorAll('.highlight pre').forEach(fixCodeBlockNewlines);
+    });
+})();
+</script>
+
 <!-- jquery.tagcloud.js -->
 <script>
     // only load tagcloud.js in tag.html

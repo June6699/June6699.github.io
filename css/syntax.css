@@ -1,14 +1,19 @@
 /* preserve line breaks in code (nowrap was collapsing R and other code to one line) */
-.highlight pre code * {
-  white-space: pre;
+.highlight pre code,
+.highlight pre code *,
+.post-container .highlight pre code,
+.post-container .highlight pre code * {
+  white-space: pre !important;
 }
 
-.highlight pre {
+.highlight pre,
+.post-container .highlight pre {
   overflow-x: auto;
+  white-space: pre !important;
 }
 
 .highlight pre code {
-  white-space: pre;
+  white-space: pre !important;
 }
 
 
