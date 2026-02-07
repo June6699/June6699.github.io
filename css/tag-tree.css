@@ -1,0 +1,106 @@
+.tag-page-container { padding-top: 20px; }
+.tag-tree-wrap {
+  position: sticky;
+  top: 60px;
+  max-height: calc(100vh - 80px);
+  overflow-y: auto;
+}
+.tag-tree-card {
+  font-size: 13px;
+  background: #fafbfc;
+  border: 1px solid #e0e6e9;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+}
+.tag-tree-title {
+  padding: 14px 18px;
+  font-size: 15px;
+  font-weight: 700;
+  color: #fff;
+  background: linear-gradient(135deg, #0085a1 0%, #006b82 100%);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+.tag-tree-inner {
+  padding: 14px 10px 18px 14px;
+  max-height: calc(100vh - 180px);
+  overflow-y: auto;
+}
+.tag-tree-group { margin-bottom: 10px; }
+.tag-tree-top {
+  font-weight: 700;
+  font-size: 14px;
+  color: #fff !important;
+  padding: 10px 14px 10px 18px;
+  margin: 0 0 6px 0;
+  border-radius: 8px;
+  border-left: none;
+  background: linear-gradient(135deg, #0096b3 0%, #0085a1 100%) !important;
+  cursor: pointer;
+  user-select: none;
+  line-height: 1.4;
+  box-shadow: 0 1px 3px rgba(0, 133, 161, 0.25);
+}
+.tag-tree-top:hover {
+  background: linear-gradient(135deg, #00a0c0 0%, #0096b3 100%) !important;
+  color: #fff !important;
+  box-shadow: 0 2px 6px rgba(0, 133, 161, 0.35);
+}
+.tag-tree-node {
+  margin-top: 4px;
+  margin-left: 0;
+  padding-left: 28px;
+  border-left: none;
+}
+.tag-tree-node .tag-tree-tag {
+  display: block;
+  padding: 8px 12px 8px 14px;
+  margin: 4px 0 4px 0;
+  font-weight: 600;
+  font-size: 13px;
+  color: #0a5f75 !important;
+  text-decoration: none !important;
+  border-radius: 6px;
+  line-height: 1.4;
+  background: #e0f2f6 !important;
+  border-left: 4px solid #2d9db5;
+}
+.tag-tree-node .tag-tree-tag:hover {
+  background: #c5e8ef !important;
+  color: #006b82 !important;
+}
+.tag-tree-posts {
+  margin-left: 24px;
+  padding-left: 12px;
+  border-left: 2px solid #d0e4e8;
+  display: none;
+}
+.tag-tree-group.open .tag-tree-node .tag-tree-posts { display: block; }
+.tag-tree-node.open .tag-tree-posts { display: block; }
+.tag-tree-post {
+  display: block;
+  padding: 6px 10px 6px 12px;
+  margin: 2px 0;
+  font-size: 12px;
+  color: #555 !important;
+  text-decoration: none !important;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.4;
+  border-radius: 4px;
+  background: transparent !important;
+  border-left: none !important;
+}
+.tag-tree-post:hover {
+  color: #0085a1 !important;
+  background: rgba(0, 133, 161, 0.08) !important;
+}
+@media only screen and (max-width: 991px) {
+  .tag-tree-wrap {
+    position: static;
+    max-height: none;
+    margin-bottom: 24px;
+  }
+  .tag-tree-inner { max-height: none; }
+}
