@@ -21,7 +21,9 @@ header-img: "img/flowers/tags.jpg"
 <div class="container tag-page-container">
 	<div class="row">
 		<aside class="col-lg-3 col-md-4 tag-tree-wrap">
-			<nav class="tag-tree" id="tag-tree">
+			<nav class="tag-tree-card" id="tag-tree">
+				<div class="tag-tree-title">标签导航</div>
+				<div class="tag-tree-inner">
 				{% assign sorted_tags = site.tags | sort %}
 				{% assign current_top = "" %}
 				{% for tag in sorted_tags %}
@@ -50,6 +52,7 @@ header-img: "img/flowers/tags.jpg"
 					</div>
 				{% endfor %}
 				{% if current_top != "" %}</div>{% endif %}
+				</div>
 			</nav>
 		</aside>
 		<div class="col-lg-9 col-md-8 tag-main">

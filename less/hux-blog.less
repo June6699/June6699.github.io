@@ -803,42 +803,93 @@ img::-moz-selection {
 		margin-bottom: 24px;
 	}
 }
-.tag-tree {
+.tag-tree-card {
 	font-size: 13px;
-	padding-right: 12px;
+	background: linear-gradient(180deg, #f8fafb 0%, #f0f4f6 100%);
+	border: 1px solid #e2e8ec;
+	border-radius: 10px;
+	box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+	overflow: hidden;
 }
-.tag-tree-group { margin-bottom: 12px; }
+.tag-tree-title {
+	padding: 12px 16px;
+	font-size: 14px;
+	font-weight: 700;
+	color: #fff;
+	background: linear-gradient(135deg, #0085a1 0%, #006b82 100%);
+	border-bottom: 1px solid rgba(255,255,255,0.15);
+}
+.tag-tree-inner {
+	padding: 12px 8px 16px 12px;
+	max-height: calc(100vh - 180px);
+	overflow-y: auto;
+	@media only screen and (max-width: 991px) {
+		max-height: none;
+	}
+}
+.tag-tree-group { margin-bottom: 8px; }
 .tag-tree-top {
-	font-weight: 600;
-	color: #333;
-	padding: 4px 0 4px 8px;
-	border-left: 3px solid #0085a1;
+	font-weight: 700;
+	font-size: 13px;
+	color: #006b82;
+	padding: 8px 10px 8px 14px;
+	margin: 0 4px 4px 0;
+	border-radius: 6px;
+	border-left: 4px solid #0085a1;
+	background: rgba(0,133,161,0.08);
 	cursor: pointer;
 	user-select: none;
-	&:hover { color: #0085a1; }
+	line-height: 1.35;
+	&:hover {
+		background: rgba(0,133,161,0.14);
+		color: #005a6e;
+	}
 }
-.tag-tree-node { margin-left: 12px; margin-top: 4px; }
-.tag-tree-node .tag-tree-tag {
-	display: block;
-	padding: 2px 0 2px 8px;
-	color: #555;
-	text-decoration: none;
-	border-left: 2px solid #ddd;
-	&:hover { color: #0085a1; }
+.tag-tree-node {
+	margin-top: 2px;
+	margin-left: 20px;
+	padding-left: 10px;
+	border-left: 2px solid #b8d4dc;
+	.tag-tree-tag {
+		display: block;
+		padding: 5px 8px 5px 10px;
+		margin: 2px 0;
+		font-weight: 600;
+		font-size: 12px;
+		color: #0d6b8a;
+		text-decoration: none;
+		border-radius: 4px;
+		line-height: 1.35;
+		&:hover {
+			background: rgba(0,133,161,0.1);
+			color: #0085a1;
+		}
+	}
 }
-.tag-tree-posts { margin-left: 16px; display: none; }
+.tag-tree-posts {
+	margin-left: 24px;
+	padding-left: 12px;
+	border-left: 1px solid #e2e8ec;
+	display: none;
+}
 .tag-tree-group.open .tag-tree-node .tag-tree-posts { display: block; }
 .tag-tree-node.open .tag-tree-posts { display: block; }
 .tag-tree-post {
 	display: block;
-	padding: 2px 0 2px 6px;
+	padding: 4px 8px 4px 6px;
+	margin: 2px 0;
 	font-size: 12px;
-	color: #666;
+	color: #555;
 	text-decoration: none;
 	white-space: nowrap;
 	overflow: hidden;
 	text-overflow: ellipsis;
-	&:hover { color: #0085a1; }
+	line-height: 1.4;
+	border-radius: 3px;
+	&:hover {
+		color: #0085a1;
+		background: rgba(0,133,161,0.06);
+	}
 }
 #tag_cloud{
 	margin: 16px 0 24px 0;
