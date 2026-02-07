@@ -62,32 +62,20 @@ layout: default
 
                 <hr style="visibility: hidden;">
 
-                {% assign articles_coll = site.collections["articles"] %}
-                {% if articles_coll %}{% assign sorted_articles = articles_coll.docs | sort: 'date' | reverse %}{% else %}{% assign sorted_articles = "" | split: "," %}{% endif %}
-                {% assign prev_url = "" %}{% assign prev_title = "" %}{% assign next_url = "" %}{% assign next_title = "" %}{% assign found = false %}
-                {% for doc in sorted_articles %}
-                    {% if doc.id == page.id %}
-                        {% assign found = true %}
-                    {% elsif found %}
-                        {% assign next_url = doc.url %}{% assign next_title = doc.title %}{% assign found = false %}
-                    {% else %}
-                        {% assign prev_url = doc.url %}{% assign prev_title = doc.title %}
-                    {% endif %}
-                {% endfor %}
                 <ul class="pager">
-                    {% if prev_url != "" %}
+                    {% if page.previous.url %}
                     <li class="previous">
-                        <a href="{{ prev_url | prepend: site.baseurl | replace: '//', '/' }}" data-toggle="tooltip" data-placement="top" title="{{ prev_title }}">
+                        <a href="{{ page.previous.url | prepend: site.baseurl | replace: '//', '/' }}" data-toggle="tooltip" data-placement="top" title="{{ page.previous.title }}">
                         Previous<br>
-                        <span>{{ prev_title }}</span>
+                        <span>{{ page.previous.title }}</span>
                         </a>
                     </li>
                     {% endif %}
-                    {% if next_url != "" %}
+                    {% if page.next.url %}
                     <li class="next">
-                        <a href="{{ next_url | prepend: site.baseurl | replace: '//', '/' }}" data-toggle="tooltip" data-placement="top" title="{{ next_title }}">
+                        <a href="{{ page.next.url | prepend: site.baseurl | replace: '//', '/' }}" data-toggle="tooltip" data-placement="top" title="{{ page.next.title }}">
                         Next<br>
-                        <span>{{ next_title }}</span>
+                        <span>{{ page.next.title }}</span>
                         </a>
                     </li>
                     {% endif %}

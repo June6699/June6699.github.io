@@ -23,16 +23,10 @@ github_username:
 facebook_username:  
 jianshu_username:	
 
-# Collections (articles in _articles/, images stay in _articles/*.assets/)
-collections:
-  articles:
-    output: true
-    permalink: /_articles/:name/
-
 # Build settings
 permalink: pretty
 paginate: 10
-exclude: ["less","node_modules","Gruntfile.js","package.json","README.md","assets","vendor"]
+exclude: ["less","node_modules","Gruntfile.js","package.json","README.md","assets","vendor","articles"]
 anchorjs: true
 
 # Gems

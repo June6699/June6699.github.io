@@ -2,6 +2,10 @@
   padding-top: 20px;
   overflow-anchor: none;
 }
+.tag-main {
+  touch-action: pan-y;
+  overflow-x: hidden;
+}
 .tag-tree-wrap {
   position: sticky;
   top: 60px;
@@ -9,6 +13,10 @@
   overflow-y: auto;
   overscroll-behavior: contain;
   -webkit-overflow-scrolling: touch;
+  touch-action: pan-y;
+}
+.tag-tree-wrap:focus {
+  outline: none;
 }
 .tag-tree-card {
   font-size: 13px;

@@ -11,9 +11,7 @@ layout: null
     <pubDate>{{ site.time | date_to_rfc822 }}</pubDate>
     <lastBuildDate>{{ site.time | date_to_rfc822 }}</lastBuildDate>
     <generator>Jekyll v{{ jekyll.version }}</generator>
-    {% assign articles_coll = site.collections["articles"] %}
-    {% if articles_coll %}{% assign sorted_articles = articles_coll.docs | sort: 'date' | reverse %}{% else %}{% assign sorted_articles = "" | split: "," %}{% endif %}
-    {% for post in sorted_articles limit:10 %}
+    {% for post in site.posts limit:10 %}
       <item>
         <title>{{ post.title | xml_escape }}</title>
         <description>{{ post.content | xml_escape }}</description>

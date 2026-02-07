@@ -34,5 +34,5 @@ Temporary Items
 # debug file
 _site
 
-# 图片只保留 _articles 下与 md 同级的文件夹，根目录 assets 为旧复制可删
+# 文章源在 articles/，图片由 sync_articles.py 同步到 img/；构建用 _posts + img
 /assets
