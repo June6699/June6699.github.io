@@ -137,7 +137,7 @@ def cmd_move_assets_and_update_md():
         shutil.move(str(f), str(dest))
         print(f"移动: {f.name} -> {target_dir}/")
     text = target_md.read_text(encoding='utf-8')
-    base = f"{{{{ site.baseurl }}}}/img/{target_prefix}/"
+    base = f"../img/{target_prefix}/"
     new_text = re.sub(
         r'!\[([^\]]*)\]\(\s*(\./)?assets/([^\)]+)\)',
         lambda m: f'![{m.group(1)}]({base}{m.group(3)})',
