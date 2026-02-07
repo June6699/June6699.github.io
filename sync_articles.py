@@ -44,11 +44,11 @@ def clear_img_except_keep():
 
 
 def get_assets_slug_map():
-    """_articles 里 .md 对应的 assets 文件夹名 -> img 用的前缀 slug。优先 front matter 的 assets_folder。"""
+    """_articles 里 .md 对应的 assets 文件夹名 -> img 用的前缀 slug。优先 front matter 的 assets_folder。再扫一遍所有 .assets 目录，避免漏拷。"""
     m = {}
     if not SRC.exists():
         return m
-    for f in SRC.iterdir():
+    for f in sorted(SRC.iterdir()):
         if f.suffix != ".md":
             continue
         name = f.stem
@@ -67,13 +67,19 @@ def get_assets_slug_map():
         if adir.is_dir():
             base = folder[:-7].replace("_", "-")
             m[folder] = slug_from_name(base)
+    # 兜底：_articles 下所有 .assets 目录都拷到 img，防止漏掉（如 Win11_right_click.assets）
+    for p in sorted(SRC.iterdir()):
+        if p.is_dir() and p.name.endswith(".assets") and p.name not in m:
+            base = p.name[:-7].replace("_", "-")
+            m[p.name] = slug_from_name(base)
     return m
 
 
 def copy_article_assets_to_img():
     """把 _articles/*.assets 里每个文件拷到 img/，命名为 slug_原文件名（扁平，无子文件夹）"""
     amap = get_assets_slug_map()
-    for folder_name, slug in amap.items():
+    IMG.mkdir(parents=True, exist_ok=True)
+    for folder_name, slug in sorted(amap.items()):
         src_dir = SRC / folder_name
         if not src_dir.is_dir():
             continue
