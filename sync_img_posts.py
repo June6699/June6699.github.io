@@ -2,10 +2,13 @@
 # -*- coding: utf-8 -*-
 """
 Post 和图片文件夹同步脚本
+约定：图片只存一份在 _posts/<asset-dir>（与 md 同级的无日期文件夹，如 HiCPlot.assets），
+Typora 用 ./HiCPlot.assets/ 引用，HTML 通过本脚本复制到 assets/ 后由 Jekyll 一起发布。
+
 功能：
-1. 根据 md 中的 img-prefix 自动重命名 img 下对应文件夹（每个 md 对应单独 img 文件夹）
+1. 根据 md 中的 img-prefix 自动重命名 img 下对应文件夹（兼容旧流程）
 2. 将 _posts/assets 移动到 img/<img-prefix> 并更新 md 内图片路径
-3. 将 _posts/<stem>.assets 或 _posts/<asset-dir> 复制到 img/<img-prefix 文件夹>，供 Jekyll 构建后 HTML 显示图片
+3. 将 _posts/<asset-dir> 复制到 assets/<asset-dir>，与 md 共用一套图；构建前运行即可
 """
 import os
 import re
@@ -14,7 +17,9 @@ import shutil
 from pathlib import Path
 
 POSTS_DIR = Path('_posts')
+ARTICLES_DIR = Path('_articles')  # 无日期文件名的文章（collection）
 IMG_DIR = Path('img')
+ASSETS_DIR = Path('assets')  # 与 _posts 下同名文件夹对应，供 HTML 用同一套图
 
 
 def read_front_matter(md_path):
@@ -155,34 +160,71 @@ def cmd_move_assets_and_update_md():
         print("已删除空文件夹 _posts/assets")
 
 
+def _copy_asset_dir_to_assets(asset_dir_name, assets_src_dir):
+    """把 assets_src_dir 复制到 assets/asset_dir_name"""
+    if not assets_src_dir.is_dir():
+        return
+    target_dir = ASSETS_DIR / asset_dir_name
+    target_dir.mkdir(parents=True, exist_ok=True)
+    for f in assets_src_dir.iterdir():
+        if f.is_file():
+            dest = target_dir / f.name
+            if not dest.exists() or dest.stat().st_mtime < f.stat().st_mtime:
+                shutil.copy2(str(f), str(dest))
+                print(f"复制: {f.name} -> {target_dir}/")
+
+
 def cmd_copy_post_assets_to_img():
     """
-    将 _posts/<stem>.assets 或 _posts/<asset-dir> 复制到 img/<img-prefix 文件夹>，
-    这样 Jekyll 构建后 HTML 里通过 layout 替换成的 /img/xxx/ 路径能访问到图片。
-    md 内仍保留 ./stem.assets/ 或 ./asset-dir/，Typora 本地可正常显示。
+    单一图源：把 _posts/<asset-dir> 复制到 assets/<asset-dir>。
+    - 先检查 _articles/*.md（无日期文件名），再检查 _posts/*.md；asset-dir 的图都在 _posts 下。
+    - 构建前运行本命令后，HTML 里替换为 /assets/XXX.assets/，Jekyll 会把这些文件带进 _site。
     """
+    seen_asset_dirs = set()
+    # 1) 从 _articles 读取（无日期文件名）
+    if ARTICLES_DIR.is_dir():
+        for md_file in sorted(ARTICLES_DIR.glob('*.md')):
+            if not md_file.is_file():
+                continue
+            fm, _ = read_front_matter(md_file)
+            asset_dir_name = fm.get('asset-dir') or fm.get('asset_dir')
+            if not asset_dir_name or asset_dir_name in seen_asset_dirs:
+                continue
+            seen_asset_dirs.add(asset_dir_name)
+            assets_src = POSTS_DIR / asset_dir_name
+            _copy_asset_dir_to_assets(asset_dir_name, assets_src)
+    # 2) 从 _posts 读取（兼容仍放在 _posts 的 md）
     for md_file in sorted(POSTS_DIR.glob('*.md')):
         if not md_file.is_file():
             continue
         fm, _ = read_front_matter(md_file)
+        stem = md_file.stem
+        asset_dir_name = fm.get('asset-dir') or fm.get('asset_dir')
+        if asset_dir_name:
+            if asset_dir_name in seen_asset_dirs:
+                continue
+            seen_asset_dirs.add(asset_dir_name)
+            assets_src = POSTS_DIR / asset_dir_name
+            _copy_asset_dir_to_assets(asset_dir_name, assets_src)
+            continue
+        # 兼容：无 asset-dir 时按 img-prefix 复制到 img/
         prefix_value = fm.get('img-prefix') or fm.get('img_prefix')
         folder_name = get_img_prefix_folder(prefix_value)
         if not folder_name:
             continue
-        stem = md_file.stem
-        asset_dir_name = fm.get('asset-dir') or fm.get('asset_dir') or (stem + '.assets')
-        assets_dir = POSTS_DIR / asset_dir_name
-        if not assets_dir.is_dir():
+        legacy_asset_name = stem + '.assets'
+        assets_src = POSTS_DIR / legacy_asset_name
+        if not assets_src.is_dir():
             continue
         target_dir = IMG_DIR / folder_name
         target_dir.mkdir(parents=True, exist_ok=True)
-        for f in assets_dir.iterdir():
+        for f in assets_src.iterdir():
             if f.is_file():
                 dest = target_dir / f.name
                 if not dest.exists() or dest.stat().st_mtime < f.stat().st_mtime:
                     shutil.copy2(str(f), str(dest))
-                    print(f"复制: {f.name} -> {target_dir}/")
-    print("post assets 已同步到 img，可执行 Jekyll 构建。")
+                    print(f"复制(旧): {f.name} -> {target_dir}/")
+    print("post assets 已同步（asset-dir -> assets/；仅 img-prefix -> img/）。可执行 Jekyll 构建。")
 
 
 def main():
@@ -190,7 +232,7 @@ def main():
         print("用法: sync_img_posts.py <1|2|3>")
         print("  1 = 根据 img-prefix 重命名 img 文件夹并更新 md 内路径")
         print("  2 = 将 assets 移到 img 对应 prefix 并更新 md 内图片路径")
-        print("  3 = 将 _posts/*.assets 复制到 img（供 HTML 显示），md 仍用同级 .assets（Typora 可见）")
+        print("  3 = 将 _posts/<asset-dir> 复制到 assets/（与 md 共用一套图，构建前必跑）")
         return
     cmd = sys.argv[1].strip()
     if cmd == '1':

@@ -5,7 +5,7 @@ description: "Keep Learning"
 header-img: "img/flowers/tags.jpg"
 ---
 
-<header class="intro-header" style="background-image: url('{{ site.baseurl }}/{% if page.header-img %}{{ page.header-img }}{% else %}{{ site.header-img }}{% endif %}')">
+<header class="intro-header intro-header-full" style="background-image: url('{{ site.baseurl }}/{% if page.header-img %}{{ page.header-img }}{% else %}{{ site.header-img }}{% endif %}')">
     <div class="container">
         <div class="row">
             <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
@@ -24,54 +24,43 @@ header-img: "img/flowers/tags.jpg"
 			<nav class="tag-tree-card" id="tag-tree">
 				<div class="tag-tree-title">标签导航</div>
 				<div class="tag-tree-inner">
-				{% assign sorted_tags = site.tags | sort %}
-				{% assign current_top = "" %}
-				{% for tag in sorted_tags %}
-					{% assign tag_name = tag[0] %}
-					{% assign parts = tag_name | split: "/" %}
-					{% assign top = parts[0] %}
-					{% if tag_name contains "/" %}
-						{% if top != current_top %}
-							{% if current_top != "" %}</div>{% endif %}
-							<div class="tag-tree-group {% if current_top == "" %}open{% endif %}">
-								<div class="tag-tree-top">{{ top }}</div>
-							{% assign current_top = top %}
-						{% endif %}
-						{% assign segs = tag_name | split: "/" %}
-						{% assign display_name = segs | last %}
-					{% else %}
-						{% if current_top != "" %}</div>{% assign current_top = "" %}{% endif %}
-						{% assign display_name = tag_name %}
-					{% endif %}
-					<div class="tag-tree-node {% unless tag_name contains '/' %}tag-tree-node-flat{% endunless %}" data-target="tag-{{ forloop.index }}">
-						<a href="#tag-{{ forloop.index }}" class="tag-tree-tag" title="{{ tag_name }}">{{ display_name }} ({{ tag[1].size }})</a>
+				{% for tag_name in site.tag_list %}
+					{% assign count = 0 %}
+					{% for a in site.articles %}
+						{% if a.tags contains tag_name %}{% assign count = count | plus: 1 %}{% endif %}
+					{% endfor %}
+					<div class="tag-tree-node tag-tree-node-flat" data-target="tag-{{ forloop.index }}">
+						<a href="#tag-{{ forloop.index }}" class="tag-tree-tag" title="{{ tag_name }}">{{ tag_name }} ({{ count }})</a>
 						<div class="tag-tree-posts">
-							{% for post in tag[1] %}
-							<a href="{{ post.url | prepend: site.baseurl }}" class="tag-tree-post">{{ post.title }}</a>
+							{% for a in site.articles %}
+								{% if a.tags contains tag_name %}
+								<a href="{{ a.url | prepend: site.baseurl }}" class="tag-tree-post">{{ a.title }}</a>
+								{% endif %}
 							{% endfor %}
 						</div>
 					</div>
 				{% endfor %}
-				{% if current_top != "" %}</div>{% endif %}
 				</div>
 			</nav>
 		</aside>
 		<div class="col-lg-9 col-md-8 tag-main">
 			<div id="tag_cloud" class="tags tag-cloud-chips">
-				{% for tag in sorted_tags %}
-				<a href="#tag-{{ forloop.index }}" title="{{ tag[0] }}" rel="{{ tag[1].size }}">{{ tag[0] }} ({{ tag[1].size }})</a>
+				{% for tag_name in site.tag_list %}
+					{% assign count = 0 %}
+					{% for a in site.articles %}{% if a.tags contains tag_name %}{% assign count = count | plus: 1 %}{% endif %}{% endfor %}
+				<a href="#tag-{{ forloop.index }}" title="{{ tag_name }}" rel="{{ count }}">{{ tag_name }} ({{ count }})</a>
 				{% endfor %}
 			</div>
 
-			{% for tag in sorted_tags %}
-			{% assign tag_name = tag[0] %}
-			<div class="one-tag-list {% if tag_name contains '/' %}tag-sub{% endif %}" id="tag-{{ forloop.index }}">
+			{% for tag_name in site.tag_list %}
+			<div class="one-tag-list" id="tag-{{ forloop.index }}">
 				<h2 class="tag-section-heading">
 					<span class="fa fa-tag listing-seperator"></span>
 					<span class="tag-text">{{ tag_name }}</span>
 				</h2>
 				<div class="tag-posts-grid">
-					{% for post in tag[1] %}
+					{% for post in site.articles %}
+						{% if post.tags contains tag_name %}
 					<article class="tag-post-card">
 						<a href="{{ post.url | prepend: site.baseurl }}" class="tag-post-card-link">
 							<h3 class="tag-post-card-title">{{ post.title }}</h3>
@@ -81,6 +70,7 @@ header-img: "img/flowers/tags.jpg"
 							<p class="tag-post-card-meta">{{ post.date | date: "%Y-%m-%d" }}</p>
 						</a>
 					</article>
+						{% endif %}
 					{% endfor %}
 				</div>
 			</div>

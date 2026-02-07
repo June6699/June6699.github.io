@@ -58,24 +58,42 @@ layout: default
                 col-md-10 col-md-offset-1
                 post-container">
 
-				{% comment %} 将 md 内 ./filename.assets/ 或 ./asset-dir/ 替换为站内 img 路径，以便 HTML 能显示；本地 Typora 仍用同级 .assets 路径 {% endcomment %}
-				{% if page.img-prefix %}
+				{% comment %}
+				  图片统一来源：md 里写 ./XXX.assets/（与 _posts 下文件夹同名，无日期），Typora 和 HTML 共用这一套。
+				  - 有 asset-dir 时：替换为 {{ baseurl }}/assets/{{ asset-dir }}/（构建前需运行 sync_img_posts.py 3 把 _posts/XXX.assets 复制到 assets/）
+				  - 无 asset-dir 仅有 img-prefix 时：仍替换为 img/ 路径（兼容旧文）
+				{% endcomment %}
+				{% if page.asset-dir %}
+					{% capture old_asset %}./{{ page.asset-dir }}/{% endcapture %}
+					{% capture new_asset %}{{ site.baseurl }}/assets/{{ page.asset-dir }}/{% endcapture %}
+					{{ content | replace: old_asset, new_asset | replace: '//', '/' | replace: '^o^', '<sup>o</sup>' }}
+				{% elsif page.img-prefix %}
 					{% assign path_parts = page.path | split: '/' %}
 					{% assign filename = path_parts | last %}
 					{% assign stem = filename | replace: '.md', '' %}
-					{% if page.asset-dir %}
-						{% capture old_asset %}./{{ page.asset-dir }}/{% endcapture %}
-					{% else %}
-						{% capture old_asset %}./{{ stem }}.assets/{% endcapture %}
-					{% endif %}
+					{% assign img_folder = page.img-prefix | split: '/' | last %}
 					{% capture new_asset %}{{ site.baseurl }}/{{ page.img-prefix }}/{% endcapture %}
-					{{ content | replace: old_asset, new_asset | replace: '//', '/' | replace: '^o^', '<sup>o</sup>' }}
+					{% capture old_stem %}./{{ stem }}.assets/{% endcapture %}
+					{% capture old_folder %}./{{ img_folder }}/{% endcapture %}
+					{{ content | replace: old_stem, new_asset | replace: old_folder, new_asset | replace: '//', '/' | replace: '^o^', '<sup>o</sup>' }}
 				{% else %}
 					{{ content | replace: '^o^', '<sup>o</sup>' }}
 				{% endif %}
 
                 <hr style="visibility: hidden;">
 
+                {% comment %} collection 文章无 page.previous/next，用 site.articles 按日期算上一篇/下一篇 {% endcomment %}
+                {% assign sorted_articles = site.articles | sort: 'date' | reverse %}
+                {% assign prev_url = "" %}{% assign prev_title = "" %}{% assign next_url = "" %}{% assign next_title = "" %}{% assign found = false %}
+                {% for doc in sorted_articles %}
+                    {% if doc.url == page.url %}
+                        {% assign found = true %}
+                    {% elsif found %}
+                        {% assign next_url = doc.url %}{% assign next_title = doc.title %}{% assign found = false %}
+                    {% else %}
+                        {% assign prev_url = doc.url %}{% assign prev_title = doc.title %}
+                    {% endif %}
+                {% endfor %}
                 <ul class="pager">
                     {% if page.previous.url %}
                     <li class="previous">
@@ -84,12 +102,26 @@ layout: default
                         <span>{{page.previous.title}}</span>
                         </a>
                     </li>
+                    {% elsif prev_url != "" %}
+                    <li class="previous">
+                        <a href="{{ prev_url | prepend: site.baseurl | replace: '//', '/' }}" data-toggle="tooltip" data-placement="top" title="{{ prev_title }}">
+                        Previous<br>
+                        <span>{{ prev_title }}</span>
+                        </a>
+                    </li>
                     {% endif %}
                     {% if page.next.url %}
                     <li class="next">
                         <a href="{{ page.next.url | prepend: site.baseurl | replace: '//', '/' }}" data-toggle="tooltip" data-placement="top" title="{{page.next.title}}">
                         Next<br>
                         <span>{{page.next.title}}</span>
+                        </a>
+                    </li>
+                    {% elsif next_url != "" %}
+                    <li class="next">
+                        <a href="{{ next_url | prepend: site.baseurl | replace: '//', '/' }}" data-toggle="tooltip" data-placement="top" title="{{ next_title }}">
+                        Next<br>
+                        <span>{{ next_title }}</span>
                         </a>
                     </li>
                     {% endif %}
@@ -159,12 +191,8 @@ layout: default
                     <hr class="hidden-sm hidden-xs">
                     <h5><a href="/tags/">FEATURED TAGS</a></h5>
                     <div class="tags">
-        				{% for tag in site.tags %}
-                            {% if tag[1].size > {{site.featured-condition-size}} %}
-                				<a href="/tags/#{{ tag[0] }}" title="{{ tag[0] }}" rel="{{ tag[1].size }}">
-                                    {{ tag[0] }}
-                                </a>
-                            {% endif %}
+        				{% for tag in site.tag_list %}
+                				<a href="/tags/#tag-{{ forloop.index }}" title="{{ tag }}" rel="1">{{ tag }}</a>
         				{% endfor %}
         			</div>
                 </section>
