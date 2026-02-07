@@ -18,11 +18,42 @@ header-img: "img/flowers/tags.jpg"
     </div>
 </header>
 
-<div class="container">
+<div class="container tag-page-container">
 	<div class="row">
-		<div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
-			<div id="tag_cloud" class="tags tag-cloud-chips">
+		<aside class="col-lg-3 col-md-4 tag-tree-wrap">
+			<nav class="tag-tree" id="tag-tree">
 				{% assign sorted_tags = site.tags | sort %}
+				{% assign current_top = "" %}
+				{% for tag in sorted_tags %}
+					{% assign tag_name = tag[0] %}
+					{% assign parts = tag_name | split: "/" %}
+					{% assign top = parts[0] %}
+					{% if top != current_top %}
+						{% if current_top != "" %}</div>{% endif %}
+						<div class="tag-tree-group {% if current_top == "" %}open{% endif %}">
+							<div class="tag-tree-top">{{ top }}</div>
+						{% assign current_top = top %}
+					{% endif %}
+					{% if tag_name contains "/" %}
+						{% assign segs = tag_name | split: "/" %}
+						{% assign display_name = segs | last %}
+					{% else %}
+						{% assign display_name = tag_name %}
+					{% endif %}
+					<div class="tag-tree-node" data-target="tag-{{ forloop.index }}">
+						<a href="#tag-{{ forloop.index }}" class="tag-tree-tag" title="{{ tag_name }}">{{ display_name }} ({{ tag[1].size }})</a>
+						<div class="tag-tree-posts">
+							{% for post in tag[1] %}
+							<a href="{{ post.url | prepend: site.baseurl }}" class="tag-tree-post">{{ post.title }}</a>
+							{% endfor %}
+						</div>
+					</div>
+				{% endfor %}
+				{% if current_top != "" %}</div>{% endif %}
+			</nav>
+		</aside>
+		<div class="col-lg-9 col-md-8 tag-main">
+			<div id="tag_cloud" class="tags tag-cloud-chips">
 				{% for tag in sorted_tags %}
 				<a href="#tag-{{ forloop.index }}" title="{{ tag[0] }}" rel="{{ tag[1].size }}">{{ tag[0] }} ({{ tag[1].size }})</a>
 				{% endfor %}
@@ -44,11 +75,6 @@ header-img: "img/flowers/tags.jpg"
 							<p class="tag-post-card-subtitle">{{ post.subtitle }}</p>
 							{% endif %}
 							<p class="tag-post-card-meta">{{ post.date | date: "%Y-%m-%d" }}</p>
-							{% if post.excerpt %}
-							<p class="tag-post-card-excerpt">{{ post.excerpt | strip_html | truncate: 120 }}</p>
-							{% else %}
-							<p class="tag-post-card-excerpt">{{ post.content | strip_html | truncate: 120 }}</p>
-							{% endif %}
 						</a>
 					</article>
 					{% endfor %}
@@ -58,3 +84,33 @@ header-img: "img/flowers/tags.jpg"
 		</div>
 	</div>
 </div>
+
+<script>
+(function(){
+	var tree = document.getElementById('tag-tree');
+	if (!tree) return;
+	var tops = tree.querySelectorAll('.tag-tree-top');
+	var nodes = tree.querySelectorAll('.tag-tree-node');
+	tops.forEach(function(el){
+		el.addEventListener('click', function(){
+			var group = el.parentNode;
+			var open = group.classList.toggle('open');
+			group.querySelectorAll('.tag-tree-node').forEach(function(n){ n.classList.toggle('open', open); });
+		});
+	});
+	nodes.forEach(function(el){
+		var tagLink = el.querySelector('.tag-tree-tag');
+		var posts = el.querySelector('.tag-tree-posts');
+		if (!tagLink || !posts || !posts.children.length) return;
+		tagLink.addEventListener('click', function(e){
+			e.preventDefault();
+			var open = el.classList.toggle('open');
+			var id = el.getAttribute('data-target');
+			if (id) {
+				var section = document.getElementById(id);
+				if (section) section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+			}
+		});
+	});
+})();
+</script>
