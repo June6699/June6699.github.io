@@ -59,9 +59,7 @@ layout: default
                 post-container">
 
 				{% comment %}
-				  图片统一来源：md 里写 ./XXX.assets/（与 _posts 下文件夹同名，无日期），Typora 和 HTML 共用这一套。
-				  - 有 asset-dir 时：替换为 {{ baseurl }}/assets/{{ asset-dir }}/（构建前需运行 sync_img_posts.py 3 把 _posts/XXX.assets 复制到 assets/）
-				  - 无 asset-dir 仅有 img-prefix 时：仍替换为 img/ 路径（兼容旧文）
+				  md 与图同级（Typora 要求）。有 asset-dir 时：正文 ./asset-dir/ 替换为 baseurl/assets/asset-dir/；构建前需运行 sync_img_posts.py 3（从 _articles 复制到 assets/）。
 				{% endcomment %}
 				{% if page.asset-dir %}
 					{% capture old_asset %}./{{ page.asset-dir }}/{% endcapture %}

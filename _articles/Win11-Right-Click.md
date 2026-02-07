@@ -8,14 +8,14 @@ header-img: img/flowers/flower-7958117_1920.jpg
 catalog:    true
 tags:
     - Windows
-asset-dir:  Win11-Right-Click.assets
+asset-dir:  Win11_right_click
 ---
 
 ## 问题描述
 
 当我们下载了某些软件后，右键菜单常常变得冗余，从而看起来很不舒服，如下图所示：
 
-![Win11右键菜单正在加载中](./Win11-Right-Click.assets/Win11右键正在加载中.png)
+![Win11右键菜单正在加载中](./Win11_right_click/Win11右键正在加载中.png)
 
 ### 原因分析
 
@@ -32,7 +32,7 @@ Win11 的新版右键菜单采用了**二级菜单设计**（"显示更多选项
 #### 文件下载
 
 - **GitHub 源码地址**：[点击访问](https://github.com/javakam/Windows-Scripts/blob/master/Win11%E6%94%B9%E7%94%A8%E4%BC%A0%E7%BB%9F%E5%8F%B3%E9%94%AE%E8%8F%9C%E5%8D%95.bat)
-- **本地文件下载**：[点击下载]({{ site.baseurl }}/assets/Win11-Right-Click.assets/Win11改用传统右键菜单.txt)（下载后请将文件后缀改为 `.bat`）
+- **本地文件下载**：[点击下载]({{ site.baseurl }}/assets/Win11_right_click/Win11改用传统右键菜单.txt)（下载后请将文件后缀改为 `.bat`）
 
 #### 脚本内容
 

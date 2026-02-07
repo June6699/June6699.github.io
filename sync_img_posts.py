@@ -176,55 +176,26 @@ def _copy_asset_dir_to_assets(asset_dir_name, assets_src_dir):
 
 def cmd_copy_post_assets_to_img():
     """
-    单一图源：把 _posts/<asset-dir> 复制到 assets/<asset-dir>。
-    - 先检查 _articles/*.md（无日期文件名），再检查 _posts/*.md；asset-dir 的图都在 _posts 下。
-    - 构建前运行本命令后，HTML 里替换为 /assets/XXX.assets/，Jekyll 会把这些文件带进 _site。
+    md 与图片必须在同级（Typora 要求）。只从 md 所在目录复制：
+    - _articles/*.md 的图从 _articles/<asset-dir>/ 复制到 assets/<asset-dir>/
+    构建前运行后，HTML 里替换为 /assets/<asset-dir>/，只此一份图源。
     """
     seen_asset_dirs = set()
-    # 1) 从 _articles 读取（无日期文件名）
-    if ARTICLES_DIR.is_dir():
-        for md_file in sorted(ARTICLES_DIR.glob('*.md')):
-            if not md_file.is_file():
-                continue
-            fm, _ = read_front_matter(md_file)
-            asset_dir_name = fm.get('asset-dir') or fm.get('asset_dir')
-            if not asset_dir_name or asset_dir_name in seen_asset_dirs:
-                continue
-            seen_asset_dirs.add(asset_dir_name)
-            assets_src = POSTS_DIR / asset_dir_name
-            _copy_asset_dir_to_assets(asset_dir_name, assets_src)
-    # 2) 从 _posts 读取（兼容仍放在 _posts 的 md）
-    for md_file in sorted(POSTS_DIR.glob('*.md')):
+    if not ARTICLES_DIR.is_dir():
+        print("未找到 _articles 目录")
+        return
+    for md_file in sorted(ARTICLES_DIR.glob('*.md')):
         if not md_file.is_file():
             continue
         fm, _ = read_front_matter(md_file)
-        stem = md_file.stem
         asset_dir_name = fm.get('asset-dir') or fm.get('asset_dir')
-        if asset_dir_name:
-            if asset_dir_name in seen_asset_dirs:
-                continue
-            seen_asset_dirs.add(asset_dir_name)
-            assets_src = POSTS_DIR / asset_dir_name
-            _copy_asset_dir_to_assets(asset_dir_name, assets_src)
+        if not asset_dir_name or asset_dir_name in seen_asset_dirs:
             continue
-        # 兼容：无 asset-dir 时按 img-prefix 复制到 img/
-        prefix_value = fm.get('img-prefix') or fm.get('img_prefix')
-        folder_name = get_img_prefix_folder(prefix_value)
-        if not folder_name:
-            continue
-        legacy_asset_name = stem + '.assets'
-        assets_src = POSTS_DIR / legacy_asset_name
-        if not assets_src.is_dir():
-            continue
-        target_dir = IMG_DIR / folder_name
-        target_dir.mkdir(parents=True, exist_ok=True)
-        for f in assets_src.iterdir():
-            if f.is_file():
-                dest = target_dir / f.name
-                if not dest.exists() or dest.stat().st_mtime < f.stat().st_mtime:
-                    shutil.copy2(str(f), str(dest))
-                    print(f"复制(旧): {f.name} -> {target_dir}/")
-    print("post assets 已同步（asset-dir -> assets/；仅 img-prefix -> img/）。可执行 Jekyll 构建。")
+        seen_asset_dirs.add(asset_dir_name)
+        # 与 md 同级：_articles/<asset-dir>/
+        assets_src = ARTICLES_DIR / asset_dir_name
+        _copy_asset_dir_to_assets(asset_dir_name, assets_src)
+    print("已从 _articles 同步到 assets/。请执行 Jekyll 构建。")
 
 
 def main():
