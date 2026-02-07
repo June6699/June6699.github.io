@@ -14,8 +14,7 @@ echo.
 echo    [2] 将 assets 移到 img 并更新 md 内图片路径
 echo        （把 _posts/assets 移到 img/^<img-prefix^>，并改 md 里的图片链接）
 echo.
-echo    [3] 将 _posts 下 *.assets 复制到 img（供 HTML 显示）
-echo        （md 仍用同级 .assets，Typora 可见；构建前运行 3 即可）
+echo    [3] 将 _posts 下 ^<asset-dir^> 复制到 assets/（与 md 共用一套图，构建前运行）
 echo.
 set /p choice=  输入 1、2 或 3：
 if "%choice%"=="1" goto run1

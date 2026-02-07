@@ -499,10 +499,20 @@ pre code {
   margin-bottom: 0px;
   /* 0 on mobile, modify by Hux */
 }
+.intro-header.intro-header-full {
+  -webkit-background-size: contain;
+  -moz-background-size: contain;
+  -o-background-size: contain;
+  background-size: contain;
+  min-height: 280px;
+}
 @media only screen and (min-width: 768px) {
   .intro-header {
     margin-bottom: 20px;
     /* response on desktop */
+  }
+  .intro-header.intro-header-full {
+    min-height: 380px;
   }
 }
 .intro-header .site-heading,

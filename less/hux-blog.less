@@ -406,6 +406,17 @@ pre code{
 	@media only screen and (min-width: 768px) {
 		margin-bottom: 20px;  /* response on desktop */
 	}
+	// 首页/About/Tags 头部图完整显示不裁剪
+	&.intro-header-full {
+		-webkit-background-size: contain;
+		-moz-background-size: contain;
+		-o-background-size: contain;
+		background-size: contain;
+		min-height: 280px;
+		@media only screen and (min-width: 768px) {
+			min-height: 380px;
+		}
+	}
 	.site-heading,
 	.post-heading,
 	.page-heading {

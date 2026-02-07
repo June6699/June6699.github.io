@@ -5,10 +5,9 @@ subtitle:   这是一个示例，用来记录博客功能
 date:       2026-01-23
 author:     June
 header-img: img/flowers/hans-pink-324175_1920.jpg
-catalog: 	 true
+catalog:    true
 tags:
     - Sample
-img-prefix: img/sample/
 ---
 
 ## 欢迎来到我的博客

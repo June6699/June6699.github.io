@@ -8,9 +8,7 @@ header-img: img/flowers/HicPlot.jpg
 catalog: true
 tags:
     - R
-img-prefix: img/HICPlot
 asset-dir: HiCPlot.assets
-permalink: /HiCPlot/
 ---
 
 ### 0 R绘图过程
@@ -133,7 +131,7 @@ rect(xleft, ybottom, xright, ytop, density = NULL,angle = 45, col = NA, border =
 polygon(x, y = NULL, density = NULL, angle = 45,border = NULL, col = NA, lty = par("lty"), ...,fillOddEven = FALSE)
 ```
 
-- 避免回到原点：polygon没有这种参数，但是可以通过在xy中设置NA来达到一个“提笔”的作用，让R不知道该画哪里，他就不画，进而笔就到下一个点了，而非连成线，简而言之就是，中间断了笔。
+- 避免回到原点：polygon没有这种参数，但是可以通过在xy中设置NA来达到一个"提笔"的作用，让R不知道该画哪里，他就不画，进而笔就到下一个点了，而非连成线，简而言之就是，中间断了笔。
 
 ```R
 plot(c(1, 9), 1:2, type = "n")
@@ -176,7 +174,7 @@ graph LR
 
 x：sample，如x=1代表sample_A
 
-y：gene，如y=1代表gene_A。
+y：gene，如y=1代表gene_A
 
 方法
 
