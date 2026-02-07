@@ -1,9 +1,14 @@
-.tag-page-container { padding-top: 20px; }
+.tag-page-container {
+  padding-top: 20px;
+  overflow-anchor: none;
+}
 .tag-tree-wrap {
   position: sticky;
   top: 60px;
   max-height: calc(100vh - 80px);
   overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
 }
 .tag-tree-card {
   font-size: 13px;
@@ -24,6 +29,7 @@
   padding: 14px 10px 18px 14px;
   max-height: calc(100vh - 180px);
   overflow-y: auto;
+  overscroll-behavior: contain;
 }
 .tag-tree-group { margin-bottom: 10px; }
 .tag-tree-top {
