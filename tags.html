@@ -24,15 +24,16 @@ header-img: "img/flowers/tags.jpg"
 			<nav class="tag-tree-card" id="tag-tree">
 				<div class="tag-tree-title">标签导航</div>
 				<div class="tag-tree-inner">
+				{% assign article_pages = site.pages | where: "article", true | sort: 'date' | reverse %}
 				{% for tag_name in site.tag_list %}
 					{% assign count = 0 %}
-					{% for a in site.articles %}
+					{% for a in article_pages %}
 						{% if a.tags contains tag_name %}{% assign count = count | plus: 1 %}{% endif %}
 					{% endfor %}
 					<div class="tag-tree-node tag-tree-node-flat" data-target="tag-{{ forloop.index }}">
 						<a href="#tag-{{ forloop.index }}" class="tag-tree-tag" title="{{ tag_name }}">{{ tag_name }} ({{ count }})</a>
 						<div class="tag-tree-posts">
-							{% for a in site.articles %}
+							{% for a in article_pages %}
 								{% if a.tags contains tag_name %}
 								<a href="{{ a.url | prepend: site.baseurl }}" class="tag-tree-post">{{ a.title }}</a>
 								{% endif %}
@@ -45,9 +46,10 @@ header-img: "img/flowers/tags.jpg"
 		</aside>
 		<div class="col-lg-9 col-md-8 tag-main">
 			<div id="tag_cloud" class="tags tag-cloud-chips">
+				{% assign article_pages = site.pages | where: "article", true | sort: 'date' | reverse %}
 				{% for tag_name in site.tag_list %}
 					{% assign count = 0 %}
-					{% for a in site.articles %}{% if a.tags contains tag_name %}{% assign count = count | plus: 1 %}{% endif %}{% endfor %}
+					{% for a in article_pages %}{% if a.tags contains tag_name %}{% assign count = count | plus: 1 %}{% endif %}{% endfor %}
 				<a href="#tag-{{ forloop.index }}" title="{{ tag_name }}" rel="{{ count }}">{{ tag_name }} ({{ count }})</a>
 				{% endfor %}
 			</div>
@@ -59,7 +61,7 @@ header-img: "img/flowers/tags.jpg"
 					<span class="tag-text">{{ tag_name }}</span>
 				</h2>
 				<div class="tag-posts-grid">
-					{% for post in site.articles %}
+					{% for post in article_pages %}
 						{% if post.tags contains tag_name %}
 					<article class="tag-post-card">
 						<a href="{{ post.url | prepend: site.baseurl }}" class="tag-post-card-link">

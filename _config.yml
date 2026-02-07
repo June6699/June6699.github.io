@@ -29,15 +29,13 @@ paginate: 10
 exclude: ["less","node_modules","Gruntfile.js","package.json","README.md","assets"]
 anchorjs: true
 
-# 文章用 collection，文件名无日期（与 assets 文件夹一致）
-collections:
-  articles:
-    output: true
-    permalink: /:name/
-
 # Gems
 # gems: [jekyll-paginate]
 plugins: [jekyll-paginate]
+
+# 关闭 jekyll-relative-links，避免把文章图片拷到 _site 根目录
+relative_links:
+  enabled: false
 
 # Markdown settings
 markdown: kramdown

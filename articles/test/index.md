@@ -5,9 +5,9 @@ subtitle:   这是一个示例，用来记录博客功能
 date:       2026-01-23
 author:     June
 header-img: img/flowers/hans-pink-324175_1920.jpg
-catalog:    true
 tags:
     - Sample
+article: true
 ---
 
 ## 欢迎来到我的博客
@@ -55,4 +55,3 @@ bundle exec jekyll serve --livereload
 > 这是一段引用文字
 > 可以用来强调重要内容
 > 或者引用他人的话语
-
