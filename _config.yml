@@ -66,6 +66,11 @@ ga_domain: auto
 featured-tags: true
 featured-condition-size: 1
 
+# 多级 Tags：在文章 front matter 中可使用多个 tags，层级用 "父级/子级" 表示，例如：
+# tags:
+#   - 玩转电脑
+#   - 玩转电脑/Windows
+
 # Progressive Web Apps
 chrome-tab-theme-color: "#000000"
 service-worker: true

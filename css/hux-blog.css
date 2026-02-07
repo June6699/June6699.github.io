@@ -883,26 +883,37 @@ img::-moz-selection {
   }
 }
 #tag_cloud {
-  margin: 20px 0 15px 0;
+  margin: 24px 0 32px 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 12px;
 }
-#tag_cloud a,
-#tag_cloud .tag {
+#tag_cloud.tag-cloud-chips a,
+#tag_cloud.tag-cloud-chips .tag {
   font-size: 14px;
   border: none;
-  line-height: 28px;
-  margin: 0 2px;
-  margin-bottom: 8px;
-  background: #D6D6D6;
+  line-height: 1.4;
+  padding: 8px 14px;
+  margin: 0;
+  margin-bottom: 0;
+  background: #e8e8e8;
+  color: #404040;
+  border-radius: 999em;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  transition: background-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
 }
-#tag_cloud a:hover,
-#tag_cloud .tag:hover,
-#tag_cloud a:active,
-#tag_cloud .tag:active {
+#tag_cloud.tag-cloud-chips a:hover,
+#tag_cloud.tag-cloud-chips .tag:hover,
+#tag_cloud.tag-cloud-chips a:active,
+#tag_cloud.tag-cloud-chips .tag:active {
   background-color: #0085a1 !important;
+  color: #fff !important;
+  box-shadow: 0 2px 8px rgba(0, 133, 161, 0.35);
+  text-decoration: none;
 }
 @media only screen and (min-width: 768px) {
   #tag_cloud {
-    margin-bottom: 25px;
+    margin-bottom: 40px;
   }
 }
 .tag-comments {
@@ -929,14 +940,98 @@ img::-moz-selection {
     line-height: 2 !important;
   }
 }
+.one-tag-list {
+  margin-bottom: 48px;
+}
+.one-tag-list:last-child {
+  margin-bottom: 24px;
+}
+.tag-section-heading {
+  font-size: 1.35rem;
+  font-weight: 600;
+  color: #333;
+  margin: 0 0 1rem 0;
+  padding: 0 0 0 12px;
+  border-left: 4px solid #0085a1;
+  line-height: 1.5;
+}
+.tag-section-heading .listing-seperator {
+  margin-right: 6px;
+}
+.one-tag-list.tag-sub .tag-section-heading {
+  margin-left: 16px;
+  border-left-color: #6ab0ce;
+}
 .one-tag-list .tag-text {
-  font-weight: 200;
-  /* Hux learn from
-     *     TypeIsBeautiful,
-     *     [This Post](http://zhuanlan.zhihu.com/ibuick/20186806) etc.
-     */
+  font-weight: 600;
   font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", "Arial", "PingFang SC", "Hiragino Sans GB", "STHeiti", "Microsoft YaHei", "Microsoft JhengHei", "Source Han Sans SC", "Noto Sans CJK SC", "Source Han Sans CN", "Noto Sans SC", "Source Han Sans TC", "Noto Sans CJK TC", "WenQuanYi Micro Hei", SimSun, sans-serif;
   line-height: 1.7;
+}
+.tag-posts-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 20px;
+}
+@media only screen and (min-width: 600px) {
+  .tag-posts-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+@media only screen and (min-width: 992px) {
+  .tag-posts-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 24px;
+  }
+}
+.tag-post-card {
+  background: #fff;
+  border: 1px solid #eee;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+  transition: box-shadow 0.2s ease, border-color 0.2s ease;
+}
+.tag-post-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border-color: #ddd;
+}
+.tag-post-card-link {
+  display: block;
+  padding: 18px 20px;
+  color: inherit;
+  text-decoration: none;
+}
+.tag-post-card-link:hover,
+.tag-post-card-link:focus {
+  color: inherit;
+  text-decoration: none;
+}
+.tag-post-card-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin: 0 0 6px 0;
+  line-height: 1.35;
+  color: #404040;
+}
+.tag-post-card-link:hover .tag-post-card-title {
+  color: #0085a1;
+}
+.tag-post-card-subtitle {
+  font-size: 0.9rem;
+  color: #666;
+  margin: 0 0 8px 0;
+  line-height: 1.4;
+}
+.tag-post-card-meta {
+  font-size: 0.8rem;
+  color: #999;
+  margin: 0 0 10px 0;
+}
+.tag-post-card-excerpt {
+  font-size: 0.85rem;
+  color: #777;
+  margin: 0;
+  line-height: 1.5;
 }
 .one-tag-list .post-preview {
   position: relative;
