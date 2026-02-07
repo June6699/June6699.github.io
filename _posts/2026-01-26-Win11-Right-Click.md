@@ -7,7 +7,7 @@ author:     June
 header-img: img/flowers/flower-7958117_1920.jpg
 catalog: 	 true
 tags:
-    - mess
+    - Mess/Windows
 img-prefix: img/Win11_right_click/
 ---
 
