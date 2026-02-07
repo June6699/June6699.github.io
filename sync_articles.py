@@ -52,7 +52,7 @@ def get_assets_slug_map():
         if f.suffix != ".md":
             continue
         name = f.stem
-        raw = f.read_text(encoding="utf-8")
+        raw = f.read_text(encoding="utf-8").replace("\r\n", "\n").replace("\r", "\n")
         if not raw.startswith("---"):
             continue
         parts = re.split(r"\n---\n", raw, 2)
@@ -102,8 +102,8 @@ def rewrite_content(content, assets_to_slug):
 
 
 def parse_date_from_front_matter(text):
-    """从 front matter 取 date，返回 YYYY-MM-DD"""
-    match = re.search(r"^date:\s*(\d{4}-\d{2}-\d{2})", text, re.MULTILINE)
+    """从 front matter 取 date，返回 YYYY-MM-DD（不依赖行首，兼容 CRLF）"""
+    match = re.search(r"date:\s*(\d{4}-\d{2}-\d{2})", text)
     if match:
         return match.group(1)
     return "2026-01-01"
@@ -119,7 +119,7 @@ def generate_posts(assets_to_slug):
             continue
         name = f.stem
         slug = slug_from_name(name.replace("_", "-"))
-        raw = f.read_text(encoding="utf-8")
+        raw = f.read_text(encoding="utf-8").replace("\r\n", "\n").replace("\r", "\n")
         if not raw.startswith("---"):
             continue
         parts = re.split(r"\n---\n", raw, 2)

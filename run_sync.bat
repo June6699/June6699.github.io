@@ -1,7 +1,6 @@
 @echo off
 cd /d "%~dp0"
 python sync_articles.py
-REM 兜底：确保 Win11 资源拷到 img（与 sync 脚本命名一致）
-copy "_articles\Win11_right_click.assets\Win11右键正在加载中.png" "img\win11-right-click_Win11右键正在加载中.png" 2>nul
-copy "_articles\Win11_right_click.assets\Win11改用传统右键菜单.txt" "img\win11-right-click_Win11改用传统右键菜单.txt" 2>nul
+REM Win11 资源由 sync_articles.py 已拷到 img/，此处用 Python 兜底复制（避免 bat 中文编码问题）
+python -c "import shutil; from pathlib import Path; r=Path('.').resolve(); s=r/'_articles'/'Win11_right_click.assets'; d=r/'img'; d.mkdir(exist_ok=True); [shutil.copy2(f, d/('win11-right-click_'+f.name)) for f in s.iterdir() if f.is_file()]"
 pause
