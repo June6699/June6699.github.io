@@ -15,7 +15,7 @@ asset-dir:  Win11_right_click
 
 当我们下载了某些软件后，右键菜单常常变得冗余，从而看起来很不舒服，如下图所示：
 
-![Win11右键菜单正在加载中](./Win11_right_click/Win11右键正在加载中.png)
+![Win11右键菜单正在加载中](./Win11_right_click.assets/Win11右键正在加载中.png)
 
 ### 原因分析
 

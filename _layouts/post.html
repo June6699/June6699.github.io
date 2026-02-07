@@ -58,8 +58,14 @@ layout: default
                 col-md-10 col-md-offset-1
                 post-container">
 
-				{% comment %} md 与图同级，构建时插件会复制到输出，正文相对路径 ./asset-dir/ 即可 {% endcomment %}
-				{{ content | replace: '^o^', '<sup>o</sup>' }}
+				{% comment %} 正文用 ./asset-dir/，替换为绝对路径保证 HTML 能加载图（插件会复制到 _site/url/asset-dir/） {% endcomment %}
+				{% if page.asset-dir %}
+					{% capture old_p %}./{{ page.asset-dir }}/{% endcapture %}
+					{% capture new_p %}{{ site.baseurl }}{{ page.url }}{{ page.asset-dir }}/{% endcapture %}
+					{{ content | replace: old_p, new_p | replace: '^o^', '<sup>o</sup>' }}
+				{% else %}
+					{{ content | replace: '^o^', '<sup>o</sup>' }}
+				{% endif %}
 
                 <hr style="visibility: hidden;">
 

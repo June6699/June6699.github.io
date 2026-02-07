@@ -245,7 +245,7 @@
 
 
 
-<!-- Side Catalog -->
+<!-- Side Catalog：延后执行，避免阻塞首屏和滚动 -->
 {% if page.catalog %}
 <script type="text/javascript">
     function generateCatalog (selector) {
@@ -259,36 +259,35 @@
             l = $('<li class="'+n+'_nav"></li>').append(c);
             $(selector).append(l);
         });
-        return true;    
+        return true;
     }
-
-    generateCatalog(".catalog-body");
-
-    // toggle side catalog
-    $(".catalog-toggle").click((function(e){
-        e.preventDefault();
-        $('.side-catalog').toggleClass("fold")
-    }))
-
-    /*
-     * Doc: https://github.com/davist11/jQuery-One-Page-Nav
-     * Fork by Hux to support padding
-     */
-    async("{{ '/js/jquery.nav.js' | prepend: site.baseurl }}", function () {
-        $('.catalog-body').onePageNav({
-            currentClass: "active",
-            changeHash: !1,
-            easing: "swing",
-            filter: "",
-            scrollSpeed: 700,
-            scrollOffset: 0,
-            scrollThreshold: .2,
-            begin: null,
-            end: null,
-            scrollChange: null,
-            padding: 80
+    function initCatalog() {
+        generateCatalog(".catalog-body");
+        $(".catalog-toggle").off("click").on("click", function(e){
+            e.preventDefault();
+            $('.side-catalog').toggleClass("fold");
         });
-    });
+        async("{{ '/js/jquery.nav.js' | prepend: site.baseurl }}", function () {
+            $('.catalog-body').onePageNav({
+                currentClass: "active",
+                changeHash: !1,
+                easing: "swing",
+                filter: "",
+                scrollSpeed: 700,
+                scrollOffset: 0,
+                scrollThreshold: .2,
+                begin: null,
+                end: null,
+                scrollChange: null,
+                padding: 80
+            });
+        });
+    }
+    if (requestAnimationFrame) {
+        requestAnimationFrame(function() { setTimeout(initCatalog, 0); });
+    } else {
+        setTimeout(initCatalog, 0);
+    }
 </script>
 {% endif %}
 
