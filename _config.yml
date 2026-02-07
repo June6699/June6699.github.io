@@ -32,7 +32,7 @@ collections:
 # Build settings
 permalink: pretty
 paginate: 10
-exclude: ["less","node_modules","Gruntfile.js","package.json","README.md","assets"]
+exclude: ["less","node_modules","Gruntfile.js","package.json","README.md","assets","vendor"]
 anchorjs: true
 
 # Gems
