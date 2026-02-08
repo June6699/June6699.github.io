@@ -909,8 +909,8 @@ img::-moz-selection {
 }
 .tag-tree-wrap {
   position: sticky;
-  top: 88px;
-  max-height: calc(100vh - 108px);
+  top: 100px;
+  max-height: calc(100vh - 120px);
   overflow-y: auto;
 }
 .tag-tree-card {

@@ -2,6 +2,21 @@
   padding-top: 20px;
   overflow-anchor: auto;
 }
+/* 手机端：保证文章可完整滚动到底，不被裁切 */
+@media (max-width: 991px) {
+  .post-page-container,
+  .post-page-container .row,
+  .post-page-container .post-container,
+  .post-page-container .tag-tree-wrap {
+    overflow: visible !important;
+    max-height: none !important;
+  }
+  article {
+    overflow-x: hidden;
+    overflow-y: visible;
+    min-height: 0;
+  }
+}
 .tag-main {
   touch-action: pan-y;
   overflow-x: hidden;
@@ -9,11 +24,11 @@
 .one-tag-list {
   scroll-margin-top: 70px;
 }
-/* 左右侧栏统一：随页面滑动保持可见，顶部留出大导航栏高度，避免上滑时遮挡 */
+/* 左右侧栏统一：随页面滑动保持可见（sticky），顶部留足空间不贴顶、不被大导航遮挡 */
 .sidebar-sticky-top {
   position: sticky;
-  top: 88px;
-  max-height: calc(100vh - 108px);
+  top: 100px;
+  max-height: calc(100vh - 120px);
   overflow-y: auto;
   overscroll-behavior: contain;
   -webkit-overflow-scrolling: touch;
@@ -21,8 +36,8 @@
 }
 .tag-tree-wrap {
   position: sticky;
-  top: 88px;
-  max-height: calc(100vh - 108px);
+  top: 100px;
+  max-height: calc(100vh - 120px);
   overflow-y: auto;
   overscroll-behavior: contain;
   -webkit-overflow-scrolling: touch;
@@ -156,8 +171,8 @@
 }
 .post-page-container .catalog-aside-wrap {
   position: sticky;
-  top: 88px;
-  max-height: calc(100vh - 108px);
+  top: 100px;
+  max-height: calc(100vh - 120px);
   overflow-y: auto;
   overscroll-behavior: contain;
   -webkit-overflow-scrolling: touch;
@@ -170,6 +185,13 @@
   display: block !important;
   width: 100%;
   padding-bottom: 40px;
+  /* 不用 fixed，随外层 catalog-aside-wrap 的 sticky 一起滑动，避免“突然固定” */
+  position: relative !important;
+  top: auto !important;
+}
+/* 保证 row 不裁切，左右侧栏的 sticky 才能生效 */
+.post-page-container .row {
+  overflow: visible;
 }
 .catalog-title-row {
   padding: 14px 18px;
@@ -195,6 +217,48 @@
 }
 .catalog-title-row .nav-toggle-btn:hover {
   color: #fff;
+}
+/* 右侧目录层级缩进：h1/h2 顶格，h3～h6 逐级增加，与正文标题层级一致 */
+.post-page-container .side-catalog .catalog-body {
+  list-style: none;
+  padding-left: 0;
+}
+.post-page-container .side-catalog .catalog-body .h1_nav,
+.post-page-container .side-catalog .catalog-body .h2_nav {
+  margin-left: 0;
+  padding-left: 0;
+}
+.post-page-container .side-catalog .catalog-body .h1_nav a,
+.post-page-container .side-catalog .catalog-body .h2_nav a {
+  padding-left: 10px;
+}
+.post-page-container .side-catalog .catalog-body .h3_nav {
+  margin-left: 0;
+  padding-left: 12px;
+}
+.post-page-container .side-catalog .catalog-body .h3_nav a {
+  padding-left: 10px;
+}
+.post-page-container .side-catalog .catalog-body .h4_nav {
+  margin-left: 0;
+  padding-left: 24px;
+}
+.post-page-container .side-catalog .catalog-body .h4_nav a {
+  padding-left: 10px;
+}
+.post-page-container .side-catalog .catalog-body .h5_nav {
+  margin-left: 0;
+  padding-left: 36px;
+}
+.post-page-container .side-catalog .catalog-body .h5_nav a {
+  padding-left: 10px;
+}
+.post-page-container .side-catalog .catalog-body .h6_nav {
+  margin-left: 0;
+  padding-left: 48px;
+}
+.post-page-container .side-catalog .catalog-body .h6_nav a {
+  padding-left: 10px;
 }
 /* 折叠=只保留层级最高的那一级（与左侧标签导航一致），按实际最小层级显示 */
 .side-catalog.catalog-fold-sub .catalog-body .h1_nav,
