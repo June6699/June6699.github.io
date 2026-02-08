@@ -239,12 +239,137 @@ head(pdat)
 
 
 
-### 1、TAD热图
+### 1 TAD热图
 
 思路类似普通热图，但是需要把中心点逆时针旋转45°。
 
+#### 1.1 旋转中心点
+
 Q：为什么要转呢？
 
-A：为了把斜着的对角线（$y=x$）变成水平的 X 轴（$y'=0$）
+A：为了把斜着的对角线（$y=x$）变成水平的 X 轴（$y'=0$），将一个正方形矩阵转为一个水平底边的三角形展示，如果不转就是斜着的。
 
 ![image-20260207142342514](./HiCPlot.assets/image-20260207142342514.png)
+
+
+
+旋转后坐标发生变化
+
+![image-20260208142351411](./HiCPlot.assets/image-20260208142351411.png)
+
+#### 1.2 旋转中心点后处理数据
+
+每个中心点确定好想画一个多边形出来就要有四个点的坐标，每四个点提一次笔，也就是添加一个（NA，NA），以此达到避免`polygon`画乱了最终热图。
+$$
+\begin{aligned}
+X_{list} &= [x1_1, x2_1, x3_1, x4_1, \mathbf{NA}, x1_2, x2_2, x3_2, x4_2, \mathbf{NA}, ...] \\
+Y_{list} &= [y1_1, y2_1, y3_1, y4_1, \mathbf{NA}, y1_2, y2_2, y3_2, y4_2, \mathbf{NA}, ...]
+\end{aligned}
+$$
+![image-20260208142942516](./HiCPlot.assets/image-20260208142942516.png)
+
+#### 1.3 代码实现
+
+##### 1.3.1 数据准备
+
+```R
+library(scales)
+library(reshape2)
+set.seed(2026)
+n <- 20
+
+# 模拟相关系数矩阵 (-1 到 1)，并设置对角线为 1，因为自己对自己相关性为 1
+sim_data <- matrix(runif(n * n, -1, 1), nrow = n, ncol = n)
+diag(sim_data) <- 1
+
+# 将下三角设为 NA，只保留上三角
+# lower.tri即Lower Triangle，他会返回一个与矩阵dim一模一样的布尔值矩阵，以此来index
+sim_data[lower.tri(sim_data)] <- NA
+
+# 设置行列名（对应 bin1, bin2...）
+bin.name <- paste0("bin", 1:n)
+colnames(sim_data) <- 1:n
+rownames(sim_data) <- 1:n
+pdat <- melt(sim_data)
+pdat <- pdat[!is.na(pdat$value),]
+```
+- 我们每个中心点画4个顶点，然后提笔移动到下一组4个顶点，以此循环。
+- 这里我们有20个bin，两两选择就是$C_{20}^{2} = 190$，加上本身对本身的20个，就是$190 + 20 = 210$个框要画。
+
+
+
+##### 1.3.2 获取点坐标
+
+旋转 45 度的坐标变换公式，注意：因为只保留了上三角(Col >= Row)，所以 ==y 恒大于等于 0==。
+
+<img src="./HiCPlot.assets/image-20260208150510451.png" alt="image-20260208150510451" style="zoom:50%;" />
+
+```R
+pdat$x <- (pdat$Var2 + pdat$Var1) / sqrt(2)
+pdat$y <- (pdat$Var2 - pdat$Var1) / sqrt(2)
+
+# 步长为1时，旋转后的对角线长度是 sqrt(2)，半长就是 sqrt(2)/2
+wid <- sqrt(2) / 2
+
+# 顺序：左 -> 上 -> 右 -> 下
+# 并添加 NA 列，用于在 polygon 绘图时提笔
+pdat$x1 <- pdat$x - wid
+pdat$x2 <- pdat$x
+pdat$x3 <- pdat$x + wid
+pdat$x4 <- pdat$x
+pdat$y1 <- pdat$y
+pdat$y2 <- pdat$y + wid
+pdat$y3 <- pdat$y
+pdat$y4 <- pdat$y - wid
+pdat$int <- NA
+
+# 设置颜色梯度：RdBu表示 蓝(-1) -> 白(0) -> 红(1)
+pdat$cols <- col_numeric(palette = "RdBu", domain = c(-1, 1))(pdat$value)
+
+# 构造两个坐标向量，as.vector之前转置之后，是x1一行向量，x2一行，y1一行...
+# 使用 t() 转置，按行读取，形成 x1, x2, x3, x4, NA, x1, x2... 的序列
+whole.x <- as.vector(t(pdat[, c("x1", "x2", "x3", "x4", "int")]))
+whole.y <- as.vector(t(pdat[, c("y1", "y2", "y3", "y4", "int")]))
+
+head(whole.x)
+# [1] 0.7071068 1.4142136 2.1213203 1.4142136        NA 1.4142136
+head(whole.y)
+# [1]  0.0000000  0.7071068  0.0000000 -0.7071068         NA  0.7071068
+```
+
+- 这里根据图中的坐标转换，我们拿到了两串坐标值，一一对应就是所有要画的点的坐标。
+
+
+
+##### 1.3.3 绘图
+
+- 这里`ylim = c(0, max(whole.y, na.rm = TRUE))`与老师的`ylim=range(whole.y,na.rm=TRUE)+c(wid,0)`差不多，range会返回最小值和最大值，最小值出现在bin和bin自己配对，也就是`y-x = 0`，那么`y4`就是`-wid`，加上`wid`后就是0了，另一边也一样。
+- 同时也是说明两个bin的位置越近，他的中心点y值就越低，最低为0，而bin的排序bin1、bin2、bin3一般都是根据基因组位置，按照`bin.size`来切割的。
+
+```R
+# 设置边距 (下, 左, 上, 右)
+par(mar = c(3, 1, 1, 1))
+
+# 使用高级函数 plot 创建画布（type = "n"，即空白）
+# asp = 1 保证 x 和 y 轴比例尺一致，让菱形是正的而不是压扁的
+# ylim 只取正值，确保不显示下方空白
+plot(0, type = 'n', axes = F, xlab = '', ylab = '',
+     xlim = range(whole.x, na.rm = TRUE),
+     ylim = c(0, max(whole.y, na.rm = TRUE)), 
+     xaxs = 'i', yaxs = 'i', asp = 1)
+
+# 绘制多边形
+polygon(x = whole.x, y = whole.y, col = pdat$cols, border = 'grey90', lwd = 0.5)
+
+# 添加 X 轴标签
+# 标签的位置是 1:n 乘以 sqrt(2)
+# e.g., bin1-bin2的距离，即一个完整对角线长度，即sqrt(2)
+axis(1, at = (1:n) * sqrt(2), labels = bin.name, 
+     cex.axis = 0.8, las = 2, tick = FALSE, line = -0.5)
+```
+
+
+
+##### 1.3.4 最终20个bin的TAD热图效果
+
+![image-20260208153326009](./HiCPlot.assets/image-20260208153326009.png)

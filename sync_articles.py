@@ -101,6 +101,17 @@ def rewrite_content(content, assets_to_slug):
     return content
 
 
+def highlight_double_equals(body):
+    """把正文里 ==高亮== 转为 <mark>高亮</mark>，跳过 ``` 代码块内"""
+    parts = re.split(r"```", body)
+    out = []
+    for i, part in enumerate(parts):
+        if i % 2 == 0:
+            part = re.sub(r"==([^=]+?)==", r"<mark>\1</mark>", part)
+        out.append(part)
+    return "```".join(out)
+
+
 def parse_date_from_front_matter(text):
     """从 front matter 取 date，返回 YYYY-MM-DD（不依赖行首，兼容 CRLF）"""
     match = re.search(r"date:\s*(\d{4}-\d{2}-\d{2})", text)
@@ -110,29 +121,43 @@ def parse_date_from_front_matter(text):
 
 
 def generate_posts(assets_to_slug):
-    """从 _articles/*.md 生成 _posts/YYYY-MM-DD-slug.md"""
+    """从 _articles/*.md 生成 _posts/YYYY-MM-DD-slug.md。永远覆盖：每次都用 front matter 的 date，直接替换同名校验。"""
     POSTS.mkdir(parents=True, exist_ok=True)
     if not SRC.exists():
+        print("  (no _articles dir)")
         return
     for f in sorted(SRC.iterdir()):
         if f.suffix != ".md":
             continue
         name = f.stem
         slug = slug_from_name(name.replace("_", "-"))
-        raw = f.read_text(encoding="utf-8").replace("\r\n", "\n").replace("\r", "\n")
+        try:
+            raw = f.read_text(encoding="utf-8-sig").replace("\r\n", "\n").replace("\r", "\n")
+        except Exception as e:
+            print("  [skip] {} (read error: {})".format(f.name, e))
+            continue
+        raw = raw.lstrip("\ufeff")
         if not raw.startswith("---"):
+            print("  [skip] {} (no front matter ---)".format(f.name))
             continue
-        parts = re.split(r"\n---\n", raw, 2)
-        if len(parts) < 3:
+        # 格式: ---\nfront\n---\nbody；按 \n---\n 分割得 [ "---\nfront", "body" ]
+        parts = re.split(r"\n---\n", raw, 1)
+        if len(parts) < 2:
+            print("  [skip] {} (need \\n---\\n to separate front and body)".format(f.name))
             continue
-        front, body = parts[1], parts[2]
+        front = parts[0][4:] if parts[0].startswith("---\n") else parts[0]
+        body = parts[1]
         date = parse_date_from_front_matter(front)
         front = re.sub(r"\nassets_folder:.*", "", front)
         front = re.sub(r"\narticle:\s*true\s*", "\n", front)
+        body = highlight_double_equals(body)
         body = rewrite_content(body, assets_to_slug)
         out_path = POSTS / "{}-{}.md".format(date, slug)
-        out_path.write_text("---\n" + front + "\n---\n" + body, encoding="utf-8")
-        print("  _posts/{}".format(out_path.name))
+        try:
+            out_path.write_text("---\n" + front + "\n---\n" + body, encoding="utf-8")
+            print("  _posts/{} <- {}".format(out_path.name, f.name))
+        except Exception as e:
+            print("  [fail] {} -> _posts/{} (write error: {})".format(f.name, out_path.name, e))
 
 
 def main():

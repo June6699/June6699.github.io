@@ -69,6 +69,7 @@ layout: default
 				{{ content | replace: '^o^', '<sup>o</sup>' }}
 
                 <hr style="visibility: hidden;">
+                <style>.post-container mark{background:rgba(255,235,59,0.5);padding:0 .15em;border-radius:2px;}</style>
 
                 <ul class="pager">
                     {% if page.previous.url %}
@@ -158,6 +159,11 @@ layout: default
 <!-- disqus 公共JS代码 end -->
 {% endif %}
 
+
+<!-- KaTeX 公式：支持 $...$ 行内、$$...$$ 块级 -->
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" crossorigin="anonymous"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" crossorigin="anonymous"
+    onload="renderMathInElement(document.querySelector('.post-container'),{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false},{left:'\\\\[',right:'\\\\]',display:true},{left:'\\\\(',right:'\\\\)',display:false}],throwOnError:false});"></script>
 
 {% if site.anchorjs %}
 <!-- async load function -->
