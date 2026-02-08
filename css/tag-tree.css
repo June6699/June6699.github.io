@@ -215,24 +215,25 @@
   overflow: visible;
 }
 
-/* 左右侧栏：不移动与正文的边界，只加宽导航容器本身（左栏向左扩、右栏向右扩） */
+/* 文章页大屏布局：去掉正文右侧 5% 空隙，侧栏加宽，整体贴紧 */
 @media only screen and (min-width: 992px) {
   .post-page-container.container {
     padding-left: 0;
     padding-right: 0;
     max-width: 100%;
   }
-  /* 左导航：容器加宽，多出的宽度向左延伸，右边界不动 */
+  /* 取消 hux 的 5%，避免右导航和文章之间出现大空白，只保留列间距 */
+  .post-page-container .post-container {
+    padding-right: 0;
+  }
+  /* 左/右导航仅保留内边距，宽度由 col-lg-3 决定（已在 layout 中改为 3 列） */
   .post-page-container .tag-tree-wrap {
-    width: calc(100% + 140px);
-    margin-left: -140px;
-    padding-left: 24px;
+    padding-left: 16px;
     box-sizing: border-box;
   }
-  /* 右导航：容器加宽，多出的宽度向右延伸，左边界不动 */
   .post-page-container .catalog-aside-wrap {
-    width: calc(100% + 140px);
-    padding-right: 24px;
+    padding-right: 16px;
+    padding-left: 12px;
     box-sizing: border-box;
   }
 }
