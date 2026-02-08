@@ -24,7 +24,7 @@
 .one-tag-list {
   scroll-margin-top: 70px;
 }
-/* 左右侧栏统一：随页面滑动保持可见（sticky），顶部留足空间不贴顶、不被大导航遮挡 */
+/* 左右侧栏：滑动时始终可见（sticky），顶部留足空间不贴顶、不被大导航遮挡 */
 .sidebar-sticky-top {
   position: sticky;
   top: 100px;
@@ -42,6 +42,15 @@
   overscroll-behavior: contain;
   -webkit-overflow-scrolling: touch;
   touch-action: pan-y;
+}
+/* 大屏下明确保证左右侧栏均为 sticky，滑动时能一直看到 */
+@media only screen and (min-width: 992px) {
+  .tag-tree-wrap,
+  .post-page-container .catalog-aside-wrap {
+    position: sticky !important;
+    top: 100px;
+    max-height: calc(100vh - 120px);
+  }
 }
 .tag-tree-wrap:focus {
   outline: none;
@@ -276,15 +285,16 @@
 .side-catalog.catalog-fold-sub.catalog-has-min-5 .catalog-body .h5_nav { display: list-item; }
 .side-catalog.catalog-fold-sub.catalog-has-min-6 .catalog-body .h6_nav { display: list-item; }
 
+/* 仅在小屏单列布局时取消 sticky，避免侧栏挡住正文 */
 @media only screen and (max-width: 991px) {
   .tag-tree-wrap {
-    position: static;
+    position: static !important;
     max-height: none;
     margin-bottom: 24px;
   }
   .tag-tree-inner { max-height: none; }
   .post-page-container .catalog-aside-wrap {
-    position: static;
+    position: static !important;
     max-height: none;
     margin-top: 24px;
   }
@@ -293,4 +303,54 @@
   .post-page-container .catalog-aside-wrap .side-catalog {
     display: block !important;
   }
+}
+
+/* ========== Tags 页：每篇文章卡片紧凑，信息不少、占位更小 ========== */
+.tag-page-container .one-tag-list {
+  margin-bottom: 28px;
+}
+.tag-page-container .one-tag-list:last-child {
+  margin-bottom: 16px;
+}
+.tag-page-container .tag-section-heading {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.15rem;
+  padding: 0 0 0 10px;
+}
+.tag-page-container .tag-posts-grid {
+  gap: 10px;
+}
+@media only screen and (min-width: 992px) {
+  .tag-page-container .tag-posts-grid {
+    gap: 12px;
+  }
+}
+.tag-page-container .tag-post-card {
+  border-radius: 6px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+.tag-page-container .tag-post-card:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+.tag-page-container .tag-post-card-link {
+  padding: 6px 10px;
+  display: block;
+}
+.tag-page-container .tag-post-card-title {
+  font-size: 0.925rem;
+  font-weight: 600;
+  margin: 0 0 1px 0;
+  line-height: 1.35;
+}
+.tag-page-container .tag-post-card-subtitle {
+  font-size: 0.8rem;
+  color: #666;
+  margin: 0 0 0 0;
+  line-height: 1.3;
+}
+.tag-page-container .tag-post-card-meta {
+  font-size: 0.7rem;
+  color: #999;
+  margin: 0;
+  line-height: 1.25;
 }
