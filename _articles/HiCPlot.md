@@ -373,3 +373,172 @@ axis(1, at = (1:n) * sqrt(2), labels = bin.name,
 ##### 1.3.4 最终20个bin的TAD热图效果
 
 ![image-20260208153326009](./HiCPlot.assets/image-20260208153326009.png)
+
+
+
+### 2 Hi-C 交互热图
+
+- 这张图展示了基因组上特定区域内，不同位置之间染色质相互作用的频率（斜对角线最深）。
+
+- 对角线上的深色块表示这些区域在三维空间中折叠在一起，形成结构域（TAD）。
+  - 远离对角线的黑块信号代表了长距离的染色质相互作用，而非基因组上的接近造成。
+
+![image-20260208161355154](./HiCPlot.assets/image-20260208161355154.png)
+
+代码实现
+
+```R
+library(gplots)
+library(gtools)
+library(plyr)
+library(reshape2)
+library(RColorBrewer)
+
+setwd("/data/xujun/HiCPlot_test/multiway/")
+raw <- "merge_rao_mboi_200M.18.18.50000.kr.fill.nn3.mat"
+TADfile <- "total.combined.domaincalls"
+outdir <- "/data/xujun/HiCPlot_test/multiway/"
+samname <- "test"
+start <- 0
+end <- 5100000
+step <- 1000000
+mychr <- 18
+mycol <- "orange"
+
+myTAD <- read.table(TADfile, stringsAsFactors = F)
+colnames(myTAD) = c("chr", "start", "end") # 后续不用，只是方便理解
+
+# 数据过滤逻辑加了空格，看得更清楚
+myTAD <- myTAD[myTAD$V1 == mychr & myTAD$V2 <= end & myTAD$V3 >= start, ]
+
+
+#cmd1 <- paste("mkdir -p ", outdir, "/whole", sep = "")
+#cmd2 <- paste("mkdir -p ", outdir, "/perchr", sep = "")
+#system(cmd1)
+#system(cmd2)
+
+if (!is.null(raw)) {
+  mat <- read.table(raw, stringsAsFactors = F)
+  #reso <- as.numeric(gsub("(.*)-(.*)", "\\2", mat$V1, perl = T))[2] - as.numeric(gsub("(.*)-(.*)", "\\2", mat$V1, perl = T))[1]
+
+  reso <- as.numeric(mat$V3[1] - mat$V2[1])
+
+  #genor <- data.frame(ID = 1:length(mat$V1), chr = gsub("(.*)-(.*)", "\\1", mat$V1, perl = T), start = as.numeric(gsub("(.*)-(.*)", "\\2", mat$V1, perl = T)), end = as.numeric(gsub("(.*)-(.*)", "\\2", mat$V1, perl = T)) + reso)
+  #geno <- ddply(genor, .(chr), summarize, chrsize = max(end))
+  #geno <- geno[mixedorder(geno$chr), ]
+  #cum <- cumsum(geno$chrsize)
+  #geno$cum <- c(0, cum[-length(cum)])
+  #plotrow <- merge(genor, geno, by = "chr")
+  #plotrow <- plotrow[order(plotrow$ID), ]
+  #plotrow$ps <- plotrow$start + plotrow$cum
+  #plotrow$pd <- plotrow$end + plotrow$cum
+
+  mat <- mat[mat$V2 >= start & mat$V3 <= end, c(T, T, T, mat$V2 >= start & mat$V3 <= end)]
+  matnew <- mat[, -c(1:3)]
+
+  #names(mat) <- paste(norm$V1, norm$V2, norm$V3, sep = ':')
+  #row.names(mat) <- paste(norm$V1, norm$V2, norm$V3, sep = ':')
+
+  names(matnew) <- paste(mat$V1, ':', mat$V2, '-', mat$V3, sep = '')
+  row.names(matnew) <- paste(mat$V1, ':', mat$V2, '-', mat$V3, sep = '')
+  matnew <- as.matrix(matnew)
+  pdata <- melt(matnew)
+
+  #== This is important! ============
+  # 这里加了空格，正则部分更容易区分
+  pdata$xleft   <- as.numeric(gsub("(.*):(.*)-(.*)", "\\2", pdata$Var1, perl = T))
+  pdata$ybottom <- as.numeric(gsub("(.*):(.*)-(.*)", "\\2", pdata$Var2, perl = T))
+  pdata$xright  <- as.numeric(gsub("(.*):(.*)-(.*)", "\\3", pdata$Var1, perl = T))
+  pdata$ytop    <- as.numeric(gsub("(.*):(.*)-(.*)", "\\3", pdata$Var2, perl = T))
+
+
+  pdata$chr1 <- gsub("(.*):(.*)-(.*)", "\\1", pdata$Var1, perl = T)
+  pdata$chr2 <- gsub("(.*):(.*)-(.*)", "\\1", pdata$Var2, perl = T)
+
+  pdata$value <- log(as.numeric(pdata$value) + 1)
+
+  pdata <- pdata[order(pdata$value), ]
+  #numzero <- sum(pdata$value == 0)
+  #Col <- c('white', rev(rainbow(1021, end = 4/6)))
+  #lencol <- length(Col)
+
+  mycutoff <- as.numeric(quantile(pdata$value, 0.95))
+
+  logi <- 1
+  if (logi) {
+    #Col <- rev(colorRampPalette(c('red', "red", 'orange', "yellow", 'green', 'cyan', 'blue', 'blue'))(10000))
+    Col <- rev(colorRampPalette(c('black', 'lightgray'))(10000))
+    lencol <- length(Col)
+    pdata$Col[pdata$value < mycutoff] <- rep(Col, table(cut(pdata$value[pdata$value < mycutoff], lencol)))
+    pdata$Col[pdata$value == 0] <- "lightgray"
+    pdata$Col[pdata$value >= mycutoff] <- "black"
+  } else {
+    palette <- "RdBu"
+    rati <- abs(min(pdata$value) / max(pdata$value))
+    minr <- 1 / (1 + rati)
+    maxr <- rati / (1 + rati)
+    minc <- floor(minr * 10000)
+    maxc <- floor(maxr * 10000)
+    colzero <- colorRampPalette(brewer.pal(11, palette)[c(11:6)])(minc)
+    colgzero <- colorRampPalette(brewer.pal(11, palette)[c(6:1)])(maxc)
+    datcol1 <- rep(colzero, table(cut(pdata$value[pdata$value <= 0], length(colzero))))
+    datcol2 <- rep(colgzero, table(cut(pdata$value[pdata$value > 0], length(colgzero))))
+    pdata$Col <- c(datcol1, datcol2)
+    Col <- c(colzero, colgzero)
+    ind <- floor(mean(which(Col == "#F7F7F7")))
+  }
+  lencol <- length(Col)
+  #valmin <- min(pdata$value)
+  #valmax <- max(pdata$value)
+  #colmin <- 1
+  #colmax <- length(Col)
+  #a <- (colmax - colmin) / (valmax - valmin)
+  #b <- colmin - valmin * a
+  #index <- (pdata$value * a + b)
+  #pdata$Col <- apply(data.frame(V1 = index), 1, function(x){Col[x[1]]})
+
+  breaks <- c(start)
+  labels <- c(start)
+  for (i in 1:round(nrow(matnew) * reso / step, 0)) {
+    breaks <- c(breaks, start + i * step)
+    labels <- c(labels, start + i * step)
+  }
+
+  outwholepdf <- paste(outdir, "/", samname, ".heatmap.pdf", sep = "")
+  pdf(outwholepdf, width = 10, height = 10)
+  
+  layout(matrix(1:2, nrow = 2), c(8, 0), c(8, 1))
+  par(mgp = c(0.2, 0.5, 0), yaxs = 'i', xaxs = 'i', mar = c(0, 5, 5, 2))
+  
+  # plot 函数分行写，参数一目了然
+  plot(x = 1:5, 
+       xlim = c(min(pdata$ybottom), max(pdata$ytop)), 
+       ylim = c(max(pdata$ytop), min(pdata$ybottom)), 
+       axes = F, type = "n", xlab = '', ylab = '')
+       
+  rect(pdata$xleft, pdata$ybottom, pdata$xright, pdata$ytop, col = pdata$Col, border = pdata$Col, lwd = 0.01)
+  
+  axis(2, at = breaks, labels = labels, tick = T, cex.axis = 0.8, las = 1)
+  axis(3, at = breaks, labels = labels, tick = T, cex.axis = 0.8)
+
+  rect(myTAD$V2, myTAD$V2, myTAD$V3, myTAD$V3, lwd = 4, col = NULL, border = mycol)
+
+  box(lwd = 2)
+
+  par(mar = c(2, 2, 1.5, 2), mgp = c(1, 0.5, 0), yaxs = 'i', xaxs = 'i')
+  plot(1:10, ylim = c(0, 1.5), type = 'n', axes = F, xlab = '', ylab = '')
+  segments(seq(4, 6, len = length(Col)), 0, seq(4, 6, len = length(Col)), 1, col = Col)
+  
+  #if (1){axis(1, at = c(4, seq(4, 6, len = length(Col))[ind], 6), labels = c(round(min(pdata$value), 2), 0, round(max(pdata$value), 2)), tck = -0.1, tick = T, cex.axis = 1.3)}else{
+  
+  if (1) {
+    axis(1, at = c(4, 6), labels = c(round(min(pdata$value), 2), round(quantile(pdata$value, 0.95), 2)), tck = -0.1, tick = T, cex.axis = 0.8)
+  } else {
+    axis(1, at = c(4, 6), labels = c('min', 'max'), tick = F, cex.axis = 0.8)
+  }
+  
+  text(5, 1.3, cex = 0.8, font = 1, expression('log(number of normalized contacts)'))
+  dev.off()
+}
+```
+

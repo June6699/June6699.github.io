@@ -223,12 +223,12 @@
     max-width: 100%;
   }
   .post-page-container .tag-tree-wrap {
-    margin-left: -48px;
-    padding-left: 20px;
+    margin-left: -120px;
+    padding-left: 24px;
   }
   .post-page-container .catalog-aside-wrap {
-    margin-right: -48px;
-    padding-right: 20px;
+    margin-right: -120px;
+    padding-right: 24px;
   }
 }
 
