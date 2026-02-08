@@ -210,19 +210,20 @@
   overflow: visible;
 }
 
-/* 左右侧栏向两侧外扩：减少容器左右留白，侧栏负边距贴边，内容多露一点 */
+/* 左右侧栏向两侧外扩：尽量贴边，给导航内容更多横向空间 */
 @media only screen and (min-width: 992px) {
   .post-page-container.container {
-    padding-left: 8px;
-    padding-right: 8px;
+    padding-left: 4px;
+    padding-right: 4px;
+    max-width: 100%;
   }
   .post-page-container .tag-tree-wrap {
-    margin-left: -8px;
-    padding-left: 6px;
+    margin-left: -28px;
+    padding-left: 16px;
   }
   .post-page-container .catalog-aside-wrap {
-    margin-right: -8px;
-    padding-right: 6px;
+    margin-right: -28px;
+    padding-right: 16px;
   }
 }
 

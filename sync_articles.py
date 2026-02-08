@@ -112,6 +112,13 @@ def highlight_double_equals(body):
     return "```".join(out)
 
 
+def fix_inline_aligned_math(body):
+    """\( \begin{aligned} ... \end{aligned} \) 在 KaTeX 里需用块级 \[ \] 才能正确渲染，同步时自动改掉"""
+    body = re.sub(r"\(\s*\\begin\{aligned\}", r"\\[\\begin{aligned}", body)
+    body = re.sub(r"\\end\{aligned\}\s*\)", r"\\end{aligned}\\]", body)
+    return body
+
+
 def parse_date_from_front_matter(text):
     """从 front matter 取 date，返回 YYYY-MM-DD（不依赖行首，兼容 CRLF）"""
     match = re.search(r"date:\s*(\d{4}-\d{2}-\d{2})", text)
@@ -151,6 +158,7 @@ def generate_posts(assets_to_slug):
         front = re.sub(r"\nassets_folder:.*", "", front)
         front = re.sub(r"\narticle:\s*true\s*", "\n", front)
         body = highlight_double_equals(body)
+        body = fix_inline_aligned_math(body)
         body = rewrite_content(body, assets_to_slug)
         out_path = POSTS / "{}-{}.md".format(date, slug)
         try:
