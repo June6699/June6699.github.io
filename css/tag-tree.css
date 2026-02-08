@@ -331,9 +331,17 @@
 }
 .tag-page-container .tag-section-heading {
   margin: 0 0 0.35rem 0;
-  font-size: 1.2rem;
+  font-size: 1.8rem;
   padding: 0 0 0 10px;
   line-height: 1.4;
+}
+/* 蓝色标签图标缩小为 0.7 倍 */
+.tag-page-container .tag-section-heading .listing-seperator,
+.tag-page-container .tag-section-heading .fa-tag {
+  transform: scale(0.7);
+  transform-origin: left center;
+  display: inline-block;
+  vertical-align: middle;
 }
 .tag-page-container .tag-posts-grid {
   gap: 8px;
@@ -360,7 +368,7 @@
   display: block;
 }
 .tag-page-container .tag-post-card-title {
-  font-size: 1.1rem;
+  font-size: 1.65rem;
   font-weight: 600;
   margin: 0 0 2px 0;
   line-height: 1.35;
@@ -370,13 +378,13 @@
   color: #0085a1;
 }
 .tag-page-container .tag-post-card-subtitle {
-  font-size: 0.95rem;
+  font-size: 1.425rem;
   color: #444;
   margin: 0 0 2px 0;
   line-height: 1.4;
 }
 .tag-page-container .tag-post-card-meta {
-  font-size: 0.9rem;
+  font-size: 1.35rem;
   color: #666;
   margin: 0;
   line-height: 1.3;
