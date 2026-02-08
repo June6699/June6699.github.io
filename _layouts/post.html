@@ -70,7 +70,7 @@ layout: default
 
                 <hr style="visibility: hidden;">
                 <style>.post-container mark{background:rgba(255,235,59,0.5);padding:0 .15em;border-radius:2px;}</style>
-                <style>.post-container .mermaid{margin:1em 0;text-align:center;}</style>
+                <style>.post-container .mermaid,.post-container .katex-block{margin:1em 0;text-align:center;}</style>
 
                 <ul class="pager">
                     {% if page.previous.url %}
@@ -161,35 +161,45 @@ layout: default
 {% endif %}
 
 
-<!-- KaTeX 公式：支持 $...$ 行内、$$...$$ 块级（含 \begin{aligned}） -->
-<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" crossorigin="anonymous"></script>
-<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" crossorigin="anonymous"
-    onload="renderMathInElement(document.querySelector('.post-container'),{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false},{left:'\\\\[',right:'\\\\]',display:true},{left:'\\\\(',right:'\\\\)',display:false}],throwOnError:false});"></script>
-
-<!-- Mermaid：渲染 ```mermaid 代码块（如 graph LR） -->
+<!-- KaTeX + Mermaid：DOM 就绪后再渲染，保证 $$、\begin{aligned}、graph LR 都能显示 -->
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js" crossorigin="anonymous"></script>
 <script>
 (function(){
-  function initMermaid(){
+  function run(){
     var container = document.querySelector('.post-container');
-    if (!container || typeof mermaid === 'undefined') return;
-    var codes = container.querySelectorAll('pre code.language-mermaid');
-    codes.forEach(function(code){
-      var pre = code.closest('pre');
-      if (!pre) return;
-      var div = document.createElement('div');
-      div.className = 'mermaid';
-      div.textContent = code.textContent.replace(/^\s+|\s+$/g,'');
-      pre.parentNode.replaceChild(div, pre);
-    });
-    var nodes = container.querySelectorAll('.mermaid');
-    if (nodes.length) {
-      mermaid.initialize({ startOnLoad: false, theme: 'default' });
-      mermaid.run({ nodes: nodes });
+    if (!container) return;
+    if (typeof renderMathInElement === 'function') {
+      renderMathInElement(container, {
+        delimiters: [
+          { left: '$$', right: '$$', display: true },
+          { left: '$', right: '$', display: false },
+          { left: '\\[', right: '\\]', display: true },
+          { left: '\\(', right: '\\)', display: false }
+        ],
+        throwOnError: false
+      });
+    }
+    if (typeof mermaid !== 'undefined') {
+      var codes = container.querySelectorAll('pre code.language-mermaid');
+      codes.forEach(function(code){
+        var pre = code.closest('pre');
+        if (!pre) return;
+        var div = document.createElement('div');
+        div.className = 'mermaid';
+        div.textContent = code.textContent.replace(/^\s+|\s+$/g,'');
+        pre.parentNode.replaceChild(div, pre);
+      });
+      var nodes = container.querySelectorAll('.mermaid');
+      if (nodes.length) {
+        mermaid.initialize({ startOnLoad: false, theme: 'default' });
+        mermaid.run({ nodes: nodes });
+      }
     }
   }
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initMermaid);
-  else initMermaid();
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', run);
+  else setTimeout(run, 0);
 })();
 </script>
 

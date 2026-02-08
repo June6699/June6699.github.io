@@ -119,6 +119,22 @@ def fix_inline_aligned_math(body):
     return body
 
 
+def wrap_display_math_blocks(body):
+    """把 $$...$$ 块包成单 div，避免 kramdown 拆成多个 <p> 导致 KaTeX 无法识别"""
+    parts = re.split(r"```", body)
+    out = []
+    for i, part in enumerate(parts):
+        if i % 2 == 0:
+            part = re.sub(
+                r"\n?\$\$\n(.*?)\n\$\$",
+                r'\n<div class="katex-block">$$\n\1\n$$</div>\n',
+                part,
+                flags=re.DOTALL,
+            )
+        out.append(part)
+    return "```".join(out)
+
+
 def parse_date_from_front_matter(text):
     """从 front matter 取 date，返回 YYYY-MM-DD（不依赖行首，兼容 CRLF）"""
     match = re.search(r"date:\s*(\d{4}-\d{2}-\d{2})", text)
@@ -159,6 +175,7 @@ def generate_posts(assets_to_slug):
         front = re.sub(r"\narticle:\s*true\s*", "\n", front)
         body = highlight_double_equals(body)
         body = fix_inline_aligned_math(body)
+        body = wrap_display_math_blocks(body)
         body = rewrite_content(body, assets_to_slug)
         out_path = POSTS / "{}-{}.md".format(date, slug)
         try:

@@ -2,19 +2,24 @@
   padding-top: 20px;
   overflow-anchor: auto;
 }
-/* 手机端：保证文章可完整滚动到底，不被裁切 */
+/* 手机端：保证文章可完整滚动到底，不被裁切（含 HICPlot 等长文） */
 @media (max-width: 991px) {
-  .post-page-container,
-  .post-page-container .row,
-  .post-page-container .post-container,
-  .post-page-container .tag-tree-wrap {
+  .post-article,
+  .post-article .post-page-container,
+  .post-article .post-page-container .row,
+  .post-article .post-page-container .post-container,
+  .post-article .post-page-container .tag-tree-wrap,
+  .post-article .post-page-container .catalog-aside-wrap {
     overflow: visible !important;
     max-height: none !important;
+    min-height: 0;
   }
-  article {
+  article.post-article {
     overflow-x: hidden;
     overflow-y: visible;
-    min-height: 0;
+  }
+  body .container.post-page-container {
+    overflow: visible !important;
   }
 }
 .tag-main {
@@ -213,17 +218,17 @@
 /* 左右侧栏向两侧外扩：尽量贴边，给导航内容更多横向空间 */
 @media only screen and (min-width: 992px) {
   .post-page-container.container {
-    padding-left: 4px;
-    padding-right: 4px;
+    padding-left: 0;
+    padding-right: 0;
     max-width: 100%;
   }
   .post-page-container .tag-tree-wrap {
-    margin-left: -28px;
-    padding-left: 16px;
+    margin-left: -48px;
+    padding-left: 20px;
   }
   .post-page-container .catalog-aside-wrap {
-    margin-right: -28px;
-    padding-right: 16px;
+    margin-right: -48px;
+    padding-right: 20px;
   }
 }
 
