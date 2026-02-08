@@ -385,7 +385,13 @@ axis(1, at = (1:n) * sqrt(2), labels = bin.name,
 
 ![image-20260208161355154](./HiCPlot.assets/image-20260208161355154.png)
 
-代码实现
+
+
+#### 2.0 代码实现
+
+课题组同学可直接拿`server`上的完整代码一键执行。
+
+#### 2.1 筛选能画的TAD
 
 ```R
 library(gplots)
@@ -408,65 +414,99 @@ mycol <- "orange"
 myTAD <- read.table(TADfile, stringsAsFactors = F)
 colnames(myTAD) = c("chr", "start", "end") # 后续不用，只是方便理解
 
-# 数据过滤逻辑加了空格，看得更清楚
+# 只要这个 TAD 和我想画图的窗口（Window）有任何一点点“沾边”（重叠），就把这个 TAD 留下来
+# 即!(V2 > end && V3 < start)
 myTAD <- myTAD[myTAD$V1 == mychr & myTAD$V2 <= end & myTAD$V3 >= start, ]
+```
 
 
-#cmd1 <- paste("mkdir -p ", outdir, "/whole", sep = "")
-#cmd2 <- paste("mkdir -p ", outdir, "/perchr", sep = "")
-#system(cmd1)
-#system(cmd2)
 
+#### 2.2 处理交互矩阵
+
+```R
 if (!is.null(raw)) {
   mat <- read.table(raw, stringsAsFactors = F)
-  #reso <- as.numeric(gsub("(.*)-(.*)", "\\2", mat$V1, perl = T))[2] - as.numeric(gsub("(.*)-(.*)", "\\2", mat$V1, perl = T))[1]
-
   reso <- as.numeric(mat$V3[1] - mat$V2[1])
+```
 
-  #genor <- data.frame(ID = 1:length(mat$V1), chr = gsub("(.*)-(.*)", "\\1", mat$V1, perl = T), start = as.numeric(gsub("(.*)-(.*)", "\\2", mat$V1, perl = T)), end = as.numeric(gsub("(.*)-(.*)", "\\2", mat$V1, perl = T)) + reso)
-  #geno <- ddply(genor, .(chr), summarize, chrsize = max(end))
-  #geno <- geno[mixedorder(geno$chr), ]
-  #cum <- cumsum(geno$chrsize)
-  #geno$cum <- c(0, cum[-length(cum)])
-  #plotrow <- merge(genor, geno, by = "chr")
-  #plotrow <- plotrow[order(plotrow$ID), ]
-  #plotrow$ps <- plotrow$start + plotrow$cum
-  #plotrow$pd <- plotrow$end + plotrow$cum
+- mat前三列分别是`chr`、`start`、`end`，从V4开始就是这个bin与bin1、2、3...的互作强度
 
+- 如`(1, V4)`，`(2, V5)`，`(3, V6)` 值很高，因为其是自己对自己。
+
+  `head(mat[1:5,1:10])`
+
+```R
+    V1     V2     V3         V4         V5         V6        V7         V8
+  1 18      0  50000 2437.88350  145.82236   67.41942  22.58425   38.64174
+  2 18  50000 100000  145.82236 1381.27700  208.89398 104.96341   68.41629
+  3 18 100000 150000   67.41942  208.89398 1126.76560 446.77230  184.51733
+  4 18 150000 200000   22.58425  104.96341  446.77230 949.24713  410.59424
+  5 18 200000 250000   38.64174   68.41629  184.51733 410.59424 1029.87110
+```
+
+- 这里同时对行列筛选`start`和`end`是为了让`mat`还是一个正方形矩阵而非长方形，保证除了前三列，`(1, V4)` `(2,V5)`还是自己对自己。
+- 列名、行名就是bin名字，如`18:0-50000`。
+- 使用`melt`转为长格式。
+
+```R
   mat <- mat[mat$V2 >= start & mat$V3 <= end, c(T, T, T, mat$V2 >= start & mat$V3 <= end)]
   matnew <- mat[, -c(1:3)]
-
-  #names(mat) <- paste(norm$V1, norm$V2, norm$V3, sep = ':')
-  #row.names(mat) <- paste(norm$V1, norm$V2, norm$V3, sep = ':')
-
   names(matnew) <- paste(mat$V1, ':', mat$V2, '-', mat$V3, sep = '')
   row.names(matnew) <- paste(mat$V1, ':', mat$V2, '-', mat$V3, sep = '')
   matnew <- as.matrix(matnew)
   pdata <- melt(matnew)
+  head(pdata)
+```
 
+```R
+              Var1       Var2      value
+1       18:0-50000 18:0-50000 2437.88350
+2  18:50000-100000 18:0-50000  145.82236
+3 18:100000-150000 18:0-50000   67.41942
+4 18:150000-200000 18:0-50000   22.58425
+5 18:200000-250000 18:0-50000   38.64174
+6 18:250000-300000 18:0-50000   32.37135
+```
+
+
+
+#### 2.3 端点坐标
+
+`18:0-50000`
+
+- `perl`是一个很喜欢正则表达式的语言，`.*`表示任何东西匹配任意次数。
+- `order`是因为后续颜色隐射需要，让最高值得到最黑的颜色。
+- 取`log`：防止TAD内部（较近的）太黑，而其他较远的根本看不出来有互作。加一是为了防止value为0的情况，使之最低互作都有0。
+- 取`quantile`：在下面，让大于0.95分位数的都设为`black`。
+
+```R
   #== This is important! ============
-  # 这里加了空格，正则部分更容易区分
   pdata$xleft   <- as.numeric(gsub("(.*):(.*)-(.*)", "\\2", pdata$Var1, perl = T))
   pdata$ybottom <- as.numeric(gsub("(.*):(.*)-(.*)", "\\2", pdata$Var2, perl = T))
   pdata$xright  <- as.numeric(gsub("(.*):(.*)-(.*)", "\\3", pdata$Var1, perl = T))
   pdata$ytop    <- as.numeric(gsub("(.*):(.*)-(.*)", "\\3", pdata$Var2, perl = T))
-
-
   pdata$chr1 <- gsub("(.*):(.*)-(.*)", "\\1", pdata$Var1, perl = T)
   pdata$chr2 <- gsub("(.*):(.*)-(.*)", "\\1", pdata$Var2, perl = T)
-
   pdata$value <- log(as.numeric(pdata$value) + 1)
-
   pdata <- pdata[order(pdata$value), ]
-  #numzero <- sum(pdata$value == 0)
-  #Col <- c('white', rev(rainbow(1021, end = 4/6)))
-  #lencol <- length(Col)
-
+  
   mycutoff <- as.numeric(quantile(pdata$value, 0.95))
+```
 
+示意图：见==红蓝交界黑色端点==，实际的`bin.size`比这个更小。
+
+![image-20260208172523485](./HiCPlot.assets/image-20260208172523485.png)
+
+
+
+#### 2.4 颜色映射
+
+- `logi`为1：为0的统统改成浅灰色，`>= mycutoff`的都黑色。
+- `logi`为0：用`RdBu`，处理相关性矩阵（有正有负）。
+
+```R
   logi <- 1
   if (logi) {
-    #Col <- rev(colorRampPalette(c('red', "red", 'orange', "yellow", 'green', 'cyan', 'blue', 'blue'))(10000))
     Col <- rev(colorRampPalette(c('black', 'lightgray'))(10000))
     lencol <- length(Col)
     pdata$Col[pdata$value < mycutoff] <- rep(Col, table(cut(pdata$value[pdata$value < mycutoff], lencol)))
@@ -488,44 +528,66 @@ if (!is.null(raw)) {
     ind <- floor(mean(which(Col == "#F7F7F7")))
   }
   lencol <- length(Col)
-  #valmin <- min(pdata$value)
-  #valmax <- max(pdata$value)
-  #colmin <- 1
-  #colmax <- length(Col)
-  #a <- (colmax - colmin) / (valmax - valmin)
-  #b <- colmin - valmin * a
-  #index <- (pdata$value * a + b)
-  #pdata$Col <- apply(data.frame(V1 = index), 1, function(x){Col[x[1]]})
+```
 
+
+
+#### 2.5 绘图
+
+##### 2.5.1 计算刻度值
+
+`breaks`：告诉 R 语言刻度线画在哪个数值位置。
+
+`labels`：告诉 R 语言那个位置旁边写什么字（通常就是位置本身的数字）。
+
+```R
   breaks <- c(start)
   labels <- c(start)
   for (i in 1:round(nrow(matnew) * reso / step, 0)) {
-    breaks <- c(breaks, start + i * step)
+    breaks <- c(breaks, start + i * step) # 这段总共有多少MB，因为一个step是是 MB
     labels <- c(labels, start + i * step)
   }
+```
 
+##### 2.5.2 画整个的互作图
+
+```R
   outwholepdf <- paste(outdir, "/", samname, ".heatmap.pdf", sep = "")
   pdf(outwholepdf, width = 10, height = 10)
   
+  # 布局：上下两个矩阵，上面矩阵放图，高度8，下面放色阶图，高度1
   layout(matrix(1:2, nrow = 2), c(8, 0), c(8, 1))
+  # 坐标轴标题、刻度标签、轴线的距离，并强制不留 4% 的白，页边距下、左、上、右
   par(mgp = c(0.2, 0.5, 0), yaxs = 'i', xaxs = 'i', mar = c(0, 5, 5, 2))
   
-  # plot 函数分行写，参数一目了然
   plot(x = 1:5, 
        xlim = c(min(pdata$ybottom), max(pdata$ytop)), 
        ylim = c(max(pdata$ytop), min(pdata$ybottom)), 
        axes = F, type = "n", xlab = '', ylab = '')
-       
+  
+  # 两个端点
   rect(pdata$xleft, pdata$ybottom, pdata$xright, pdata$ytop, col = pdata$Col, border = pdata$Col, lwd = 0.01)
   
+  # 2表示左侧，3表示顶部，at是刻度线位置（tick = T就画那个小凸起），cex.axis表坐标数字80%大小
+  # las = 1 表文字的方向，始终横向
   axis(2, at = breaks, labels = labels, tick = T, cex.axis = 0.8, las = 1)
   axis(3, at = breaks, labels = labels, tick = T, cex.axis = 0.8)
+```
 
+
+
+##### 2.5.3 画 myTAD 框
+
+```R
+  mycol <- "orange"
   rect(myTAD$V2, myTAD$V2, myTAD$V3, myTAD$V3, lwd = 4, col = NULL, border = mycol)
 
   box(lwd = 2)
-
+  
+  # 页边距下、左、上、右，坐标轴标题、刻度标签、轴线的距离
   par(mar = c(2, 2, 1.5, 2), mgp = c(1, 0.5, 0), yaxs = 'i', xaxs = 'i')
+
+  # 创建画布画色标，用 10,000 根彩色垂直线段拼成的，肉眼看着就是连续的变化色标
   plot(1:10, ylim = c(0, 1.5), type = 'n', axes = F, xlab = '', ylab = '')
   segments(seq(4, 6, len = length(Col)), 0, seq(4, 6, len = length(Col)), 1, col = Col)
   
@@ -542,3 +604,8 @@ if (!is.null(raw)) {
 }
 ```
 
+
+
+#### 2.6 最终效果
+
+![image-20260208182901349](./HiCPlot.assets/image-20260208182901349.png)
