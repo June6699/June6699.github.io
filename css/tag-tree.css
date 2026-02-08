@@ -215,26 +215,45 @@
   overflow: visible;
 }
 
-/* 文章页大屏布局：去掉正文右侧 5% 空隙，侧栏加宽，整体贴紧 */
+/* 文章页大屏布局：用满两端、正文不挤，右导航标题可换行且贴近右边界 */
 @media only screen and (min-width: 992px) {
+  /* 用满视口宽度，不再限制 1170px，两端只留少量留白 */
   .post-page-container.container {
-    padding-left: 0;
-    padding-right: 0;
+    width: 100%;
     max-width: 100%;
+    padding-left: 12px;
+    padding-right: 12px;
   }
-  /* 取消 hux 的 5%，避免右导航和文章之间出现大空白，只保留列间距 */
+  /* 取消 hux 的 5%，避免右导航和文章之间出现大空白 */
   .post-page-container .post-container {
     padding-right: 0;
   }
-  /* 左/右导航仅保留内边距，宽度由 col-lg-3 决定（已在 layout 中改为 3 列） */
   .post-page-container .tag-tree-wrap {
-    padding-left: 16px;
-    box-sizing: border-box;
-  }
-  .post-page-container .catalog-aside-wrap {
-    padding-right: 16px;
     padding-left: 12px;
     box-sizing: border-box;
+  }
+  /* 右导航：内边距较小，标题可贴近右边界（不用完全贴死） */
+  .post-page-container .catalog-aside-wrap {
+    padding-right: 10px;
+    padding-left: 12px;
+    box-sizing: border-box;
+  }
+  /* 右导航 TOC 链接：完整显示、可换行，贴近容器右边界（覆盖 hux 的 max-width/ellipsis） */
+  .post-page-container .side-catalog .catalog-body li a,
+  .post-page-container .side-catalog .catalog-body .h4_nav a,
+  .post-page-container .side-catalog .catalog-body .h5_nav a,
+  .post-page-container .side-catalog .catalog-body .h6_nav a {
+    max-width: none;
+    white-space: normal;
+    overflow: visible;
+    text-overflow: clip;
+    display: block;
+    line-height: 1.4;
+    height: auto;
+    min-height: 30px;
+    padding-right: 6px;
+    padding-top: 4px;
+    padding-bottom: 4px;
   }
 }
 
