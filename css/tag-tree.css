@@ -219,8 +219,8 @@
 @media only screen and (min-width: 992px) {
   /* 用满视口宽度，不再限制 1170px，两端只留少量留白 */
   .post-page-container.container {
-    width: 100%;
-    max-width: 100%;
+    width: 97%;
+    max-width: 97%;
     padding-left: 12px;
     padding-right: 12px;
   }
