@@ -63,13 +63,14 @@ layout: default
 
     <!-- Post Container -->
             <div class="
-                col-lg-6 col-md-6
+                col-lg-8 col-md-6
                 post-container">
 
 				{{ content | replace: '^o^', '<sup>o</sup>' }}
 
                 <hr style="visibility: hidden;">
                 <style>.post-container mark{background:rgba(255,235,59,0.5);padding:0 .15em;border-radius:2px;}</style>
+                <style>.post-container .mermaid{margin:1em 0;text-align:center;}</style>
 
                 <ul class="pager">
                     {% if page.previous.url %}
@@ -123,7 +124,7 @@ layout: default
             </div>
 
     <!-- Right: 文章标题导航 (原 theme side-catalog，多级目录) -->
-            <aside class="col-lg-3 col-md-3 catalog-aside-wrap">
+            <aside class="col-lg-2 col-md-3 catalog-aside-wrap">
                 <div class="catalog-container">
                     <div class="side-catalog" id="side-catalog">
                         <div class="catalog-title-row">
@@ -160,10 +161,37 @@ layout: default
 {% endif %}
 
 
-<!-- KaTeX 公式：支持 $...$ 行内、$$...$$ 块级 -->
+<!-- KaTeX 公式：支持 $...$ 行内、$$...$$ 块级（含 \begin{aligned}） -->
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" crossorigin="anonymous"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" crossorigin="anonymous"
     onload="renderMathInElement(document.querySelector('.post-container'),{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false},{left:'\\\\[',right:'\\\\]',display:true},{left:'\\\\(',right:'\\\\)',display:false}],throwOnError:false});"></script>
+
+<!-- Mermaid：渲染 ```mermaid 代码块（如 graph LR） -->
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js" crossorigin="anonymous"></script>
+<script>
+(function(){
+  function initMermaid(){
+    var container = document.querySelector('.post-container');
+    if (!container || typeof mermaid === 'undefined') return;
+    var codes = container.querySelectorAll('pre code.language-mermaid');
+    codes.forEach(function(code){
+      var pre = code.closest('pre');
+      if (!pre) return;
+      var div = document.createElement('div');
+      div.className = 'mermaid';
+      div.textContent = code.textContent.replace(/^\s+|\s+$/g,'');
+      pre.parentNode.replaceChild(div, pre);
+    });
+    var nodes = container.querySelectorAll('.mermaid');
+    if (nodes.length) {
+      mermaid.initialize({ startOnLoad: false, theme: 'default' });
+      mermaid.run({ nodes: nodes });
+    }
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initMermaid);
+  else initMermaid();
+})();
+</script>
 
 {% if site.anchorjs %}
 <!-- async load function -->
