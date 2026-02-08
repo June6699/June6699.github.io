@@ -29,7 +29,7 @@
   position: sticky;
   top: 100px;
   max-height: calc(100vh - 120px);
-  overflow-y: auto;
+  overflow-y: scroll;
   overscroll-behavior: contain;
   -webkit-overflow-scrolling: touch;
   touch-action: pan-y;
@@ -38,7 +38,7 @@
   position: sticky;
   top: 100px;
   max-height: calc(100vh - 120px);
-  overflow-y: auto;
+  overflow-y: scroll;
   overscroll-behavior: contain;
   -webkit-overflow-scrolling: touch;
   touch-action: pan-y;
@@ -188,7 +188,7 @@
   position: sticky;
   top: 100px;
   max-height: calc(100vh - 120px);
-  overflow-y: auto;
+  overflow-y: scroll;
   overscroll-behavior: contain;
   -webkit-overflow-scrolling: touch;
   touch-action: pan-y;
@@ -208,6 +208,49 @@
 /* 保证 row 不裁切，左右侧栏的 sticky 才能生效 */
 .post-page-container .row {
   overflow: visible;
+}
+
+/* 左右侧栏向两侧外扩：减少容器左右留白，侧栏负边距贴边，内容多露一点 */
+@media only screen and (min-width: 992px) {
+  .post-page-container.container {
+    padding-left: 8px;
+    padding-right: 8px;
+  }
+  .post-page-container .tag-tree-wrap {
+    margin-left: -8px;
+    padding-left: 6px;
+  }
+  .post-page-container .catalog-aside-wrap {
+    margin-right: -8px;
+    padding-right: 6px;
+  }
+}
+
+/* 左右导航栏滚动条常显、可拖拽（三区域独立滑动：左导航 / 正文 / 右导航） */
+.tag-tree-wrap::-webkit-scrollbar,
+.post-page-container .catalog-aside-wrap::-webkit-scrollbar {
+  width: 8px;
+}
+.tag-tree-wrap::-webkit-scrollbar-track,
+.post-page-container .catalog-aside-wrap::-webkit-scrollbar-track {
+  background: #f0f0f0;
+  border-radius: 4px;
+}
+.tag-tree-wrap::-webkit-scrollbar-thumb,
+.post-page-container .catalog-aside-wrap::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 4px;
+}
+.tag-tree-wrap::-webkit-scrollbar-thumb:hover,
+.post-page-container .catalog-aside-wrap::-webkit-scrollbar-thumb:hover {
+  background: #a0a0a0;
+}
+@supports (scrollbar-width: thin) {
+  .tag-tree-wrap,
+  .post-page-container .catalog-aside-wrap {
+    scrollbar-width: thin;
+    scrollbar-color: #c1c1c1 #f0f0f0;
+  }
 }
 .catalog-title-row {
   padding: 14px 18px;
