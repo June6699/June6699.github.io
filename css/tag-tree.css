@@ -215,20 +215,25 @@
   overflow: visible;
 }
 
-/* 左右侧栏向两侧外扩：尽量贴边，给导航内容更多横向空间 */
+/* 左右侧栏：不移动与正文的边界，只加宽导航容器本身（左栏向左扩、右栏向右扩） */
 @media only screen and (min-width: 992px) {
   .post-page-container.container {
     padding-left: 0;
     padding-right: 0;
     max-width: 100%;
   }
+  /* 左导航：容器加宽，多出的宽度向左延伸，右边界不动 */
   .post-page-container .tag-tree-wrap {
-    margin-left: -120px;
+    width: calc(100% + 140px);
+    margin-left: -140px;
     padding-left: 24px;
+    box-sizing: border-box;
   }
+  /* 右导航：容器加宽，多出的宽度向右延伸，左边界不动 */
   .post-page-container .catalog-aside-wrap {
-    margin-right: -120px;
+    width: calc(100% + 140px);
     padding-right: 24px;
+    box-sizing: border-box;
   }
 }
 
