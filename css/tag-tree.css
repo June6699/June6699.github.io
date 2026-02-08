@@ -313,29 +313,39 @@
   }
 }
 
-/* ========== Tags 页：紧凑但不挤，标题/副标题/日期易读 ========== */
+/* ========== Tags 页：字体够大易读，间距收紧不松散 ========== */
+.tag-page-container #tag_cloud {
+  margin: 12px 0 16px 0;
+  gap: 8px 12px;
+}
+.tag-page-container #tag_cloud.tag-cloud-chips a,
+.tag-page-container #tag_cloud.tag-cloud-chips .tag {
+  font-size: 14px;
+  padding: 6px 12px;
+}
 .tag-page-container .one-tag-list {
-  margin-bottom: 28px;
+  margin-bottom: 20px;
 }
 .tag-page-container .one-tag-list:last-child {
-  margin-bottom: 16px;
+  margin-bottom: 12px;
 }
 .tag-page-container .tag-section-heading {
-  margin: 0 0 0.5rem 0;
-  font-size: 1.15rem;
+  margin: 0 0 0.35rem 0;
+  font-size: 1.2rem;
   padding: 0 0 0 10px;
+  line-height: 1.4;
 }
 .tag-page-container .tag-posts-grid {
-  gap: 10px;
+  gap: 8px;
 }
 @media only screen and (min-width: 992px) {
   .tag-page-container .tag-posts-grid {
-    gap: 12px;
+    gap: 10px;
   }
 }
 .tag-page-container .tag-post-card {
   border-radius: 0;
-  border: 1px solid #eee;
+  border: 1px solid #e8e8e8;
   border-left: 3px solid #0085a1;
   box-shadow: none;
   background: #fafbfc;
@@ -346,28 +356,28 @@
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
 }
 .tag-page-container .tag-post-card-link {
-  padding: 8px 12px 10px;
+  padding: 10px 14px 12px;
   display: block;
 }
 .tag-page-container .tag-post-card-title {
-  font-size: 1rem;
+  font-size: 1.1rem;
   font-weight: 600;
-  margin: 0 0 4px 0;
-  line-height: 1.4;
-  color: #333;
+  margin: 0 0 2px 0;
+  line-height: 1.35;
+  color: #222;
 }
 .tag-page-container .tag-post-card-link:hover .tag-post-card-title {
   color: #0085a1;
 }
 .tag-page-container .tag-post-card-subtitle {
-  font-size: 0.875rem;
-  color: #555;
-  margin: 0 0 4px 0;
+  font-size: 0.95rem;
+  color: #444;
+  margin: 0 0 2px 0;
   line-height: 1.4;
 }
 .tag-page-container .tag-post-card-meta {
-  font-size: 0.8125rem;
-  color: #888;
+  font-size: 0.9rem;
+  color: #666;
   margin: 0;
   line-height: 1.3;
 }
