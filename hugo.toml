@@ -1,0 +1,47 @@
+# 主题放在 themes/PaperMod，不用 Hugo Module
+baseURL = "https://June6699.github.io/"
+languageCode = "zh-cn"
+title = "June's Blog"
+theme = "PaperMod"
+
+# 排除 content/posts/images（junction），避免 Windows 下 read 报错
+[build]
+  ignoreFiles = ["content/posts/images", "content/posts/images/"]
+
+# 允许正文中的 Raw HTML（诗词等 div/class）并屏蔽相关警告
+[markup.goldmark.renderer]
+  unsafe = true
+ignoreLogs = ["warning-goldmark-raw-html"]
+
+[params]
+  description = "Who Changes? Who Benefits!"
+  author = "June"
+  # 统计页「已运行天数」起始日（可改为建站/博客上线日）
+  siteBirthDate = "2026-01-01"
+  # 首页、归档等从 posts 取文章列表
+  mainSections = ["posts"]
+  # 文章页显示右侧目录
+  ShowToc = true
+  TocOpen = false
+
+[params.cover]
+  # 首页/列表不展示文章封面图，仅标题与摘要
+  hiddenInList = true
+
+# 导航菜单
+[[menu.main]]
+  name = "首页"
+  url = "/"
+  weight = 1
+[[menu.main]]
+  name = "关于"
+  url = "/about/"
+  weight = 2
+[[menu.main]]
+  name = "标签"
+  url = "/tags/"
+  weight = 3
+[[menu.main]]
+  name = "统计"
+  url = "/statistics/"
+  weight = 4

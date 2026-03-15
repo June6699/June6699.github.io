@@ -1,0 +1,97 @@
+{{- define "main" }}
+<header class="page-header">
+  <h1>{{ .Title }}</h1>
+  {{- if .Description }}
+  <div class="post-description">{{ .Description }}</div>
+  {{- end }}
+</header>
+
+<div class="statistics-page">
+  {{- $posts := where site.RegularPages "Section" "posts" }}
+  {{- $total := len $posts }}
+  {{- $.Scratch.Set "totalChars" 0 }}
+  {{- range $posts }}{{ $.Scratch.Add "totalChars" (countrunes (plainify .Content)) }}{{ end }}
+  {{- $totalChars := $.Scratch.Get "totalChars" }}
+  {{- $currentYear := now.Year }}
+  {{- $postsThisYear := where $posts "Date.Year" $currentYear }}
+  {{- $oldest := $posts.ByDate | first 1 }}
+  {{- $newest := $posts.ByDate.Reverse | first 1 }}
+
+  <section class="stat-cards">
+    <div class="stat-card">
+      <span class="stat-number">{{ $total }}</span>
+      <span class="stat-label">文章总数</span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-number">{{ len site.Taxonomies.tags }}</span>
+      <span class="stat-label">标签数</span>
+    </div>
+    {{- with site.Params.siteBirthDate }}
+    {{- $birth := time . }}
+    {{- $days := div (int (now.Sub $birth).Seconds) 86400 }}
+    <div class="stat-card stat-card--highlight">
+      <span class="stat-number">{{ $days }}</span>
+      <span class="stat-label">已运行天数</span>
+    </div>
+    {{- end }}
+    <div class="stat-card">
+      <span class="stat-number">{{ $totalChars }}</span>
+      <span class="stat-label">总字数（字符）</span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-number">{{ len $postsThisYear }}</span>
+      <span class="stat-label">{{ $currentYear }} 年新文</span>
+    </div>
+  </section>
+
+  <section class="stat-section">
+    <h2>时间线</h2>
+    <ul class="stat-timeline">
+      {{- with index $oldest 0 }}<li>最早文章：<a href="{{ .Permalink }}">{{ .Title }}</a>（{{ .Date.Format "2006-01-02" }}）</li>{{- end }}
+      {{- with index $newest 0 }}<li>最新文章：<a href="{{ .Permalink }}">{{ .Title }}</a>（{{ .Date.Format "2006-01-02" }}）</li>{{- end }}
+    </ul>
+  </section>
+
+  <section class="stat-section">
+    <h2>热门标签</h2>
+    <ul class="terms-tags tag-cloud">
+      {{- range first 20 site.Taxonomies.tags.ByCount }}
+      <li><a href="{{ .Page.Permalink }}">{{ .Page.Title }} <sup>{{ .Count }}</sup></a></li>
+      {{- end }}
+    </ul>
+  </section>
+
+  <section class="stat-section">
+    <h2>最新文章</h2>
+    <ul class="stat-posts-list">
+      {{- range first 10 $posts.ByDate.Reverse }}
+      <li><a href="{{ .Permalink }}">{{ .Title }}</a> <span class="stat-date">{{ .Date.Format "2006-01-02" }}</span></li>
+      {{- end }}
+    </ul>
+  </section>
+
+  <section class="stat-section">
+    <h2>按年归档</h2>
+    <ul class="stat-archives">
+      {{- range $posts.GroupByDate "2006" }}
+      <li><a href="{{ site.BaseURL }}posts/#{{ .Key }}">{{ .Key }}</a> <sup>{{ len .Pages }}</sup></li>
+      {{- end }}
+    </ul>
+  </section>
+</div>
+
+<style>
+.statistics-page { max-width: 720px; margin: 0 auto; }
+.stat-cards { display: flex; gap: 1rem; margin: 1.5rem 0; flex-wrap: wrap; }
+.stat-card { background: var(--entry); border-radius: 8px; padding: 1.25rem 1.5rem; min-width: 120px; text-align: center; border: 1px solid var(--border); }
+.stat-number { display: block; font-size: 1.75rem; font-weight: 700; color: var(--primary); }
+.stat-label { font-size: 0.9rem; color: var(--secondary); }
+.stat-section { margin: 2rem 0; }
+.stat-section h2 { font-size: 1.1rem; margin-bottom: 0.75rem; color: var(--secondary); }
+.statistics-page .terms-tags { list-style: none; padding: 0; display: flex; flex-wrap: wrap; gap: 0.5rem; }
+.statistics-page .terms-tags a { padding: 0.35rem 0.75rem; background: var(--entry); border-radius: 6px; border: 1px solid var(--border); }
+.stat-posts-list, .stat-archives, .stat-timeline { list-style: none; padding: 0; }
+.stat-posts-list li, .stat-archives li, .stat-timeline li { margin: 0.4rem 0; }
+.stat-date { color: var(--secondary); font-size: 0.9rem; margin-left: 0.5rem; }
+</style>
+{{- end }}

@@ -1,0 +1,6 @@
+@echo off
+cd /d "%~dp0"
+echo Syncing content/posts/images -> static/posts/images ...
+python scripts\sync_images.py
+echo Starting Hugo server...
+hugo server
