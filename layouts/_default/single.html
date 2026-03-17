@@ -61,10 +61,15 @@
     {{- end }}
   </article>
 
-  {{- if (.Param "ShowToc") }}
-  <aside class="toc-sidebar">
-    {{- partial "toc.html" . }}
-  </aside>
+  {{- $showToc := (.Param "ShowToc") -}}
+  {{- $tocHTML := .TableOfContents -}}
+  {{- $hasToc := (and $showToc (findRE "href=\\\"#" $tocHTML)) -}}
+  {{- if $hasToc }}
+    <aside class="toc-sidebar">
+      {{- partial "toc.html" . }}
+    </aside>
+  {{- else }}
+    {{- partial "site_sidebar.html" . -}}
   {{- end }}
 </div>
 

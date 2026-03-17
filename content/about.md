@@ -1,6 +1,8 @@
 ---
 title: "关于"
 description: "Hey, this is June."
+ShowToc: false
+comments: false
 ---
 
 > 老当益壮，宁移白首之心？  

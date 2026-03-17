@@ -30,6 +30,150 @@
     --as-blockquote-text: #ebedf0;
 }
 
+/* ========== 首页/列表页：双栏（列表 + 右侧栏） + 顶部大图 ========== */
+.main:has(.list-with-sidebar) {
+    max-width: calc(var(--nav-width) + var(--gap, 24px) * 2);
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.list-with-sidebar {
+    display: grid;
+    grid-template-columns: 1fr 280px;
+    gap: 1.5rem;
+    align-items: start;
+}
+
+.list-with-sidebar .list-main {
+    max-width: min(960px, 100%);
+    margin-left: 0;
+    margin-right: auto;
+}
+
+.site-sidebar {
+    position: sticky;
+    top: calc(var(--header-height, 60px) + 1rem);
+}
+
+.sidebar-card {
+    background: var(--entry);
+    border: 1px solid var(--border);
+    border-radius: var(--radius, 8px);
+    padding: 1rem;
+    margin-bottom: 1rem;
+}
+
+.sidebar-title {
+    margin: 0 0 0.6rem 0;
+    font-size: 0.95rem;
+    color: var(--primary);
+}
+
+.sidebar-text {
+    margin: 0.1rem 0 0.4rem 0;
+    color: var(--secondary);
+    font-size: 0.9rem;
+    line-height: 1.55;
+}
+
+.sidebar-about-row {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+}
+
+.sidebar-avatar {
+    width: 54px;
+    height: 54px;
+    border-radius: 999px;
+    object-fit: cover;
+    border: 1px solid var(--border);
+    flex: 0 0 auto;
+}
+
+.sidebar-about-links {
+    margin-top: 0.6rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+}
+
+.sidebar-link {
+    color: var(--secondary);
+    font-size: 0.85rem;
+}
+.sidebar-link:hover { color: var(--primary); text-decoration: underline; }
+
+.sidebar-social .social-icons { justify-content: flex-start; }
+
+.sidebar-tags-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.sidebar-tag {
+    padding: 0.35rem 0.65rem;
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    color: var(--secondary);
+    font-size: 0.85rem;
+}
+
+.sidebar-tag:hover {
+    background: var(--tertiary);
+    color: var(--theme);
+    border-color: var(--primary);
+}
+
+.home-hero {
+    margin: 0.5rem 0 1.25rem 0;
+}
+
+.home-hero-inner {
+    position: relative;
+    overflow: hidden;
+    border-radius: 14px;
+    border: 1px solid var(--border);
+    background: var(--entry);
+}
+
+.home-hero-img {
+    width: 100%;
+    height: 240px;
+    object-fit: cover;
+    display: block;
+    filter: saturate(1.05);
+}
+
+.home-hero-text {
+    position: absolute;
+    left: 1.2rem;
+    bottom: 1rem;
+    right: 1.2rem;
+    color: #fff;
+    text-shadow: 0 2px 14px rgba(0,0,0,0.55);
+}
+
+.home-hero-title {
+    margin: 0;
+    font-size: 1.6rem;
+    font-weight: 750;
+}
+
+.home-hero-subtitle {
+    margin: 0.3rem 0 0 0;
+    font-size: 1rem;
+    opacity: 0.95;
+}
+
+@media (max-width: 920px) {
+    .list-with-sidebar { grid-template-columns: 1fr; }
+    .site-sidebar { position: static; }
+    .home-hero-img { height: 200px; }
+}
+
 /* ========== 文章页：与顶栏 June's Blog 同宽、双栏（正文+目录），目录从一级标题起 ========== */
 .main:has(.single-with-sidebar) {
     max-width: calc(var(--nav-width) + var(--gap, 24px) * 2);

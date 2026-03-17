@@ -56,7 +56,19 @@
     <h2>热门标签</h2>
     <ul class="terms-tags tag-cloud">
       {{- range first 20 site.Taxonomies.tags.ByCount }}
-      <li><a href="{{ .Page.Permalink }}">{{ .Page.Title }} <sup>{{ .Count }}</sup></a></li>
+        {{- $termName := .Name -}}
+        {{- $termKey := lower $termName -}}
+        {{- $exactCount := 0 -}}
+        {{- range $posts }}
+          {{- with .Params.tags }}
+            {{- range . }}
+              {{- if eq (lower .) $termKey }}{{ $exactCount = add $exactCount 1 }}{{ end }}
+            {{- end }}
+          {{- end }}
+        {{- end }}
+        {{- with site.GetPage (printf "/tags/%s" $termName) }}
+          <li><a href="{{ .Permalink }}">{{ .LinkTitle }} <sup>{{ $exactCount }}</sup></a></li>
+        {{- end }}
       {{- end }}
     </ul>
   </section>

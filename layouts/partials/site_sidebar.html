@@ -1,0 +1,31 @@
+<aside class="site-sidebar">
+  <section class="sidebar-card sidebar-about">
+    <div class="sidebar-about-row">
+      {{- with site.Params.sidebarAvatar }}
+      <img class="sidebar-avatar" src="{{ . | absURL }}" alt="avatar" loading="lazy" />
+      {{- end }}
+      <div class="sidebar-about-meta">
+        <h3 class="sidebar-title">{{ site.Params.sidebarAboutTitle | default "关于" }}</h3>
+        <p class="sidebar-text">{{ site.Params.sidebarAboutText | default (site.Params.description | default site.Title) }}</p>
+      </div>
+    </div>
+    <div class="sidebar-about-links">
+      {{- with site.Params.sidebarEmail }}
+      <a href="mailto:{{ . }}" class="sidebar-link">邮箱：{{ . }}</a>
+      {{- end }}
+      <div class="sidebar-social">
+        {{- partial "social_icons.html" (dict "align" "left") -}}
+      </div>
+    </div>
+  </section>
+
+  <section class="sidebar-card sidebar-tags">
+    <h3 class="sidebar-title">Featured Tags</h3>
+    <div class="sidebar-tags-list">
+      {{- range first 12 site.Taxonomies.tags.ByCount }}
+      <a class="sidebar-tag" href="{{ .Page.Permalink }}">{{ .Page.Title }} <sup>{{ .Count }}</sup></a>
+      {{- end }}
+    </div>
+  </section>
+</aside>
+
