@@ -3,6 +3,7 @@ baseURL = "https://June6699.github.io/"
 languageCode = "zh-cn"
 title = "June's Blog"
 theme = "PaperMod"
+googleAnalytics = "G-S7DXV0QV58"
 
 # 排除 content/posts/images（junction），避免 Windows 下 read 报错
 [build]
@@ -16,6 +17,8 @@ ignoreLogs = ["warning-goldmark-raw-html"]
 [params]
   description = "Who Changes? Who Benefits!"
   author = "June"
+  comments = true
+  ba_track_id = "6a0eceeee843ef6235b91843cc1a936e"
   # 统计页「已运行天数」起始日（可改为建站/博客上线日）
   siteBirthDate = "2026-01-01"
   # 首页、归档等从 posts 取文章列表
@@ -27,6 +30,15 @@ ignoreLogs = ["warning-goldmark-raw-html"]
 [params.cover]
   # 首页/列表不展示文章封面图，仅标题与摘要
   hiddenInList = true
+
+[params.gitalk]
+  enable = true
+  clientID = "Ov23lip1sLnFPYK622n1"
+  clientSecret = "66b4d7a3fa6cf24bb721f85072a93fddc0d80229"
+  repo = "June6699.github.io"
+  owner = "June6699"
+  admin = ["June6699"]
+  distractionFreeMode = true
 
 # 导航菜单
 [[menu.main]]

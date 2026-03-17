@@ -20,11 +20,18 @@
     <h2 class="terms-subtitle">按热度</h2>
     <ul class="terms-tags terms-tags--by-count">
       {{- range $termsCount }}
-      {{- with site.GetPage (printf "/%s/%s" .Type .Name) }}
+      {{- $termName := .Name }}
+      {{- $exactCount := 0 }}
+      {{- range site.RegularPages }}
+        {{- with .Params.tags }}
+          {{- if in . $termName }}{{ $exactCount = add $exactCount 1 }}{{ end }}
+        {{- end }}
+      {{- end }}
+      {{- with site.GetPage (printf "/%s/%s" .Type $termName) }}
       <li>
-        <a href="{{ .Permalink }}" class="term-pill term-pill--{{ .Count }}">
+        <a href="{{ .Permalink }}" class="term-pill term-pill--{{ $exactCount }}">
           <span class="term-name">{{ .Name }}</span>
-          <span class="term-count">{{ .Count }}</span>
+          <span class="term-count">{{ $exactCount }}</span>
         </a>
       </li>
       {{- end }}
@@ -36,9 +43,16 @@
     <h2 class="terms-subtitle">按名称</h2>
     <ul class="terms-tags terms-tags--alpha">
       {{- range $termsAlpha }}
-      {{- with site.GetPage (printf "/%s/%s" .Type .Name) }}
+      {{- $termName := .Name }}
+      {{- $exactCount := 0 }}
+      {{- range site.RegularPages }}
+        {{- with .Params.tags }}
+          {{- if in . $termName }}{{ $exactCount = add $exactCount 1 }}{{ end }}
+        {{- end }}
+      {{- end }}
+      {{- with site.GetPage (printf "/%s/%s" .Type $termName) }}
       <li>
-        <a href="{{ .Permalink }}">{{ .Name }} <sup>{{ .Count }}</sup></a>
+        <a href="{{ .Permalink }}">{{ .Name }} <sup>{{ $exactCount }}</sup></a>
       </li>
       {{- end }}
       {{- end }}

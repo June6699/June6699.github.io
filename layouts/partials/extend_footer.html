@@ -62,3 +62,49 @@
 })();
 </script>
 {{- end -}}
+
+{{- /* Analytics：延后加载，避免阻塞首屏 */ -}}
+{{- $gaID := "" -}}
+{{- with site.Config.Services.GoogleAnalytics }}
+  {{- with .ID }}{{- $gaID = . -}}{{- end -}}
+{{- end -}}
+{{- with $gaID }}
+<script>
+(function(){
+  function runGA4(){
+    var id = {{ . | jsonify }};
+    if (!id) return;
+    var s = document.createElement('script');
+    s.async = true;
+    s.src = 'https://www.googletagmanager.com/gtag/js?id=' + encodeURIComponent(id);
+    document.head.appendChild(s);
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){ dataLayer.push(arguments); }
+    window.gtag = window.gtag || gtag;
+    gtag('js', new Date());
+    gtag('config', id);
+  }
+  if (window.requestIdleCallback) requestIdleCallback(runGA4, { timeout: 3000 });
+  else window.addEventListener('load', function(){ setTimeout(runGA4, 0); });
+})();
+</script>
+{{- end }}
+
+{{- with site.Params.ba_track_id }}
+<script>
+(function(){
+  function runBaidu(){
+    var id = {{ . | jsonify }};
+    if (!id) return;
+    window._hmt = window._hmt || [];
+    var hm = document.createElement('script');
+    hm.async = true;
+    hm.src = 'https://hm.baidu.com/hm.js?' + encodeURIComponent(id);
+    var s = document.getElementsByTagName('script')[0];
+    s.parentNode.insertBefore(hm, s);
+  }
+  if (window.requestIdleCallback) requestIdleCallback(runBaidu, { timeout: 3000 });
+  else window.addEventListener('load', function(){ setTimeout(runBaidu, 0); });
+})();
+</script>
+{{- end }}

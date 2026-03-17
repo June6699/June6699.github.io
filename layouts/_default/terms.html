@@ -21,12 +21,17 @@
     <ul class="terms-tags terms-tags--by-count">
       {{- range $termsCount }}
       {{- $termName := .Name }}
-      {{- $termCount := .Count }}
+      {{- $exactCount := 0 }}
+      {{- range site.RegularPages }}
+        {{- with .Params.tags }}
+          {{- if in . $termName }}{{ $exactCount = add $exactCount 1 }}{{ end }}
+        {{- end }}
+      {{- end }}
       {{- with site.GetPage (printf "/%s/%s" $.Section $termName) }}
       <li>
-        <a href="{{ .Permalink }}" class="term-pill term-pill--{{ $termCount }}">
+        <a href="{{ .Permalink }}" class="term-pill term-pill--{{ $exactCount }}">
           <span class="term-name">{{ .LinkTitle }}</span>
-          <span class="term-count">{{ $termCount }}</span>
+          <span class="term-count">{{ $exactCount }}</span>
         </a>
       </li>
       {{- end }}
@@ -39,10 +44,15 @@
     <ul class="terms-tags terms-tags--alpha">
       {{- range $termsAlpha }}
       {{- $termName := .Name }}
-      {{- $termCount := .Count }}
+      {{- $exactCount := 0 }}
+      {{- range site.RegularPages }}
+        {{- with .Params.tags }}
+          {{- if in . $termName }}{{ $exactCount = add $exactCount 1 }}{{ end }}
+        {{- end }}
+      {{- end }}
       {{- with site.GetPage (printf "/%s/%s" $.Section $termName) }}
       <li>
-        <a href="{{ .Permalink }}">{{ .LinkTitle }} <sup>{{ $termCount }}</sup></a>
+        <a href="{{ .Permalink }}">{{ .LinkTitle }} <sup>{{ $exactCount }}</sup></a>
       </li>
       {{- end }}
       {{- end }}
