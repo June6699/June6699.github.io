@@ -30,21 +30,25 @@
     --as-blockquote-text: #ebedf0;
 }
 
-/* ========== 文章页：限制宽度 + 顶栏与内容对齐 ========== */
+/* ========== 文章页：与顶栏 June's Blog 同宽、双栏（正文+目录），目录从一级标题起 ========== */
 .main:has(.single-with-sidebar) {
     max-width: calc(var(--nav-width) + var(--gap, 24px) * 2);
+    margin-left: auto;
+    margin-right: auto;
 }
 
 .single-with-sidebar {
     display: grid;
-    grid-template-columns: 1fr 280px;
-    gap: 2.5rem;
+    grid-template-columns: 1fr 240px;
+    gap: 1.5rem;
     align-items: start;
 }
 
-/* 正文+封面不撑太宽，header 图限制在正文列内 */
+/* 正文与顶栏左对齐，拉宽以占满正文与目录之间的空隙，减少红框空白 */
 .single-with-sidebar .post-single {
-    max-width: 720px;
+    max-width: min(900px, 100%);
+    margin-left: 0;
+    margin-right: auto;
 }
 
 .single-with-sidebar .post-single .entry-cover {
@@ -62,21 +66,57 @@
 .toc-sidebar {
     position: sticky;
     top: calc(var(--header-height, 60px) + 1rem);
+    max-height: calc(100vh - var(--header-height, 60px) - 2rem);
+    overflow-y: auto;
+    overflow-x: hidden;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
+}
+.toc-sidebar::-webkit-scrollbar {
+    width: 6px;
+}
+.toc-sidebar::-webkit-scrollbar-track {
+    background: transparent;
+}
+.toc-sidebar::-webkit-scrollbar-thumb {
+    background: var(--border);
+    border-radius: 3px;
+}
+.toc-sidebar::-webkit-scrollbar-thumb:hover {
+    background: var(--secondary);
 }
 
 .toc-sidebar .toc {
     margin: 0;
-    padding: 0.85rem 1rem;
+    padding: 0.85rem 0.6rem 0.85rem 0.6rem;
     background: var(--entry);
     border: 1px solid var(--border);
     border-radius: var(--radius, 8px);
     font-size: 0.8rem;
 }
 
-.toc-sidebar .toc summary {
-    font-weight: 700;
-    color: var(--primary);
-    font-size: 0.9rem;
+/* 无「Table of Contents」标题，直接从一级标题列起；内边距收紧，左侧少留白 */
+.toc-sidebar .toc.toc-from-h1 .inner {
+    padding-top: 0;
+    margin: 0;
+    padding-left: 0;
+    padding-right: 0;
+}
+.toc-sidebar .toc.toc-from-h1 .inner > ul {
+    margin-top: 0;
+}
+
+/* 去掉所有层级的小圆点/项目符号 */
+.toc-sidebar .toc .inner ul,
+.toc-sidebar .toc .inner li {
+    list-style: none;
+}
+.toc-sidebar .toc .inner li::marker {
+    content: none;
+}
+
+.toc-sidebar .toc .inner ul {
+    padding-left: 0.6rem;
 }
 
 .toc-sidebar .toc .inner a {
@@ -93,8 +133,10 @@
     color: var(--primary);
 }
 
-.toc-sidebar .toc .inner ul {
-    padding-left: 1rem;
+/* 当前阅读位置高亮（由 JS scroll spy 设置 .active） */
+.toc-sidebar .toc .inner a.active {
+    color: var(--primary);
+    font-weight: 600;
 }
 
 @media (max-width: 768px) {
@@ -260,6 +302,58 @@
     padding: 1rem;
 }
 
+/* ========== 代码块语言标签（Typora 风格）：R、Python、Bash ========== */
+.post-content .highlight {
+    position: relative;
+    border-radius: 8px;
+    overflow: hidden;
+}
+.post-content .highlight::before {
+    position: absolute;
+    top: 0;
+    right: 0;
+    padding: 0.2em 0.6em;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border-radius: 0 8px 0 6px;
+    z-index: 1;
+}
+.post-content .highlight:has(code.language-r)::before {
+    content: "R";
+    background: #276dc2;
+    color: #fff;
+}
+.post-content .highlight:has(code.language-python)::before,
+.post-content .highlight:has(code.language-py)::before {
+    content: "Python";
+    background: #3581b8;
+    color: #fff;
+}
+.post-content .highlight:has(code.language-bash)::before,
+.post-content .highlight:has(code.language-sh)::before,
+.post-content .highlight:has(code.language-shell)::before {
+    content: "Bash";
+    background: #4a5568;
+    color: #fff;
+}
+:root[data-theme="dark"] .post-content .highlight:has(code.language-r)::before {
+    background: #63b3ed;
+    color: #1a202c;
+}
+:root[data-theme="dark"] .post-content .highlight:has(code.language-python)::before,
+:root[data-theme="dark"] .post-content .highlight:has(code.language-py)::before {
+    background: #68d391;
+    color: #1a202c;
+}
+:root[data-theme="dark"] .post-content .highlight:has(code.language-bash)::before,
+:root[data-theme="dark"] .post-content .highlight:has(code.language-sh)::before,
+:root[data-theme="dark"] .post-content .highlight:has(code.language-shell)::before {
+    background: #718096;
+    color: #e2e8f0;
+}
+
 .post-content a {
     color: var(--tertiary);
     font-weight: 600;
@@ -283,20 +377,211 @@
     color: #fff;
 }
 
-/* IMPORTANT 等 callout：可沿用块引用或自定义，这里用醒目边框+背景 */
+/* IMPORTANT 等 callout：可沿用块引用或自定义 */
 .post-content .important,
 .post-content blockquote.important,
 .post-content [class*="important"] {
     border-left-color: var(--as-inline-code);
     background: rgba(199, 37, 78, 0.06);
 }
-
 :root[data-theme="dark"] .post-content .important,
 :root[data-theme="dark"] .post-content blockquote.important,
 :root[data-theme="dark"] .post-content [class*="important"] {
     background: rgba(255, 110, 110, 0.12);
 }
 
-.post-content .poem-content { margin: 1rem 0; }
-.post-content .poem-lines { line-height: 2; }
-.post-content .poem-meta { color: var(--secondary); margin-bottom: 0.5rem; }
+/* ========== Typora 风格 callout（短代码 {{< important >}} 等）========== */
+.post-content .callout {
+    margin: 1.25rem 0;
+    padding: 1rem 1.25rem;
+    border-radius: 0 8px 8px 0;
+    border-left: 4px solid;
+}
+.post-content .callout .callout-label {
+    margin: 0 0 0.5rem 0;
+    font-weight: 700;
+    font-size: 0.95rem;
+}
+.post-content .callout .callout-body {
+    margin: 0;
+    font-size: 0.95rem;
+}
+.post-content .callout .callout-body p:first-child { margin-top: 0; }
+.post-content .callout .callout-body p:last-child { margin-bottom: 0; }
+
+/* IMPORTANT 重要 - 蓝/深蓝 */
+.post-content .callout-important {
+    border-left-color: #3182ce;
+    background: #e6f0fa;
+    color: #2c5282;
+}
+:root[data-theme="dark"] .post-content .callout-important {
+    border-left-color: #63b3ed;
+    background: rgba(49, 130, 206, 0.15);
+    color: #90cdf4;
+}
+
+/* WARNING 警告 - 橙/琥珀 */
+.post-content .callout-warning {
+    border-left-color: #d69e2e;
+    background: #faf3e6;
+    color: #744210;
+}
+:root[data-theme="dark"] .post-content .callout-warning {
+    border-left-color: #ecc94b;
+    background: rgba(214, 158, 46, 0.15);
+    color: #f6e05e;
+}
+
+/* NOTE 注意 */
+.post-content .callout-note {
+    border-left-color: #718096;
+    background: #edf2f7;
+    color: #2d3748;
+}
+:root[data-theme="dark"] .post-content .callout-note {
+    border-left-color: #a0aec0;
+    background: rgba(113, 128, 150, 0.15);
+    color: #e2e8f0;
+}
+
+/* TIP 建议 - 绿 */
+.post-content .callout-tip {
+    border-left-color: #38a169;
+    background: #e6fffa;
+    color: #234e52;
+}
+:root[data-theme="dark"] .post-content .callout-tip {
+    border-left-color: #68d391;
+    background: rgba(56, 161, 105, 0.15);
+    color: #9ae6b4;
+}
+
+/* REMINDER 提醒 - 紫 */
+.post-content .callout-reminder {
+    border-left-color: #805ad5;
+    background: #faf5ff;
+    color: #44337a;
+}
+:root[data-theme="dark"] .post-content .callout-reminder {
+    border-left-color: #b794f4;
+    background: rgba(128, 90, 213, 0.15);
+    color: #d6bcfa;
+}
+
+/* ========== 中国诗：节日祝福 / 札记 / 诗句 + 释义 ========== */
+
+/* 仅当小标题后紧跟诗块时才居中（避免影响其他文章 h3） */
+.post-content h3:has(+ .poem-content) {
+    text-align: center;
+    font-size: 1.15em;
+    margin: 2em 0 0.8em 0;
+    font-weight: 650;
+}
+.post-content h3:has(+ .poem-content):first-of-type { margin-top: 0; }
+
+.post-content .poem-festival-wish {
+    text-align: center;
+    margin: 1.5em 0 2em 0;
+    padding: 1em 1.5em;
+    background: linear-gradient(135deg, var(--entry) 0%, rgba(110, 168, 254, 0.20) 100%);
+    border-left: 4px solid var(--primary);
+    border-radius: 0 8px 8px 0;
+    font-size: 1.05em;
+    color: var(--content);
+    line-height: 1.8;
+}
+:root[data-theme="dark"] .post-content .poem-festival-wish {
+    background: linear-gradient(135deg, var(--entry) 0%, rgba(0, 174, 255, 0.12) 100%);
+}
+.post-content .poem-festival-wish strong { color: var(--primary); }
+
+.post-content .poem-year-end {
+    margin-top: 2.5em;
+    padding: 1.5em 2em;
+    background: linear-gradient(135deg, var(--entry) 0%, rgba(110, 168, 254, 0.18) 100%);
+    border-radius: 8px;
+    border-left: 4px solid var(--primary);
+}
+:root[data-theme="dark"] .post-content .poem-year-end {
+    background: linear-gradient(135deg, var(--entry) 0%, rgba(0, 174, 255, 0.10) 100%);
+}
+.post-content .poem-year-end .year-end-title {
+    font-size: 1.05em;
+    font-weight: 650;
+    color: var(--content);
+    margin: 0 0 0.8em 0;
+}
+.post-content .poem-year-end .year-end-placeholder {
+    font-size: 0.95em;
+    color: var(--secondary);
+    font-style: italic;
+    min-height: 2em;
+    margin: 0;
+}
+.post-content .poem-year-end .year-end-link {
+    display: inline-block;
+    margin-top: 1em;
+    font-size: 0.95em;
+    color: var(--primary);
+    font-weight: 600;
+    text-decoration: none;
+}
+.post-content .poem-year-end .year-end-link:hover {
+    color: var(--secondary);
+    text-decoration: underline;
+}
+
+.post-content .poem-content {
+    margin: 1.5em 0 2em 0;
+    text-align: center;
+}
+
+.post-content .poem-content .poem-meta {
+    font-size: 0.95em;
+    color: var(--secondary);
+    margin: 0 0 1em 0;
+    font-family: "PingFang SC", "Microsoft YaHei", serif;
+}
+
+.post-content .poem-content .poem-interp {
+    font-size: 0.92em;
+    color: var(--secondary);
+    margin: 0.5em 0 1.5em 0;
+    padding-left: 0.5em;
+    font-style: italic;
+    font-family: "PingFang SC", "Microsoft YaHei", "Helvetica Neue", sans-serif;
+}
+
+.post-content .poem-content .poem-stanza {
+    font-size: 0.85em;
+    color: var(--secondary);
+    margin: 1.2em 0 0.4em 0;
+    letter-spacing: 0.2em;
+}
+.post-content .poem-content .poem-stanza:first-of-type { margin-top: 0; }
+
+.post-content .poem-content .poem-lines {
+    font-size: 1.25em;
+    line-height: 2.2;
+    letter-spacing: 0.12em;
+    color: var(--content);
+    margin: 0 0 0.3em 0;
+    font-family: "SimSun", "宋体", "STSong", serif;
+}
+
+.post-content .poem-content ruby {
+    ruby-position: over;
+    ruby-align: center;
+}
+
+.post-content .poem-content ruby rt {
+    font-size: 0.45em;
+    line-height: 1;
+    color: var(--secondary);
+    font-weight: 500;
+    letter-spacing: 0.05em;
+    font-family: "PingFang SC", "Microsoft YaHei", "Helvetica Neue", sans-serif;
+}
+
+.post-content .poem-content ruby rp { display: none; }

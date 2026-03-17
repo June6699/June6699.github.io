@@ -20,7 +20,7 @@ ignoreLogs = ["warning-goldmark-raw-html"]
   siteBirthDate = "2026-01-01"
   # 首页、归档等从 posts 取文章列表
   mainSections = ["posts"]
-  # 文章页显示右侧目录
+  # 文章页显示右侧目录，不显示「Table of Contents」标题，直接从一级标题列起以节省空间
   ShowToc = true
   TocOpen = false
 

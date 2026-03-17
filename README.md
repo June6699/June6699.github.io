@@ -22,10 +22,10 @@ hugo
 
 - 文章：`content/posts/卜算子·自嘲.md`（保留可见文件名，不用 index.md）
 - **正文里图片路径**：`./images/卜算子·自嘲/xxx.png`（相对路径，和文件名一致）
-- 图片存**两处**（迁移脚本会双写）：
+- 图片存两处（**只用一个 static 目录**，不重复）：
   - `content/posts/images/卜算子·自嘲/` → Typora 打开 md 时 `./images/` 即指向这里，**本地能看图**
-  - `static/images/posts/卜算子·自嘲/` → Hugo 构建时正文里的 `./images/` 会替换成 `/images/posts/`，**网页能看图**
-- 无需 junction、无需改 Typora 设置。
+  - 运行 `scripts/sync_images.py` 同步到 `static/images/卜算子·自嘲/` → 正文里 `./images/` 会输出为 `/images/卜算子·自嘲/xxx`，**网页能看图**
+- 全站图片统一在 `static/images/`（含 `header_img/` 与各文章子目录），不再使用 `static/posts/images/`。
 
 ## 迁移脚本
 

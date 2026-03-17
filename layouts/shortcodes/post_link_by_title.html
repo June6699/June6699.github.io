@@ -1,0 +1,17 @@
+{{- $title := .Get "title" -}}
+{{- $text := .Get "text" -}}
+{{- if not $title -}}
+  {{- errorf "shortcode post_link_by_title: missing param title" -}}
+{{- end -}}
+
+{{- $pages := where site.RegularPages "Title" $title -}}
+{{- $p := index $pages 0 -}}
+{{- if not $text -}}
+  {{- $text = $title -}}
+{{- end -}}
+
+{{- if $p -}}
+  <a href="{{ $p.RelPermalink }}" class="{{ .Get `class` | default `year-end-link` }}">{{ $text }}</a>
+{{- else -}}
+  <span class="{{ .Get `class` | default `year-end-link` }}">{{ $text }}</span>
+{{- end -}}

@@ -1,5 +1,6 @@
 {{- $src := .Destination -}}
+{{- /* 统一：./images/xxx/file → /images/xxx/file，图片只放 static/images/，与 static/posts/images 合并 */ -}}
 {{- if hasPrefix $src "./images/" -}}
-  {{- $src = replace $src "./images/" "../images/" -}}
+  {{- $src = replace $src "./images/" "/images/" -}}
 {{- end -}}
 <img src="{{ $src }}"{{ with .PlainText }} alt="{{ . }}"{{ end }}{{ with .Title }} title="{{ . }}"{{ end }} loading="lazy" />

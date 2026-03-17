@@ -141,7 +141,7 @@ B区室是基因组中转录沉默、染色质压缩的区域（异染色质）�
 - Q2：那么为什么RNA又那么整齐？
 - A2：因为RNA聚类靠的是基因表达，标记的是细胞类型（细胞身份本身），而非细胞的状态，他们的RNA表达足够相似。
 
-<img src="./images/article1-hires-hic+rna-seq关联/image-20260307205221960.png" alt="image-20260307205221960" style="zoom: 80%;" /><img src="./images/article1-hires-hic+rna-seq关联/image-20260307205243822.png" alt="image-20260307205243822" style="zoom:50%;" />
+<img src="/images/article1-hires-hic+rna-seq关联/image-20260307205221960.png" alt="image-20260307205221960" style="zoom: 80%;" /><img src="/images/article1-hires-hic+rna-seq关联/image-20260307205243822.png" alt="image-20260307205243822" style="zoom:50%;" />
 
 > [!IMPORTANT]
 >
@@ -393,7 +393,7 @@ GREAT = **Genomic Regions Enrichment of Annotations Tool**
 
 ## 5、广泛的染色质相互作用在转录激活前发生重塑
 
-#### 5.1 用残差探究GADI与RNA表达的同步变化
+### 5.1 用残差探究GADI与RNA表达的同步变化
 
 通过GADI将染色质相互作用与特定基因关联起来后，现在能够以高分辨率比较染色质构象的伪时间动态与转录过程。
 
@@ -425,7 +425,7 @@ GADI的变化落后于RNA表达的例子
 
 
 
-#### 5.2 机制探究
+### 5.2 机制探究
 
 `图 4C`：包含H3K27ac信号（上图）或BB区室相互作用（下图）的GADI百分比。
 

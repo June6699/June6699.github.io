@@ -1,0 +1,64 @@
+{{- /* 仅文章页且有右侧目录时：TOC 滚动高亮（scroll spy），文章滚动驱动高亮；滑 TOC 不驱动文章，只有点击才跳转 */ -}}
+{{- if and (eq .Kind "page") (ne .Layout "archives") (ne .Layout "search") (.Param "ShowToc") -}}
+<script>
+(function() {
+    const sidebar = document.querySelector('.toc-sidebar');
+    const postContent = document.querySelector('.post-content');
+    if (!sidebar || !postContent) return;
+
+    const tocLinks = sidebar.querySelectorAll('.toc .inner a[href^="#"]');
+    const headings = postContent.querySelectorAll('h1[id], h2[id], h3[id], h4[id], h5[id], h6[id]');
+    if (!tocLinks.length || !headings.length) return;
+
+    function setActive(id) {
+        tocLinks.forEach(function(a) {
+            const href = a.getAttribute('href');
+            if (href === '#' + id) {
+                a.classList.add('active');
+            } else {
+                a.classList.remove('active');
+            }
+        });
+    }
+
+    const observer = new IntersectionObserver(
+        function(entries) {
+            /* 取当前最靠上且进入视口的标题 */
+            let best = null;
+            const viewTop = 0;
+            entries.forEach(function(entry) {
+                if (!entry.isIntersecting) return;
+                const id = entry.target.id;
+                if (!id) return;
+                if (!best || entry.boundingClientRect.top <= viewTop + 80)
+                    best = { id: id, top: entry.boundingClientRect.top };
+            });
+            if (best) setActive(best.id);
+        },
+        { root: null, rootMargin: '-80px 0px -60% 0px', threshold: [0, 0.25, 0.5, 1] }
+    );
+
+    /* 用 scroll 事件补一刀：精确取“当前最靠近视口顶部”的标题 */
+    function onScroll() {
+        let current = null;
+        let minOffset = Infinity;
+        headings.forEach(function(h) {
+            const rect = h.getBoundingClientRect();
+            const top = rect.top;
+            if (top <= 120 && top > -200) {
+                const off = Math.abs(top - 80);
+                if (off < minOffset) { minOffset = off; current = h.id; }
+            } else if (current === null && top > 0 && top < 300) {
+                current = h.id;
+                minOffset = Math.abs(top - 80);
+            }
+        });
+        if (current) setActive(current);
+    }
+
+    headings.forEach(function(h) { observer.observe(h); });
+    window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
+})();
+</script>
+{{- end -}}
