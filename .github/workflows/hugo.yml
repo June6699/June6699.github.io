@@ -2,7 +2,7 @@ name: Hugo build and deploy
 
 on:
   push:
-    branches: ["master", "main"]
+    branches: ["main"]
 
 permissions:
   contents: read
