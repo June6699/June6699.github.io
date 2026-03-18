@@ -1,5 +1,11 @@
 {{- $gitalk := site.Params.gitalk -}}
 {{- if and $gitalk $gitalk.enable -}}
+{{- $envClientID := getenv "GITALK_CLIENT_ID" -}}
+{{- $envClientSecret := getenv "GITALK_CLIENT_SECRET" -}}
+{{- $envRepo := getenv "GITALK_REPO" -}}
+{{- $envOwner := getenv "GITALK_OWNER" -}}
+{{- $envAdmin := getenv "GITALK_ADMIN" -}}
+{{- $envRedirectURI := getenv "GITALK_REDIRECT_URI" -}}
 <div id="gitalk-container"></div>
 <script>
 (function(){
@@ -24,12 +30,32 @@
       loadJs('https://unpkg.com/gitalk@latest/dist/gitalk.min.js', function(){
         var path = (location.pathname || '/');
         var id = (typeof md5 === 'function') ? md5(path) : path;
+        function dequote(v){
+          if (typeof v !== 'string') return v;
+          // remove accidental wrapping quotes, e.g. "\"abc\"" or "'abc'"
+          v = v.trim();
+          if ((v[0] === '"' && v[v.length-1] === '"') || (v[0] === "'" && v[v.length-1] === "'")) {
+            v = v.slice(1, -1);
+          }
+          return v;
+        }
+        var admin = {{ (cond (ne $envAdmin "") $envAdmin $gitalk.admin) | jsonify }};
+        if (typeof admin === 'string') {
+          try { admin = JSON.parse(admin); } catch(e) { admin = [dequote(admin)]; }
+        }
+        if (Array.isArray(admin)) admin = admin.map(dequote);
+        var redirectURI = dequote({{ (cond (ne $envRedirectURI "") $envRedirectURI site.BaseURL) | jsonify }});
+        // Ensure it's a clean base URL; GitHub OAuth callback should match this.
+        if (typeof redirectURI === 'string' && redirectURI && redirectURI.indexOf('#') >= 0) {
+          redirectURI = redirectURI.split('#')[0];
+        }
         var gitalk = new Gitalk({
-          clientID: {{ $gitalk.clientID | jsonify }},
-          clientSecret: {{ $gitalk.clientSecret | jsonify }},
-          repo: {{ $gitalk.repo | jsonify }},
-          owner: {{ $gitalk.owner | jsonify }},
-          admin: {{ $gitalk.admin | jsonify }},
+          clientID: dequote({{ (cond (ne $envClientID "") $envClientID $gitalk.clientID) | jsonify }}),
+          clientSecret: dequote({{ (cond (ne $envClientSecret "") $envClientSecret $gitalk.clientSecret) | jsonify }}),
+          repo: dequote({{ (cond (ne $envRepo "") $envRepo $gitalk.repo) | jsonify }}),
+          owner: dequote({{ (cond (ne $envOwner "") $envOwner $gitalk.owner) | jsonify }}),
+          admin: admin,
+          redirect_uri: redirectURI,
           distractionFreeMode: {{ $gitalk.distractionFreeMode | default true }},
           id: id
         });

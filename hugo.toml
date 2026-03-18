@@ -1,9 +1,22 @@
 # 主题放在 themes/PaperMod，不用 Hugo Module
 baseURL = "https://June6699.github.io/"
 languageCode = "zh-cn"
+defaultContentLanguage = "zh"
+defaultContentLanguageInSubdir = false
+hasCJKLanguage = true
 title = "June's Blog"
 theme = "PaperMod"
 googleAnalytics = "G-S7DXV0QV58"
+
+[languages]
+  [languages.zh]
+    languageName = "中文"
+    languageCode = "zh-cn"
+    weight = 1
+
+[security]
+  [security.funcs]
+    getenv = ['^HUGO_', '^CI$', '^GITALK_']
 
 # 排除 content/posts/images（junction），避免 Windows 下 read 报错
 [build]

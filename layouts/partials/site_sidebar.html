@@ -22,9 +22,33 @@
   <section class="sidebar-card sidebar-tags">
     <h3 class="sidebar-title">Featured Tags</h3>
     <div class="sidebar-tags-list">
-      {{- range first 12 site.Taxonomies.tags.ByCount }}
-      <a class="sidebar-tag" href="{{ .Page.Permalink }}">{{ .Page.Title }} <sup>{{ .Count }}</sup></a>
-      {{- end }}
+      {{- $items := slice -}}
+      {{- range $termName, $taxonomy := site.Taxonomies.tags -}}
+        {{- $termKey := lower $termName -}}
+        {{- $exactCount := 0 -}}
+        {{- range site.RegularPages -}}
+          {{- $pTags := .Params.tags -}}
+          {{- if $pTags -}}
+            {{- if reflect.IsSlice $pTags -}}
+              {{- range $pTags -}}
+                {{- if eq (lower .) $termKey -}}
+                  {{- $exactCount = add $exactCount 1 -}}
+                {{- end -}}
+              {{- end -}}
+            {{- else -}}
+              {{- if eq (lower $pTags) $termKey -}}
+                {{- $exactCount = add $exactCount 1 -}}
+              {{- end -}}
+            {{- end -}}
+          {{- end -}}
+        {{- end -}}
+        {{- if gt $exactCount 0 -}}
+          {{- $items = $items | append (dict "title" $taxonomy.Page.Title "permalink" $taxonomy.Page.Permalink "count" $exactCount) -}}
+        {{- end -}}
+      {{- end -}}
+      {{- range first 12 (sort $items "count" "desc") -}}
+        <a class="sidebar-tag" href="{{ .permalink }}">{{ .title }} <sup>{{ .count }}</sup></a>
+      {{- end -}}
     </div>
   </section>
 </aside>
