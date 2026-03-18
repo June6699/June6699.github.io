@@ -63,6 +63,38 @@
 </script>
 {{- end -}}
 
+{{- /* 阅读进度条：仅正文页面启用 */ -}}
+{{- if and (eq .Kind "page") (ne .Layout "archives") (ne .Layout "search") -}}
+<script>
+(function(){
+  function ensureBar(){
+    if (document.getElementById('reading-progress')) return;
+    var bar = document.createElement('div');
+    bar.id = 'reading-progress';
+    document.body.appendChild(bar);
+  }
+  function update(){
+    var doc = document.documentElement;
+    var scrollTop = (window.pageYOffset || doc.scrollTop || 0);
+    var scrollHeight = Math.max(doc.scrollHeight, document.body.scrollHeight || 0);
+    var clientHeight = doc.clientHeight || window.innerHeight || 0;
+    var total = Math.max(1, scrollHeight - clientHeight);
+    var p = Math.max(0, Math.min(1, scrollTop / total));
+    var bar = document.getElementById('reading-progress');
+    if (bar) bar.style.width = (p * 100).toFixed(2) + '%';
+  }
+  function init(){
+    ensureBar();
+    update();
+    window.addEventListener('scroll', update, { passive: true });
+    window.addEventListener('resize', update);
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+  else init();
+})();
+</script>
+{{- end -}}
+
 {{- /* Analytics：延后加载，避免阻塞首屏 */ -}}
 {{- $gaID := "" -}}
 {{- with site.Config.Services.GoogleAnalytics }}

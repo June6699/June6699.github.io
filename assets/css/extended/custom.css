@@ -184,7 +184,7 @@
 .single-with-sidebar {
     display: grid;
     grid-template-columns: 1fr 240px;
-    gap: 1.5rem;
+    gap: 1rem;
     align-items: start;
 }
 
@@ -193,18 +193,25 @@
     max-width: min(900px, 100%);
     margin-left: 0;
     margin-right: auto;
+    background: var(--entry);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    box-shadow: 0 8px 26px rgba(0, 0, 0, 0.08);
+    padding: 1.2rem 1.35rem;
 }
 
 .single-with-sidebar .post-single .entry-cover {
     max-width: 100%;
     margin-left: 0;
     margin-right: 0;
+    margin-top: 0.25rem;
 }
 
 .single-with-sidebar .post-single .entry-cover img {
     max-width: 100%;
     height: auto;
     object-fit: cover;
+    border-radius: 10px;
 }
 
 .toc-sidebar {
@@ -237,6 +244,7 @@
     border: 1px solid var(--border);
     border-radius: var(--radius, 8px);
     font-size: 0.8rem;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
 }
 
 /* 无「Table of Contents」标题，直接从一级标题列起；内边距收紧，左侧少留白 */
@@ -290,6 +298,27 @@
     .toc-sidebar {
         order: -1;
     }
+    .single-with-sidebar .post-single {
+        padding: 1rem 1.05rem;
+        border-radius: 10px;
+    }
+}
+
+/* ========== 阅读进度条（顶部） ========== */
+#reading-progress {
+    position: fixed;
+    left: 0;
+    top: 0;
+    height: 3px;
+    width: 0;
+    background: linear-gradient(90deg, var(--tertiary), var(--primary));
+    z-index: 99999;
+    transition: width 80ms linear;
+}
+
+/* 顶栏下阴影更自然 */
+.header {
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
 }
 
 .main .first-entry,
