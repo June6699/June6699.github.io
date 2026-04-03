@@ -786,3 +786,162 @@
 }
 
 .post-content .poem-content ruby rp { display: none; }
+
+/* =========================
+   Pretext Demo（仅作用于 .pretext-demo）
+   ========================= */
+.pretext-demo {
+    /* 参考 @chenglou/pretext demos 的配色/排版变量 */
+    --page: #f5f1ea;
+    --panel: #fffdf8;
+    --ink: #201b18;
+    --muted: #6d645d;
+    --rule: #d8cec3;
+    --accent: #955f3b;
+}
+
+.pretext-demo * {
+    box-sizing: border-box;
+}
+
+.pretext-demo .pretext-page {
+    width: min(940px, calc(100vw - 32px));
+    margin: 0 auto;
+    padding: 32px 0 48px;
+    background: linear-gradient(180deg, #fbf7f0 0%, var(--page) 100%);
+    color: var(--ink);
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+
+.pretext-demo .pretext-eyebrow {
+    margin: 0 0 8px;
+    font: 12px/1.2 "SF Mono", ui-monospace, monospace;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--accent);
+}
+
+.pretext-demo h1.pretext-title {
+    margin: 0;
+    font: 700 34px/1.08 Georgia, "Times New Roman", serif;
+}
+
+.pretext-demo .pretext-intro {
+    margin: 10px 0 0;
+    max-width: 62ch;
+    line-height: 1.5;
+    color: var(--muted);
+}
+
+.pretext-demo .pretext-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+    margin-top: 28px;
+}
+
+.pretext-demo .pretext-card {
+    display: block;
+    padding: 18px;
+    border: 1px solid var(--rule);
+    border-radius: 20px;
+    background: color-mix(in srgb, var(--panel) 94%, white 6%);
+    color: inherit;
+    text-decoration: none;
+    box-shadow: 0 18px 40px rgb(54 40 23 / 0.08);
+    transition: transform 160ms ease, box-shadow 160ms ease, border-color 160ms ease;
+}
+
+.pretext-demo .pretext-card:hover {
+    transform: translateY(-1px);
+    border-color: color-mix(in srgb, var(--accent) 35%, var(--rule) 65%);
+    box-shadow: 0 22px 44px rgb(54 40 23 / 0.12);
+}
+
+.pretext-demo .pretext-card h2 {
+    margin: 0;
+    font: 600 20px/1.2 "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+
+.pretext-demo .pretext-card p {
+    margin: 10px 0 0;
+    line-height: 1.5;
+    color: var(--muted);
+}
+
+@media (max-width: 760px) {
+    .pretext-demo .pretext-page {
+        width: min(100vw - 20px, 940px);
+        padding-top: 22px;
+    }
+    .pretext-demo .pretext-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Pretext A/B 标记块外观（高度/宽度由 JS 动态写回） */
+.pretext-demo [data-pretext-height="1"],
+.pretext-demo [data-pretext-bubble="1"] {
+    padding: 16px 18px;
+    border-radius: 14px;
+    border: 1px solid var(--rule);
+    background: color-mix(in srgb, var(--panel) 96%, white 4%);
+    transition: height 220ms ease, width 220ms ease;
+    will-change: height, width;
+}
+
+/* 仅 pretext-demo 这篇文章使用：实时重排互动区 */
+.pretext-reflow-demo {
+    max-width: 100%;
+}
+
+.pretext-reflow-demo .pretext-reflow-scroll {
+    max-width: 100%;
+    overflow-x: hidden;
+    overflow-y: hidden;
+    border-radius: 14px;
+    padding: 28px;
+}
+
+.pretext-reflow-demo .pretext-control-card {
+    margin-top: 20px;
+}
+
+.pretext-reflow-demo .pretext-control-label {
+    display: block;
+    font-weight: 700;
+    color: var(--accent);
+    margin-bottom: 10px;
+}
+
+.pretext-reflow-demo .pretext-width-slider {
+    width: min(560px, 100%);
+    accent-color: var(--accent);
+}
+
+.pretext-reflow-demo .pretext-metrics {
+    margin-top: 12px;
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    color: var(--muted);
+    font-size: 0.95rem;
+}
+
+.pretext-reflow-demo .pretext-reflow-card {
+    margin-top: 18px;
+}
+
+.pretext-reflow-demo .pretext-reflow-stage {
+    width: 100%;
+    min-width: 0;
+}
+
+.pretext-reflow-demo .pretext-reflow-content {
+    width: 520px; /* 初始宽度，与 slider 初始值同步 */
+    max-width: 100%;
+    line-height: 1.6;
+    transition: width 220ms ease, height 220ms ease;
+    max-height: 220px;
+    overflow-y: auto;
+}

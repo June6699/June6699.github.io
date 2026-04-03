@@ -24,26 +24,9 @@
     <div class="sidebar-tags-list">
       {{- $items := slice -}}
       {{- range $termName, $taxonomy := site.Taxonomies.tags -}}
-        {{- $termKey := lower $termName -}}
-        {{- $exactCount := 0 -}}
-        {{- range site.RegularPages -}}
-          {{- $pTags := .Params.tags -}}
-          {{- if $pTags -}}
-            {{- if reflect.IsSlice $pTags -}}
-              {{- range $pTags -}}
-                {{- if eq (lower .) $termKey -}}
-                  {{- $exactCount = add $exactCount 1 -}}
-                {{- end -}}
-              {{- end -}}
-            {{- else -}}
-              {{- if eq (lower $pTags) $termKey -}}
-                {{- $exactCount = add $exactCount 1 -}}
-              {{- end -}}
-            {{- end -}}
-          {{- end -}}
-        {{- end -}}
-        {{- if gt $exactCount 0 -}}
-          {{- $items = $items | append (dict "title" $taxonomy.Page.Title "permalink" $taxonomy.Page.Permalink "count" $exactCount) -}}
+        {{- $count := len $taxonomy.Pages -}}
+        {{- if ge $count 2 -}}
+          {{- $items = $items | append (dict "title" $taxonomy.Page.Title "permalink" $taxonomy.Page.Permalink "count" $count) -}}
         {{- end -}}
       {{- end -}}
       {{- range first 12 (sort $items "count" "desc") -}}

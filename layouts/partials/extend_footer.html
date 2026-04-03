@@ -122,6 +122,9 @@
 </script>
 {{- end }}
 
+{{- /* Pretext runtime：仅当页面存在 data-pretext-* 标记时才会实际工作 */ -}}
+<script type="module" src="/js/pretext-runtime.js"></script>
+
 {{- with site.Params.ba_track_id }}
 <script>
 (function(){
