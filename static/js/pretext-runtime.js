@@ -30,6 +30,15 @@
     return Math.max(1, w - padL - padR);
   }
 
+  function getVerticalExtras(el) {
+    const cs = getComputedStyle(el);
+    const padT = parseFloat(cs.paddingTop || "0") || 0;
+    const padB = parseFloat(cs.paddingBottom || "0") || 0;
+    const bdT = parseFloat(cs.borderTopWidth || "0") || 0;
+    const bdB = parseFloat(cs.borderBottomWidth || "0") || 0;
+    return padT + padB + bdT + bdB;
+  }
+
   function clamp(n, min, max) {
     return Math.max(min, Math.min(max, n));
   }
@@ -68,6 +77,12 @@
     if (hEl) hEl.textContent = `${Math.round(heightPx)}px`;
   }
 
+  function measureLineCount(el) {
+    const h = el.getBoundingClientRect().height || 0;
+    const lh = getLineHeightPx(el);
+    return Math.max(1, Math.round(h / Math.max(1, lh)));
+  }
+
   async function loadPretext() {
     // 只加载一次
     if (window.__pretextLayoutEngine) return window.__pretextLayoutEngine;
@@ -98,24 +113,26 @@
     const font = getCanvasFont(el);
     const lineHeightPx = getLineHeightPx(el);
 
-    let height = 0;
+    let textHeight = 0;
     let lineCount = 0;
     if (pretext && typeof pretext.prepare === "function" && typeof pretext.layout === "function") {
       const prepared = pretext.prepare(text, font);
       const out = pretext.layout(prepared, innerWidth, lineHeightPx);
-      height = out.height;
+      textHeight = out.height;
       lineCount = out.lineCount;
     } else {
       // fallback：不用 pretext 时仍可工作（粗略）
       const oldH = el.style.height;
       el.style.height = "auto";
-      height = el.scrollHeight;
-      lineCount = Math.max(1, Math.round(height / lineHeightPx));
+      const totalAuto = el.scrollHeight;
+      const extraAuto = getVerticalExtras(el);
+      textHeight = Math.max(0, totalAuto - extraAuto);
+      lineCount = Math.max(1, Math.round(textHeight / lineHeightPx));
       el.style.height = oldH;
     }
 
     // 避免亚像素导致的微抖动 + 给一个“丝滑过渡”
-    const h = Math.ceil(height);
+    const h = Math.ceil(textHeight + getVerticalExtras(el));
     const startH = Math.ceil(el.getBoundingClientRect().height || h);
     if (el.getAttribute("data-pretext-scroll") === "1") {
       el.style.overflowY = "auto";
@@ -179,9 +196,9 @@
     });
     el.dataset.pretextBubbleWidth = String(contentW);
 
-    // 再根据最终宽度设置高度（让两者联动）
+    // 再根据最终宽度设置高度（让两者联动，补齐 padding/border）
     const { height } = pretext.layout(prepared, contentW, lineHeightPx);
-    const h = Math.ceil(height);
+    const h = Math.ceil(height + getVerticalExtras(el));
     const startH = Math.ceil(el.getBoundingClientRect().height || h);
     el.style.overflow = "hidden";
     el.style.height = startH + "px";
@@ -284,6 +301,78 @@
       }
     }
     await initReflowDemos();
+
+    async function initJustificationDemos() {
+      const demos = qsAll(".pretext-just-demo");
+      if (!demos.length) return;
+      for (const root of demos) {
+        const slider = root.querySelector('[data-pretext-just-slider="1"]');
+        const widthOut = root.querySelector("[data-pretext-just-width]");
+        const cssOut = root.querySelector("[data-pretext-just-lines-css]");
+        const preOut = root.querySelector("[data-pretext-just-lines-pretext]");
+        const cols = Array.from(root.querySelectorAll('[data-pretext-just-col="1"]'));
+        const cssBlock = root.querySelector('[data-pretext-just-css="1"]');
+        const preBlocks = Array.from(root.querySelectorAll('[data-pretext-just-pretext="1"]'));
+        if (!slider || cols.length === 0) continue;
+
+        const run = async function () {
+          const raw = Number(slider.value || 364);
+          const page = root.querySelector(".pretext-page");
+          const maxByPage = page ? Math.max(240, Math.floor(getInnerWidth(page) / 3) - 16) : 520;
+          const value = clamp(raw, 240, maxByPage);
+          slider.max = String(maxByPage);
+          if (raw !== value) slider.value = String(value);
+
+          cols.forEach(function (c) { c.style.width = `${value}px`; });
+          for (const el of preBlocks) {
+            await applyHeight(pretext, el);
+          }
+          if (widthOut) widthOut.textContent = `${value}px`;
+          if (cssOut && cssBlock) cssOut.textContent = String(measureLineCount(cssBlock));
+          if (preOut) {
+            const total = preBlocks.reduce(function (n, el) { return n + measureLineCount(el); }, 0);
+            preOut.textContent = String(Math.max(1, Math.round(total / Math.max(1, preBlocks.length))));
+          }
+        };
+        slider.addEventListener("input", function () { run(); }, { passive: true });
+        slider.addEventListener("change", function () { run(); }, { passive: true });
+        await run();
+      }
+    }
+    await initJustificationDemos();
+
+    async function initDragonDemos() {
+      const demos = qsAll(".pretext-dragon-demo");
+      if (!demos.length) return;
+      demos.forEach(function (root) {
+        const scene = root.querySelector('[data-pretext-dragon-scene="1"]');
+        const flyer = root.querySelector('[data-pretext-dragon-flyer="1"]');
+        const body = root.querySelector('[data-pretext-dragon-body="1"]');
+        const text = root.querySelector('[data-pretext-dragon-text="1"]');
+        const speedCtl = root.querySelector('[data-pretext-dragon-speed="1"]');
+        if (!scene || !flyer || !body || !text) return;
+
+        let rafId = 0;
+        let t0 = performance.now();
+        const tick = async function (ts) {
+          const dt = (ts - t0) / 1000;
+          const speed = speedCtl ? Number(speedCtl.value || 8) : 8;
+          const width = Math.max(320, scene.clientWidth || 700);
+          const x = ((dt * (40 + speed * 8)) % (width + 160)) - 90;
+          const y = 10 + Math.sin(dt * 2.1) * 10;
+          flyer.style.transform = `translate(${x}px, ${y}px) rotate(${Math.sin(dt * 1.8) * 10}deg)`;
+
+          const phase = (x + 90) / Math.max(1, width + 160);
+          const shift = Math.round((Math.sin(phase * Math.PI) * 46));
+          body.style.setProperty("--dragon-shift", `${shift}px`);
+          await applyHeight(pretext, text);
+          rafId = requestAnimationFrame(tick);
+        };
+        rafId = requestAnimationFrame(tick);
+        root.addEventListener("remove", function () { cancelAnimationFrame(rafId); });
+      });
+    }
+    await initDragonDemos();
 
     // 让“交互”更明显：当元素宽度变化时（例如容器自适应/折叠），自动重算高度
     if (typeof ResizeObserver !== "undefined" && heightEls.length > 0) {

@@ -6,7 +6,8 @@
     --content: #1a1a2e;
     --border: #cfe2ff;
     --entry: #f0f7ff;
-    --nav-width: 1160px;
+    /* 略增主栏宽度，文章页正文与右侧目录之间更饱满 */
+    --nav-width: 1240px;
     /* aspartate 风格：行内代码、高亮、强调（以 aspartate 为先，再天蓝） */
     --as-inline-code: #c7254e;
     --as-mark: #c7254e;
@@ -107,18 +108,22 @@
 .sidebar-social .social-icons { justify-content: flex-start; }
 
 .sidebar-tags-list {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0.35rem;
 }
 
 .sidebar-tag {
-    padding: 0.35rem 0.65rem;
-    background: transparent;
+    padding: 0.26rem 0.52rem;
+    background: color-mix(in srgb, var(--entry) 84%, transparent 16%);
     border: 1px solid var(--border);
-    border-radius: 999px;
+    border-radius: 8px;
     color: var(--secondary);
-    font-size: 0.85rem;
+    font-size: 0.8rem;
+    line-height: 1.25;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
 .sidebar-tag:hover {
@@ -183,14 +188,17 @@
 
 .single-with-sidebar {
     display: grid;
-    grid-template-columns: 1fr 240px;
-    gap: 1rem;
+    /* minmax(0,1fr) 防止正文列被子元素撑开溢出到右侧目录 */
+    grid-template-columns: minmax(0, 1fr) 218px;
+    gap: 0.35rem;
     align-items: start;
 }
 
-/* 正文与顶栏左对齐，拉宽以占满正文与目录之间的空隙，减少红框空白 */
+/* 正文占满左侧列，与右侧目录贴紧；不再用 900px 人为缩窄导致演示区“比列还宽” */
 .single-with-sidebar .post-single {
-    max-width: min(900px, 100%);
+    max-width: 100%;
+    width: 100%;
+    min-width: 0;
     margin-left: 0;
     margin-right: auto;
     background: var(--entry);
@@ -268,7 +276,9 @@
 }
 
 .toc-sidebar .toc .inner ul {
-    padding-left: 0.6rem;
+    padding-left: 0.3rem;
+    margin-left: 0.2rem;
+    border-left: 1px dashed color-mix(in srgb, var(--border) 68%, transparent 32%);
 }
 
 .toc-sidebar .toc .inner a {
@@ -804,9 +814,19 @@
     box-sizing: border-box;
 }
 
+/* 演示区宽度跟随文章列，禁止用 100vw 撑破双栏布局 */
+.post-content .pretext-demo {
+    max-width: 100%;
+    min-width: 0;
+    overflow-x: auto;
+    overflow-y: visible;
+    -webkit-overflow-scrolling: touch;
+}
+
 .pretext-demo .pretext-page {
-    width: min(940px, calc(100vw - 32px));
-    margin: 0 auto;
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
     padding: 32px 0 48px;
     background: linear-gradient(180deg, #fbf7f0 0%, var(--page) 100%);
     color: var(--ink);
@@ -897,7 +917,7 @@
 
 .pretext-reflow-demo .pretext-reflow-scroll {
     max-width: 100%;
-    overflow-x: hidden;
+    overflow-x: auto;
     overflow-y: hidden;
     border-radius: 14px;
     padding: 28px;
@@ -944,4 +964,74 @@
     transition: width 220ms ease, height 220ms ease;
     max-height: 220px;
     overflow-y: auto;
+}
+
+.pretext-demo .pretext-compare-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+}
+
+.pretext-demo .pretext-justify-box {
+    min-height: 180px;
+}
+
+.pretext-demo .pretext-justify-text {
+    text-align: justify;
+    text-justify: inter-word;
+}
+
+.pretext-demo .pretext-just-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.pretext-demo [data-pretext-just-col="1"] {
+    width: 364px;
+    max-width: 100%;
+}
+
+.pretext-demo .pretext-dragon-scene {
+    position: relative;
+    overflow: hidden;
+    min-height: 220px;
+}
+
+.pretext-demo .pretext-dragon-flyer {
+    position: absolute;
+    left: -6%;
+    top: 12px;
+    font-size: 2.1rem;
+    line-height: 1;
+    animation: none;
+    pointer-events: none;
+    z-index: 2;
+}
+
+.pretext-demo .pretext-dragon-text {
+    margin-top: 72px;
+}
+
+.pretext-demo .pretext-dragon-body {
+    --dragon-shift: 0px;
+    transform: translateX(var(--dragon-shift));
+    transition: transform 120ms linear;
+}
+
+@keyframes pretext-dragon-fly {
+    0% { transform: translateX(0) translateY(0) rotate(-8deg); }
+    25% { transform: translateX(35vw) translateY(8px) rotate(-2deg); }
+    50% { transform: translateX(62vw) translateY(-3px) rotate(6deg); }
+    75% { transform: translateX(86vw) translateY(6px) rotate(-3deg); }
+    100% { transform: translateX(110vw) translateY(-2px) rotate(4deg); }
+}
+
+@media (max-width: 760px) {
+    .pretext-demo .pretext-compare-grid {
+        grid-template-columns: 1fr;
+    }
+    .pretext-demo .pretext-just-grid {
+        grid-template-columns: 1fr;
+    }
 }

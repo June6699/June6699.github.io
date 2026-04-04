@@ -30,7 +30,7 @@ jobs:
           extended: true
 
       - name: Build with Hugo
-        run: hugo --minify
+        run: hugo --minify --buildFuture
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3

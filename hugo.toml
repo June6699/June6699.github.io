@@ -21,6 +21,8 @@ googleAnalytics = "G-S7DXV0QV58"
 # 排除 content/posts/images（junction），避免 Windows 下 read 报错
 [build]
   ignoreFiles = ["content/posts/images", "content/posts/images/"]
+# 「未来日期」文章：默认 hugo 不会生成（见 hugo list future）。请在 hugo / hugo server 命令中加 --buildFuture，
+# 已写入 run_server.bat 与 .github/workflows/hugo.yml。
 
 # 允许正文中的 Raw HTML（诗词等 div/class）并屏蔽相关警告
 [markup.goldmark.renderer]
@@ -77,3 +79,7 @@ ignoreLogs = ["warning-goldmark-raw-html"]
   name = "统计"
   url = "/statistics/"
   weight = 4
+[[menu.main]]
+  name = "我的项目"
+  url = "/projects/"
+  weight = 5
