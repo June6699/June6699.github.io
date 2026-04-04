@@ -8,6 +8,12 @@
     --entry: #f0f7ff;
     /* 略增主栏宽度，文章页正文与右侧目录之间更饱满 */
     --nav-width: 1240px;
+    /* 正文最大宽 + 与侧栏间距；双栏由模板 .page-with-sidebar 包裹后 flex 居中（不依赖 main :has()） */
+    --content-column-max: 820px;
+    --list-sidebar-width: 280px;
+    --toc-sidebar-width: 218px;
+    --list-sidebar-gap: 1rem;
+    --single-sidebar-gap: 1rem;
     /* aspartate 风格：行内代码、高亮、强调（以 aspartate 为先，再天蓝） */
     --as-inline-code: #c7254e;
     --as-mark: #c7254e;
@@ -32,23 +38,48 @@
 }
 
 /* ========== 首页/列表页：双栏（列表 + 右侧栏） + 顶部大图 ========== */
-.main:has(.list-with-sidebar) {
+/* 列表含 projects（无 .page-with-sidebar）与首页等（有包裹） */
+.main:has(.list-with-sidebar),
+.main:has(.page-with-sidebar) {
     max-width: calc(var(--nav-width) + var(--gap, 24px) * 2);
     margin-left: auto;
     margin-right: auto;
 }
 
+/* 模板里 .page-with-sidebar 包住 .list-with-sidebar / .single-with-sidebar，整块在 main 内水平居中（不依赖 :has 选 main 为 flex） */
+.page-with-sidebar {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    width: 100%;
+    box-sizing: border-box;
+}
+
 .list-with-sidebar {
     display: grid;
-    grid-template-columns: 1fr 280px;
-    gap: 1.5rem;
+    grid-template-columns: minmax(0, 1fr) var(--list-sidebar-width, 280px);
+    gap: var(--list-sidebar-gap, 1.25rem);
     align-items: start;
+    width: 100%;
+    max-width: none;
+    margin-inline: 0;
+    box-sizing: border-box;
+}
+
+.page-with-sidebar > .list-with-sidebar {
+    min-width: 0;
+    width: min(
+        calc(var(--content-column-max) + var(--list-sidebar-width) + var(--list-sidebar-gap)),
+        100%
+    );
+    max-width: 100%;
 }
 
 .list-with-sidebar .list-main {
-    max-width: min(960px, 100%);
+    max-width: 100%;
+    min-width: 0;
     margin-left: 0;
-    margin-right: auto;
+    margin-right: 0;
 }
 
 .site-sidebar {
@@ -174,33 +205,48 @@
 }
 
 @media (max-width: 920px) {
-    .list-with-sidebar { grid-template-columns: 1fr; }
+    .page-with-sidebar {
+        display: block;
+    }
+    .list-with-sidebar {
+        grid-template-columns: 1fr;
+        width: 100%;
+        max-width: none;
+        margin-inline: 0;
+    }
+    .page-with-sidebar > .list-with-sidebar {
+        width: 100%;
+        max-width: none;
+    }
     .site-sidebar { position: static; }
     .home-hero-img { height: 200px; }
 }
 
 /* ========== 文章页：与顶栏 June's Blog 同宽、双栏（正文+目录），目录从一级标题起 ========== */
-.main:has(.single-with-sidebar) {
-    max-width: calc(var(--nav-width) + var(--gap, 24px) * 2);
-    margin-left: auto;
-    margin-right: auto;
-}
-
 .single-with-sidebar {
     display: grid;
-    /* minmax(0,1fr) 防止正文列被子元素撑开溢出到右侧目录 */
-    grid-template-columns: minmax(0, 1fr) 218px;
-    gap: 0.35rem;
+    grid-template-columns: minmax(0, 1fr) var(--toc-sidebar-width, 218px);
+    column-gap: var(--single-sidebar-gap, 1.35rem);
     align-items: start;
+    box-sizing: border-box;
 }
 
-/* 正文占满左侧列，与右侧目录贴紧；不再用 900px 人为缩窄导致演示区“比列还宽” */
+.page-with-sidebar > .single-with-sidebar {
+    min-width: 0;
+    width: min(
+        calc(var(--content-column-max) + var(--toc-sidebar-width) + var(--single-sidebar-gap)),
+        100%
+    );
+    max-width: 100%;
+}
+
+/* 正文占满第一列；列宽已封顶，不再与 TOC 之间夹一大块空列 */
 .single-with-sidebar .post-single {
     max-width: 100%;
     width: 100%;
     min-width: 0;
     margin-left: 0;
-    margin-right: auto;
+    margin-right: 0;
     background: var(--entry);
     border: 1px solid var(--border);
     border-radius: 12px;
@@ -302,8 +348,18 @@
 }
 
 @media (max-width: 768px) {
+    .page-with-sidebar {
+        display: block;
+    }
     .single-with-sidebar {
         grid-template-columns: 1fr;
+        width: 100%;
+        max-width: none;
+        margin-inline: 0;
+    }
+    .page-with-sidebar > .single-with-sidebar {
+        width: 100%;
+        max-width: none;
     }
     .toc-sidebar {
         order: -1;
@@ -981,15 +1037,21 @@
     text-justify: inter-word;
 }
 
+/* 用 auto 列 + justify-self:start，避免 1fr 拉伸格子把 JS 写入的 width「撑没」，滑块才不失效 */
 .pretext-demo .pretext-just-grid {
     display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(3, auto);
     gap: 12px;
+    justify-content: start;
+    align-items: start;
 }
 
 .pretext-demo [data-pretext-just-col="1"] {
+    justify-self: start;
+    min-width: 0;
     width: 364px;
     max-width: 100%;
+    box-sizing: border-box;
 }
 
 .pretext-demo .pretext-dragon-scene {

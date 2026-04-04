@@ -33,8 +33,8 @@ disableAnchoredHeadings: true
   <p>图片/视频转 ASCII，依赖 OpenCV 与 Pillow。含环境配置、命令示例与脚本下载路径。</p>
   <span class="tag">打开说明页 →</span>
 </a>
-
 <a class="project-card" href="/scripts/vid2ascii-gif/index.html" target="_blank" rel="noopener noreferrer">
+
   <h2>ASCII 字符视频引擎（浏览器）</h2>
   <p>本地选视频即可解析、播放、存档与导出 MP4。若克隆仓库到本地，勿双击打开 HTML：请运行 <code>static/scripts/vid2ascii-gif/run_vidascii-git.bat</code> 或阅读同目录 <code>README-本地运行.md</code>。</p>
   <span class="tag">打开演示页 →</span>

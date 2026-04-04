@@ -1,5 +1,6 @@
 {{- define "main" }}
 
+<div class="page-with-sidebar">
 <div class="single-with-sidebar">
   <article class="post-single">
     <header class="post-header">
@@ -71,6 +72,7 @@
   {{- else }}
     {{- partial "site_sidebar.html" . -}}
   {{- end }}
+</div>
 </div>
 
 {{- end }}{{/* end main */}}

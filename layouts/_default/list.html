@@ -4,6 +4,8 @@
   {{- partial "index_profile.html" . }}
 {{- else }}
 
+{{- $centerBundle := ne .Section "projects" }}
+{{- if $centerBundle }}<div class="page-with-sidebar">{{ end }}
 <div class="list-with-sidebar">
   <div class="list-main">
     {{- if .IsHome }}
@@ -95,6 +97,7 @@
 
   {{- partial "site_sidebar.html" . -}}
 </div>
+{{- if $centerBundle }}</div>{{ end }}
 
 {{- end }}{{/* end profileMode */}}
 

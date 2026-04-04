@@ -316,10 +316,14 @@
         if (!slider || cols.length === 0) continue;
 
         const run = async function () {
+          const minW = Math.max(240, Number(slider.getAttribute("min") || 240));
+          const hardMax = Math.min(520, Math.max(minW, Number(slider.getAttribute("max") || 520)));
           const raw = Number(slider.value || 364);
           const page = root.querySelector(".pretext-page");
-          const maxByPage = page ? Math.max(240, Math.floor(getInnerWidth(page) / 3) - 16) : 520;
-          const value = clamp(raw, 240, maxByPage);
+          const perCol = page ? Math.floor(getInnerWidth(page) / 3) - 16 : hardMax;
+          /* 保证 max >= min，避免 range 控件在 max<min 时彻底失灵 */
+          const maxByPage = Math.max(minW, Math.min(hardMax, Math.max(minW, perCol)));
+          const value = clamp(raw, minW, maxByPage);
           slider.max = String(maxByPage);
           if (raw !== value) slider.value = String(value);
 
