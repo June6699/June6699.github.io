@@ -122,13 +122,34 @@
         .time { font-size:11px; color:var(--muted); font-variant-numeric:tabular-nums; min-width:40px; }
         input[type="range"] { flex:1; accent-color:var(--accent); cursor:pointer; height:4px; }
         #exportArea { display:none; margin-top:10px; }
+        .render-stack {
+            display: flex; flex-direction: column; align-items: center; gap: 2px;
+            max-width: 98vw; margin: 0 auto;
+        }
+        #origVideo {
+            display: none; width: 100%; max-width: 98vw; max-height: 48vh;
+            object-fit: contain; background: #000;
+            border: 1px solid rgba(255,255,255,0.08); border-radius: 4px;
+            box-shadow: 0 0 24px rgba(0,0,0,0.45);
+        }
         #asciiRender {
             background:#000; max-width:98vw; max-height:65vh; object-fit:contain;
             border:1px solid rgba(255,255,255,0.05); border-radius:4px; display:block;
             box-shadow:0 0 60px rgba(0,230,118,0.07), 0 0 0 1px rgba(0,0,0,0.5);
             image-rendering: crisp-edges;
         }
+        .render-stack.compare-active #asciiRender {
+            max-height: min(52vh, 65vh);
+        }
         #asciiRender:fullscreen { max-width:100vw; max-height:100vh; border:none; border-radius:0; }
+        #syncCompareRow {
+            display: none; margin-top: 10px; padding: 10px 12px;
+            border: 1px dashed var(--accent-border); border-radius: 8px;
+            background: rgba(255,255,255,0.02);
+        }
+        #syncCompareRow label { font-size: 12px; color: var(--text); cursor: pointer; line-height: 1.5; }
+        #syncCompareRow input { margin-right: 8px; vertical-align: middle; }
+        #syncCompareRow .sync-hint { font-size: 11px; color: var(--muted); margin-top: 6px; }
         #modeBadge {
             display:none; position:fixed; top:0; left:50%; transform:translateX(-50%);
             background:rgba(0,0,0,0.65); color:var(--accent); font-size:11px;
@@ -190,8 +211,9 @@
                 <input type="file" id="historyInput" accept=".asciivid">
             </div>
             <div class="fg">
-                <label>🎵 恢复音频 (配合存档)</label>
+                <label>🎵 恢复音频 / 原画对比源 (配合存档)</label>
                 <input type="file" id="historyAudioInput" accept="video/*,audio/*">
+                <div class="hint" style="margin-top:6px;font-size:10px;">存档无内嵌音频时需选原片；开启「同步原画」时须选<strong>与 ASCII 同源</strong>的视频文件。</div>
             </div>
         </div>
     </div>
@@ -234,6 +256,14 @@
         </span>
     </div>
 
+    <div id="syncCompareRow">
+        <label>
+            <input type="checkbox" id="syncOrigCheck" disabled>
+            同步原画对比（上：原视频 · 下：ASCII，间隙 2px）
+        </label>
+        <div class="sync-hint">全屏时仅显示 ASCII，声音不断；从存档播放时请在本栏或「恢复音频」指定与原片一致的视频。下次点击播放时生效。</div>
+    </div>
+
     <div id="exportArea">
         <hr class="sep">
         <div class="row" style="align-items:flex-end;gap:14px;">
@@ -251,7 +281,10 @@
     </div>
 </div>
 
-<canvas id="asciiRender"></canvas>
+<div class="render-stack" id="renderStack">
+    <video id="origVideo" playsinline preload="metadata"></video>
+    <canvas id="asciiRender"></canvas>
+</div>
 <div id="modeBadge"></div>
 
 <script type="module">
@@ -280,6 +313,10 @@ const statusEl       = $('statusText');
 const srtStatusEl    = $('srtStatus');
 const canvas         = $('asciiRender');
 const ctx            = canvas.getContext('2d');
+const origVideo      = $('origVideo');
+const renderStack    = $('renderStack');
+const syncOrigCheck  = $('syncOrigCheck');
+const syncCompareRow = $('syncCompareRow');
 const pb             = $('progressBar');
 const tcEl           = $('timeCurrent');
 const ttEl           = $('timeTotal');
@@ -313,6 +350,22 @@ let seekLsn     = null;     // 进度条拖动监听器
 
 let toastMsg    = '';
 let toastTick   = 0;
+let audioBlobUrl     = null;
+let origVideoBlobUrl = null;
+
+function revokeAudioBlobUrl() {
+    if (audioBlobUrl) { try { URL.revokeObjectURL(audioBlobUrl); } catch (e) {} audioBlobUrl = null; }
+}
+function revokeOrigVideoBlobUrl() {
+    if (origVideoBlobUrl) { try { URL.revokeObjectURL(origVideoBlobUrl); } catch (e) {} origVideoBlobUrl = null; }
+}
+function releaseAllMediaBlobs() {
+    revokeAudioBlobUrl();
+    revokeOrigVideoBlobUrl();
+    try { origVideo.pause(); origVideo.removeAttribute('src'); } catch (e) {}
+    origVideo.style.display = 'none';
+    renderStack.classList.remove('compare-active');
+}
 
 // 颜色字符串缓存 (量化到4位/通道，最多缓存 4096 个字符串以提升性能)
 const CC = new Map();
@@ -328,7 +381,7 @@ function qc(r, g, b) {
 const fmt = s => isNaN(s) ? '00:00'
     : `${Math.floor(s/60).toString().padStart(2,'0')}:${Math.floor(s%60).toString().padStart(2,'0')}`;
 const setStatus = m => statusEl.textContent = m;
-const disIO = d => [videoInput, historyInput, histAudioInput, srtInput, clearBtn].forEach(e => e.disabled = d);
+const disIO = d => [videoInput, historyInput, histAudioInput, srtInput, clearBtn, syncOrigCheck].forEach(e => e.disabled = d);
 // const fontStyle = () => `${parseInt($('fontSizeInput').value)||10}px monospace`;
 const fontStyle = () => `bold ${parseInt($('fontSizeInput').value)||10}px "Consolas", "Monaco", "Courier New", monospace`;
 
@@ -353,6 +406,10 @@ const getSub = t => subs.find(s => t >= s.s && t <= s.e)?.t || null;
 // 清空与重置功能
 clearBtn.addEventListener('click', () => {
     stopPlay();
+    releaseAllMediaBlobs();
+    syncOrigCheck.checked = false;
+    syncOrigCheck.disabled = true;
+    syncCompareRow.style.display = 'none';
     // 清空文件输入
     videoInput.value = ''; 
     historyInput.value = ''; 
@@ -443,6 +500,8 @@ videoInput.addEventListener('change', () => {
     // 互斥操作：自动清理【方案 B】可能存在的残留状态
     historyInput.value = ''; 
     histAudioInput.value = '';
+    releaseAllMediaBlobs();
+    syncOrigCheck.checked = false;
     frames = []; colors = null; 
     stopPlay();
     modeGrayBtn.disabled = false; 
@@ -459,8 +518,10 @@ videoInput.addEventListener('change', () => {
 
 histAudioInput.addEventListener('change', e => {
     if (e.target.files.length) {
+        releaseAllMediaBlobs();
         audioFile = e.target.files[0];
-        setStatus(`🎵 存档外挂音频已就绪: ${audioFile.name}`);
+        setStatus(`🎵 存档外挂音频 / 原画源已就绪: ${audioFile.name}`);
+        if (frames.length) updateSyncCompareRow();
     }
 });
 
@@ -469,6 +530,8 @@ historyInput.addEventListener('change', e => {
     
     // 互斥操作：自动清理【方案 A】的挂载状态
     videoInput.value = ''; 
+    releaseAllMediaBlobs();
+    syncOrigCheck.checked = false;
     audioFile = null; 
     frames = []; colors = null; 
     stopPlay();
@@ -637,83 +700,171 @@ function setupCanvas() {
     canvas.height = (arows||(frames[0]?.split('\n').length||0)) * LINE_H;
 }
 
-// 播放控制引擎
+// 播放控制引擎（含：原画条带同步 / 全屏仅 ASCII + Audio）
+function getPlaybackTime() {
+    const inFs = document.fullscreenElement === canvas;
+    if (inFs && audio) return audio.currentTime;
+    if (syncOrigCheck.checked && audioFile && origVideo.style.display !== 'none' && origVideo.src)
+        return origVideo.currentTime;
+    if (audio) return audio.currentTime;
+    return Math.max(0, (performance.now() - silentStart) / 1000);
+}
+
+function applySeekTime(t) {
+    t = Math.max(0, Math.min(totDur, t));
+    const inFs = document.fullscreenElement === canvas;
+    if (inFs && audio) audio.currentTime = t;
+    else if (syncOrigCheck.checked && audioFile && origVideo.style.display !== 'none' && origVideo.src)
+        origVideo.currentTime = t;
+    else if (audio) audio.currentTime = t;
+    silentStart = performance.now() - t * 1000;
+}
+
+function updateSyncCompareRow() {
+    if (!frames.length) {
+        syncCompareRow.style.display = 'none';
+        return;
+    }
+    syncCompareRow.style.display = 'block';
+    syncOrigCheck.disabled = !audioFile;
+    if (!audioFile) syncOrigCheck.checked = false;
+}
+
 function stopPlay() {
-    playing=false; paused=false;
+    playing = false; paused = false;
     cancelAnimationFrame(rafId);
-    if (audio) { audio.pause(); audio=null; }
+    if (audio) { audio.pause(); audio = null; }
+    if (origVideo.src) origVideo.pause();
 }
 
 function makeLoop() {
     function loop() {
         if (!playing) return;
-        const t = audio ? audio.currentTime : (performance.now()-silentStart)/1000;
-        const fi = Math.min(Math.max(0,Math.floor(t*fps)), frames.length-1);
-        pb.value = (t/totDur)*100;
-        tcEl.textContent=fmt(t); ttEl.textContent=fmt(totDur);
+        const t = getPlaybackTime();
+        const fi = Math.min(Math.max(0, Math.floor(t * fps)), frames.length - 1);
+        pb.value = (t / totDur) * 100;
+        tcEl.textContent = fmt(t); ttEl.textContent = fmt(totDur);
         renderFrame(fi, t);
-        if (t < totDur && (!audio || !audio.ended)) {
+
+        const inFs = document.fullscreenElement === canvas;
+        let masterEnded = false;
+        if (inFs) {
+            masterEnded = (audio && audio.ended) || t >= totDur - 1e-3;
+        } else if (syncOrigCheck.checked && audioFile && origVideo.style.display !== 'none' && origVideo.src) {
+            masterEnded = origVideo.ended || t >= totDur - 1e-3;
+        } else {
+            masterEnded = (audio && audio.ended) || (!audio && t >= totDur - 1e-3);
+        }
+
+        if (!masterEnded && t < totDur) {
             rafId = requestAnimationFrame(loop);
         } else {
-            playing=false; paused=false;
-            playBtn.textContent='🔄 重新播放';
+            playing = false; paused = false;
+            playBtn.textContent = '🔄 重新播放';
             setStatus('▶ 播放完毕。您可以拖动进度条，或者点击【🔄 重新播放】。');
         }
     }
     return loop;
 }
 
-function startPlay(seekTo=0) {
+function startPlay(seekTo = 0) {
     if (!frames.length) return;
     stopPlay(); measureChar(); setupCanvas();
     totDur = frames.length / fps;
-    pb.disabled=false; pb.value=(seekTo/totDur)*100;
+    pb.disabled = false; pb.value = (seekTo / totDur) * 100;
 
-    if (audioFile) {
-        audio = new Audio(URL.createObjectURL(audioFile));
-        audio.currentTime = seekTo;
-        audio.play().catch(()=>{});
+    const inFs = document.fullscreenElement === canvas;
+    const wantStrip = syncOrigCheck.checked && audioFile && !inFs;
+    seekTo = Math.min(Math.max(0, seekTo), Math.max(0, totDur - 1e-3));
+
+    if (wantStrip) {
+        revokeAudioBlobUrl();
+        if (!origVideo.src) {
+            revokeOrigVideoBlobUrl();
+            origVideoBlobUrl = URL.createObjectURL(audioFile);
+            origVideo.src = origVideoBlobUrl;
+        }
+        origVideo.muted = false;
+        origVideo.currentTime = seekTo;
+        origVideo.style.display = 'block';
+        renderStack.classList.add('compare-active');
+        origVideo.play().catch(() => {});
+        audio = null;
+        silentStart = performance.now() - seekTo * 1000;
+    } else {
+        origVideo.style.display = 'none';
+        renderStack.classList.remove('compare-active');
+        if (origVideo.src) origVideo.pause();
+        if (audioFile) {
+            revokeAudioBlobUrl();
+            audioBlobUrl = URL.createObjectURL(audioFile);
+            audio = new Audio(audioBlobUrl);
+            audio.currentTime = seekTo;
+            audio.play().catch(() => {});
+        }
+        silentStart = performance.now() - seekTo * 1000;
     }
-    silentStart = performance.now() - seekTo*1000;
-    playing=true; paused=false;
 
-    // 进度条拖拽防重置监听 (移除旧的以避免事件累积)
+    playing = true; paused = false;
+
     if (seekLsn) pb.removeEventListener('input', seekLsn);
     seekLsn = e => {
-        const t = (e.target.value/100)*totDur;
-        if (audio) audio.currentTime=t;
-        silentStart = performance.now()-t*1000;
-        tcEl.textContent=fmt(t);
-        if (!playing) { const fi=Math.min(Math.floor(t*fps),frames.length-1); renderFrame(fi,t); }
+        const t = (e.target.value / 100) * totDur;
+        applySeekTime(t);
+        tcEl.textContent = fmt(t);
+        if (!playing) { const fi = Math.min(Math.floor(t * fps), frames.length - 1); renderFrame(fi, t); }
     };
     pb.addEventListener('input', seekLsn);
 
     modeBadge.textContent = colors ? '🎨 彩色模式' : '🔲 灰度模式';
     modeBadge.style.display = 'block';
-    playBtn.textContent='⏸ 暂停';
-    setStatus(`${colors?'🎨 彩色':'🔲 灰度'} 播放中…  (快捷操作：Space 暂停 | ←→ 跳 5 秒 | F 全屏)`);
+    playBtn.textContent = '⏸ 暂停';
+    const stripOn = syncOrigCheck.checked && audioFile && !inFs;
+    setStatus(`${colors ? '🎨 彩色' : '🔲 灰度'} 播放中…${stripOn ? ' · 原画+ASCII 同步' : ''}  (Space 暂停 | ←→ ±5s | F 全屏)`);
     rafId = requestAnimationFrame(makeLoop());
 }
 
 function pausePlay() {
-    playing=false; paused=true;
+    playing = false; paused = true;
     cancelAnimationFrame(rafId);
     if (audio) audio.pause();
-    playBtn.textContent='▶ 继续';
+    if (origVideo.style.display !== 'none') origVideo.pause();
+    playBtn.textContent = '▶ 继续';
     setStatus('⏸ 播放已暂停。按下 Space 键或点击【▶ 继续】恢复。');
 }
 
 function resumePlay() {
     if (!frames.length) return;
-    const elapsed = audio ? audio.currentTime : Math.max(0,(performance.now()-silentStart)/1000);
+    const elapsed = getPlaybackTime();
     if (elapsed >= totDur) { startPlay(0); return; }
-    if (audio) audio.play().catch(()=>{});
-    silentStart = performance.now()-elapsed*1000;
-    playing=true; paused=false;
-    playBtn.textContent='⏸ 暂停';
-    setStatus(`${colors?'🎨 彩色':'🔲 灰度'} 播放恢复中…`);
+    const inFs = document.fullscreenElement === canvas;
+    if (syncOrigCheck.checked && audioFile && origVideo.style.display !== 'none' && origVideo.src && !inFs)
+        origVideo.play().catch(() => {});
+    else if (audio) audio.play().catch(() => {});
+    silentStart = performance.now() - elapsed * 1000;
+    playing = true; paused = false;
+    playBtn.textContent = '⏸ 暂停';
+    setStatus(`${colors ? '🎨 彩色' : '🔲 灰度'} 播放恢复中…`);
     rafId = requestAnimationFrame(makeLoop());
 }
+
+syncOrigCheck.addEventListener('change', () => {
+    if (playing) {
+        const t = getPlaybackTime();
+        stopPlay();
+        if (!syncOrigCheck.checked) {
+            origVideo.style.display = 'none';
+            renderStack.classList.remove('compare-active');
+        }
+        startPlay(Math.min(t, Math.max(0, totDur - 1e-3)));
+        return;
+    }
+    if (!syncOrigCheck.checked) {
+        origVideo.style.display = 'none';
+        renderStack.classList.remove('compare-active');
+        origVideo.pause();
+    }
+});
 
 // 统一的按钮点击处理，避免注册重复监听
 playBtn.onclick = () => {
@@ -731,6 +882,7 @@ function showPlayUI() {
     setupCanvas();
     ttEl.textContent=fmt(frames.length/fps);
     pb.value=0; pb.disabled=false;
+    updateSyncCompareRow();
     if (frames.length>0) renderFrame(0, 0);
 }
 
@@ -826,10 +978,9 @@ document.addEventListener('keydown', e => {
     if ((e.key==='ArrowLeft'||e.key==='ArrowRight') && totDur>0) {
         e.preventDefault();
         const delta = e.key==='ArrowLeft' ? -5 : 5;
-        const cur = audio ? audio.currentTime : Math.max(0,(performance.now()-silentStart)/1000);
+        const cur = getPlaybackTime();
         const newT = Math.max(0, Math.min(totDur, cur+delta));
-        if (audio) audio.currentTime=newT;
-        silentStart = performance.now()-newT*1000;
+        applySeekTime(newT);
         pb.value=(newT/totDur)*100; tcEl.textContent=fmt(newT);
         if (!playing) { renderFrame(Math.min(Math.floor(newT*fps),frames.length-1), newT); }
         toastMsg=`${delta>0?'⏩':'⏪'} ${delta>0?'+':''}${delta}s`; toastTick=70;
@@ -837,7 +988,40 @@ document.addEventListener('keydown', e => {
 });
 
 document.addEventListener('fullscreenchange', () => {
-    modeBadge.style.display = (document.fullscreenElement && frames.length) ? 'block' : 'none';
+    const fs = document.fullscreenElement === canvas;
+    modeBadge.style.display = (fs && frames.length) ? 'block' : 'none';
+
+    if (!frames.length) return;
+
+    if (fs) {
+        if (syncOrigCheck.checked && audioFile && origVideo.src) {
+            const t = origVideo.currentTime;
+            origVideo.pause();
+            origVideo.style.display = 'none';
+            renderStack.classList.remove('compare-active');
+            revokeAudioBlobUrl();
+            audioBlobUrl = URL.createObjectURL(audioFile);
+            audio = new Audio(audioBlobUrl);
+            audio.currentTime = Math.min(t, Math.max(0, totDur - 1e-3));
+            silentStart = performance.now() - audio.currentTime * 1000;
+            if (playing) audio.play().catch(() => {});
+        }
+    } else {
+        if (syncOrigCheck.checked && audioFile) {
+            const t = audio ? audio.currentTime : 0;
+            if (audio) { audio.pause(); audio = null; revokeAudioBlobUrl(); }
+            if (!origVideoBlobUrl) {
+                origVideoBlobUrl = URL.createObjectURL(audioFile);
+                origVideo.src = origVideoBlobUrl;
+            }
+            origVideo.style.display = 'block';
+            renderStack.classList.add('compare-active');
+            origVideo.muted = false;
+            origVideo.currentTime = Math.min(t, Math.max(0, totDur - 1e-3));
+            silentStart = performance.now() - origVideo.currentTime * 1000;
+            if (playing) origVideo.play().catch(() => {});
+        }
+    }
 });
 </script>
 </body>
