@@ -19,16 +19,20 @@ if errorlevel 1 (
   exit /b 1
 )
 
+REM Only apply .env lines with a non-empty value; empty "KEY=" would otherwise clear User/system env (e.g. HUGO_MOMENTS_PASSWORD_HASH).
 if exist ".env" (
   for /f "usebackq eol=# tokens=1,* delims==" %%A in (".env") do (
-    if not "%%A"=="" set "%%A=%%B"
+    if not "%%A"=="" if not "%%B"=="" set "%%A=%%B"
   )
 )
 
 if not "%~1"=="" (
-  set "MOMENTS_PASSWORD_PLAIN=%~1"
-  for /f "usebackq delims=" %%H in (`powershell -NoProfile -Command "$s=$env:MOMENTS_PASSWORD_PLAIN; $bytes=[System.Text.Encoding]::UTF8.GetBytes($s); $hash=[System.Security.Cryptography.SHA256]::Create().ComputeHash($bytes); -join ($hash | ForEach-Object { $_.ToString('x2') })"`) do set "HUGO_MOMENTS_PASSWORD_HASH=%%H"
-  set "MOMENTS_PASSWORD_PLAIN="
+  for /f "usebackq delims=" %%H in (`powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0scripts\hash_plain_for_batch.ps1" "%~1"`) do set "HUGO_MOMENTS_PASSWORD_HASH=%%H"
+  if not defined HUGO_MOMENTS_PASSWORD_HASH (
+    echo [ERROR] Could not compute HUGO_MOMENTS_PASSWORD_HASH from argument. Try: powershell -File scripts\hash_plain_for_batch.ps1 "your-password"
+    pause
+    exit /b 1
+  )
 )
 
 echo Syncing content/posts/images -^> static/images ...
@@ -56,7 +60,7 @@ if defined HUGO_MOMENTS_PASSWORD_HASH (
   echo [WARN] HUGO_MOMENTS_PASSWORD_HASH not set. Moments page will stay locked.
 )
 set "HUGO_BASEURL=http://localhost:1313/"
-hugo server -D --buildFuture --baseURL "http://localhost:1313/" --appendPort=false
+hugo server -D --buildFuture --baseURL "http://localhost:1313/" --appendPort=false --disableFastRender
 if errorlevel 1 (
   echo [ERROR] Hugo failed to start. See messages above.
   pause

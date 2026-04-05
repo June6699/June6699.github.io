@@ -1,6 +1,9 @@
 {{- define "main" }}
 {{- $passwordHash := getenv "HUGO_MOMENTS_PASSWORD_HASH" | strings.TrimSpace -}}
-{{- $recoveryEmail := (getenv "HUGO_MOMENTS_RECOVERY_EMAIL" | strings.TrimSpace) | default (site.Params.sidebarEmail | default "") -}}
+{{- $rs := newScratch -}}
+{{- $rs.Set "recovery" (site.Params.sidebarEmail | default "") -}}
+{{- with getenv "HUGO_MOMENTS_RECOVERY_EMAIL" | strings.TrimSpace }}{{ $rs.Set "recovery" . }}{{ end -}}
+{{- $recoveryEmail := $rs.Get "recovery" | strings.TrimSpace -}}
 {{- $sessionSeed := $passwordHash | default "missing-password-hash" -}}
 
 <section class="moments-shell" data-moments-gate-root data-password-hash="{{ $passwordHash }}" data-session-key="moments-access-{{ slicestr $sessionSeed 0 12 }}" data-recovery-email="{{ $recoveryEmail }}">
