@@ -36,8 +36,19 @@
   }
 
   document.querySelectorAll("[data-moments-gate-root]").forEach(function (root) {
-    const expectedHash = (root.dataset.passwordHash || "").trim().toLowerCase();
     const sessionKey = root.dataset.sessionKey || "moments-access";
+    // 未勾选「记住设备」时口令存在 sessionStorage；同标签内刷新默认不会清空 sessionStorage。
+    // 在检测到整页刷新时先清掉该 key，这样刷新后需要重新输入，与「不记住设备」的预期一致。
+    try {
+      var navEntry = performance.getEntriesByType && performance.getEntriesByType("navigation")[0];
+      if (navEntry && navEntry.type === "reload") {
+        sessionStorage.removeItem(sessionKey);
+      }
+    } catch (err) {
+      console.warn("[moments-gate] navigation timing check failed:", err);
+    }
+
+    const expectedHash = (root.dataset.passwordHash || "").trim().toLowerCase();
     const recoveryEmail = (root.dataset.recoveryEmail || "").trim();
     const feed = root.querySelector("[data-moments-feed]");
     const gate = root.querySelector("[data-moments-gate-panel]");

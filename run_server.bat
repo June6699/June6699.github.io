@@ -2,6 +2,23 @@
 chcp 65001 >nul
 cd /d "%~dp0"
 
+REM Keep this file ASCII-only: cmd.exe parses .bat as system ANSI; UTF-8 Chinese breaks lines.
+where python >nul 2>&1
+if errorlevel 1 (
+  echo [ERROR] python.exe not found in PATH.
+  echo Install Python with "Add to PATH", or add its folder to User PATH.
+  echo If it works in IDE terminal but not when double-clicking this file, PATH differs; run from terminal.
+  pause
+  exit /b 1
+)
+where hugo >nul 2>&1
+if errorlevel 1 (
+  echo [ERROR] hugo.exe not found in PATH.
+  echo Add Hugo to User PATH ^(e.g. WinGet Links folder^), then run this script from cmd/PowerShell.
+  pause
+  exit /b 1
+)
+
 if exist ".env" (
   for /f "usebackq eol=# tokens=1,* delims==" %%A in (".env") do (
     if not "%%A"=="" set "%%A=%%B"
@@ -32,7 +49,7 @@ if errorlevel 1 (
 
 echo Starting Hugo server (http://localhost:1313/) ...
 echo Press Ctrl+C to stop the server.
-REM 强制站内链接走本机（与 hugo.toml 里的线上 baseURL 无关）；换端口时请同步修改。
+REM Force local baseURL; change port here and in hugo server line if needed.
 if defined HUGO_MOMENTS_PASSWORD_HASH (
   echo Moments gate hash loaded.
 ) else (

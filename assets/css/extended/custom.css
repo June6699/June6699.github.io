@@ -1535,6 +1535,15 @@
     position: relative;
 }
 
+/* 未解锁时强制隐藏动态正文：个别环境下仅靠 HTML hidden 可能被其它规则盖过 */
+[data-moments-gate-root]:not(.is-unlocked) [data-moments-feed] {
+    display: none !important;
+}
+
+[data-moments-gate-root].is-unlocked [data-moments-feed] {
+    display: block !important;
+}
+
 .moments-feed::before {
     content: "";
     position: absolute;
