@@ -1,4 +1,6 @@
 # 主题放在 themes/PaperMod，不用 Hugo Module
+# 生产构建（hugo / CI）用此 URL；本地预览请用 run_server.bat 或：hugo server --baseURL http://localhost:1313/
+# 亦可设环境变量 HUGO_BASEURL（优先级更高）。
 baseURL = "https://June6699.github.io/"
 languageCode = "zh-cn"
 defaultContentLanguage = "zh"
@@ -48,19 +50,38 @@ ignoreLogs = ["warning-goldmark-raw-html"]
   # 文章页显示右侧目录，不显示「Table of Contents」标题，直接从一级标题列起以节省空间
   ShowToc = true
   TocOpen = false
+  # 首页侧栏：隐藏标签卡（仅保留关于 + 下方快捷入口）
+  sidebarHideTagsOnHome = true
 
 [params.cover]
   # 首页/列表不展示文章封面图，仅标题与摘要
   hiddenInList = true
 
+# Gitalk：clientID / clientSecret 仅通过环境变量注入（勿写入仓库）。
+# 本地：set GITALK_CLIENT_ID=... & set GITALK_CLIENT_SECRET=...（PowerShell 用 $env:）
+# CI：在仓库 Settings → Secrets 中配置 GITALK_CLIENT_ID、GITALK_CLIENT_SECRET
+# 从仓库移除密钥后请在 GitHub OAuth App 中轮换 client secret。
 [params.gitalk]
   enable = true
+  # 与 Jekyll 版 _config.yml 一致；若仅本地使用可保留。推送到公开仓库前建议改用环境变量并轮换 OAuth secret。
   clientID = "Ov23lip1sLnFPYK622n1"
   clientSecret = "66b4d7a3fa6cf24bb721f85072a93fddc0d80229"
   repo = "June6699.github.io"
   owner = "June6699"
   admin = ["June6699"]
   distractionFreeMode = true
+
+[[params.homeQuickLinks]]
+  name = "我的项目"
+  url = "/projects/"
+
+[[params.homeQuickLinks]]
+  name = "GitHub"
+  url = "https://github.com/June6699/June6699.github.io"
+
+[[params.homeQuickLinks]]
+  name = "统计"
+  url = "/statistics/"
 
 # 导航菜单
 [[menu.main]]
@@ -72,14 +93,18 @@ ignoreLogs = ["warning-goldmark-raw-html"]
   url = "/about/"
   weight = 2
 [[menu.main]]
+  name = "动态"
+  url = "/moments/"
+  weight = 3
+[[menu.main]]
   name = "标签"
   url = "/tags/"
-  weight = 3
+  weight = 4
 [[menu.main]]
   name = "统计"
   url = "/statistics/"
-  weight = 4
+  weight = 5
 [[menu.main]]
   name = "我的项目"
   url = "/projects/"
-  weight = 5
+  weight = 6

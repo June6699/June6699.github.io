@@ -1,8 +1,20 @@
 {{- define "main" }}
 
+{{- $showToc := (.Param "ShowToc") -}}
+{{- $tocHTML := .TableOfContents -}}
+{{- $hasToc := (and $showToc (findRE "href=\\\"#" $tocHTML)) -}}
+{{- $hideSidebar := (.Param "hideSidebar") | default false -}}
+{{- $isPost := in site.Params.mainSections .Section -}}
+{{- $useWideSidebar := or $hasToc (and $isPost (not $hideSidebar)) -}}
+
+{{- if $useWideSidebar }}
 <div class="page-with-sidebar">
 <div class="single-with-sidebar">
   <article class="post-single">
+{{- else }}
+<div class="single-static-wrap">
+  <article class="post-single single-static">
+{{- end }}
     <header class="post-header">
       {{ partial "breadcrumbs.html" . }}
       <h1 class="post-title entry-hint-parent">
@@ -46,7 +58,7 @@
       {{- $tags := .Language.Params.Taxonomies.tag | default "tags" }}
       <ul class="post-tags">
         {{- range ($.GetTerms $tags) }}
-        <li><a href="{{ .Permalink }}">{{ .LinkTitle }}</a></li>
+        <li><a href="{{ .RelPermalink }}">{{ .LinkTitle }}</a></li>
         {{- end }}
       </ul>
       {{- if (.Param "ShowPostNavLinks") }}
@@ -62,9 +74,7 @@
     {{- end }}
   </article>
 
-  {{- $showToc := (.Param "ShowToc") -}}
-  {{- $tocHTML := .TableOfContents -}}
-  {{- $hasToc := (and $showToc (findRE "href=\\\"#" $tocHTML)) -}}
+  {{- if $useWideSidebar }}
   {{- if $hasToc }}
     <aside class="toc-sidebar">
       {{- partial "toc.html" . }}
@@ -72,7 +82,12 @@
   {{- else }}
     {{- partial "site_sidebar.html" . -}}
   {{- end }}
+  {{- end }}
+{{- if $useWideSidebar }}
 </div>
 </div>
+{{- else }}
+</div>
+{{- end }}
 
 {{- end }}{{/* end main */}}

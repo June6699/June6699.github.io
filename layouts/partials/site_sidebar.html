@@ -2,7 +2,7 @@
   <section class="sidebar-card sidebar-about">
     <div class="sidebar-about-row">
       {{- with site.Params.sidebarAvatar }}
-      <img class="sidebar-avatar" src="{{ . | absURL }}" alt="avatar" loading="lazy" />
+      <img class="sidebar-avatar" src="{{ . | relURL }}" alt="avatar" loading="lazy" />
       {{- end }}
       <div class="sidebar-about-meta">
         <h3 class="sidebar-title">{{ site.Params.sidebarAboutTitle | default "关于" }}</h3>
@@ -16,17 +16,31 @@
       <div class="sidebar-social">
         {{- partial "social_icons.html" (dict "align" "left") -}}
       </div>
+      {{- if and .IsHome site.Params.homeQuickLinks }}
+      <nav class="home-quick-links" aria-label="常用入口">
+        {{- range first 3 site.Params.homeQuickLinks }}
+        {{- $href := .url -}}
+        {{- if or (strings.HasPrefix $href "http://") (strings.HasPrefix $href "https://") -}}
+        <a href="{{ $href }}">{{ .name }}</a>
+        {{- else -}}
+        <a href="{{ $href | relURL }}">{{ .name }}</a>
+        {{- end -}}
+        {{- end }}
+      </nav>
+      {{- end }}
     </div>
   </section>
 
+  {{- $hideTags := and .IsHome (site.Params.sidebarHideTagsOnHome | default false) -}}
+  {{- if not $hideTags }}
   <section class="sidebar-card sidebar-tags">
-    <h3 class="sidebar-title">Featured Tags</h3>
+    <h3 class="sidebar-title">热门标签</h3>
     <div class="sidebar-tags-list">
       {{- $items := slice -}}
       {{- range $termName, $taxonomy := site.Taxonomies.tags -}}
         {{- $count := len $taxonomy.Pages -}}
         {{- if ge $count 2 -}}
-          {{- $items = $items | append (dict "title" $taxonomy.Page.Title "permalink" $taxonomy.Page.Permalink "count" $count) -}}
+          {{- $items = $items | append (dict "title" $taxonomy.Page.Title "permalink" $taxonomy.Page.RelPermalink "count" $count) -}}
         {{- end -}}
       {{- end -}}
       {{- range first 12 (sort $items "count" "desc") -}}
@@ -34,5 +48,5 @@
       {{- end -}}
     </div>
   </section>
+  {{- end }}
 </aside>
-

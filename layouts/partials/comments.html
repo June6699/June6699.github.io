@@ -1,7 +1,9 @@
 {{- $gitalk := site.Params.gitalk -}}
-{{- if and $gitalk $gitalk.enable -}}
-{{- $envClientID := getenv "GITALK_CLIENT_ID" -}}
-{{- $envClientSecret := getenv "GITALK_CLIENT_SECRET" -}}
+{{- $envClientID := getenv "GITALK_CLIENT_ID" | strings.TrimSpace -}}
+{{- $envClientSecret := getenv "GITALK_CLIENT_SECRET" | strings.TrimSpace -}}
+{{- $clientID := $envClientID | default ($gitalk.clientID | default "") | strings.TrimSpace -}}
+{{- $clientSecret := $envClientSecret | default ($gitalk.clientSecret | default "") | strings.TrimSpace -}}
+{{- if and $gitalk $gitalk.enable $clientID $clientSecret -}}
 {{- $envRepo := getenv "GITALK_REPO" -}}
 {{- $envOwner := getenv "GITALK_OWNER" -}}
 {{- $envAdmin := getenv "GITALK_ADMIN" -}}
@@ -50,8 +52,8 @@
           redirectURI = redirectURI.split('#')[0];
         }
         var gitalk = new Gitalk({
-          clientID: dequote({{ (cond (ne $envClientID "") $envClientID $gitalk.clientID) | jsonify }}),
-          clientSecret: dequote({{ (cond (ne $envClientSecret "") $envClientSecret $gitalk.clientSecret) | jsonify }}),
+          clientID: dequote({{ $clientID | jsonify }}),
+          clientSecret: dequote({{ $clientSecret | jsonify }}),
           repo: dequote({{ (cond (ne $envRepo "") $envRepo $gitalk.repo) | jsonify }}),
           owner: dequote({{ (cond (ne $envOwner "") $envOwner $gitalk.owner) | jsonify }}),
           admin: admin,
@@ -68,4 +70,8 @@
   else window.addEventListener('load', function(){ setTimeout(run, 0); });
 })();
 </script>
+{{- else if and $gitalk $gitalk.enable (.Param "comments") -}}
+{{- if hugo.IsServer -}}
+<p class="comments-gitalk-missing"><small>Gitalk：未设置 GITALK_CLIENT_ID / GITALK_CLIENT_SECRET，本地不加载评论。</small></p>
+{{- end -}}
 {{- end -}}

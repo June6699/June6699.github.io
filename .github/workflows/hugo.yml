@@ -30,6 +30,11 @@ jobs:
           extended: true
 
       - name: Build with Hugo
+        env:
+          GITALK_CLIENT_ID: ${{ secrets.GITALK_CLIENT_ID }}
+          GITALK_CLIENT_SECRET: ${{ secrets.GITALK_CLIENT_SECRET }}
+          HUGO_MOMENTS_PASSWORD_HASH: ${{ secrets.HUGO_MOMENTS_PASSWORD_HASH }}
+          HUGO_MOMENTS_RECOVERY_EMAIL: ${{ secrets.HUGO_MOMENTS_RECOVERY_EMAIL }}
         run: hugo --minify --buildFuture
 
       - name: Upload artifact
@@ -47,4 +52,3 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
-

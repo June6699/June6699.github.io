@@ -1,0 +1,844 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>ASCII 字符视频引擎 v2</title>
+    <style>
+        :root {
+            --accent: #00e676;
+            --accent-dim: rgba(0,230,118,0.1);
+            --accent-border: rgba(0,230,118,0.3);
+            --bg-panel: rgba(12,12,12,0.93);
+            --bg-input: rgba(255,255,255,0.04);
+            --border: rgba(255,255,255,0.08);
+            --text: #e4e4e4;
+            --muted: #777;
+        }
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            background: #000 url('./background.jpg') no-repeat center center fixed;
+            background-size: cover;
+            color: var(--text);
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            display: flex; flex-direction: column; align-items: center;
+            padding: 18px 10px 50px;
+            min-height: 100vh;
+        }
+        body::before {
+            content: ''; position: fixed; inset: 0;
+            background: rgba(0,0,0,0.83); z-index: -1;
+        }
+        .panel {
+            background: var(--bg-panel);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 16px 20px;
+            margin-bottom: 12px;
+            backdrop-filter: blur(14px);
+            width: min(800px, 98vw);
+        }
+        .panel-title {
+            font-size: 10.5px; font-weight: 700; letter-spacing: 2.5px;
+            color: var(--accent); text-transform: uppercase;
+            margin-bottom: 14px; display: flex; align-items: center; gap: 10px;
+        }
+        .panel-title::after { content:''; flex:1; height:1px; background:var(--border); }
+        .row { display:flex; gap:12px; flex-wrap:wrap; }
+        .col { flex:1; min-width:175px; }
+        .col-auto { flex:0 0 auto; }
+        
+        /* 新增：导入区域的视觉分割 */
+        .import-section {
+            border: 1px dashed var(--accent-border);
+            border-radius: 8px;
+            padding: 12px;
+            background: rgba(255,255,255,0.015);
+        }
+        .section-title {
+            font-size: 11px; color: var(--accent); margin-bottom: 10px; font-weight: bold;
+        }
+
+        hr.sep { border:none; border-top:1px solid var(--border); margin:12px 0; }
+        .fg { margin-bottom:10px; }
+        .fg label {
+            display:block; font-size:10.5px; color:var(--muted);
+            margin-bottom:4px; text-transform:uppercase; letter-spacing:.8px;
+        }
+        input[type="file"] { width:100%; font-size:12px; color:#aaa; cursor:pointer; }
+        input[type="file"]::file-selector-button {
+            background:rgba(255,255,255,0.06); border:1px solid var(--border);
+            color:#ccc; padding:3px 8px; border-radius:4px;
+            cursor:pointer; font-size:11px; margin-right:6px;
+        }
+        .mode-row { display:flex; gap:8px; align-items:center; }
+        .pill {
+            padding:5px 16px; border:1px solid var(--border);
+            background:transparent; color:var(--muted);
+            border-radius:20px; cursor:pointer; font-size:12px; font-weight:600;
+            transition:all .18s; letter-spacing:.5px;
+        }
+        .pill:hover:not(:disabled) { border-color:var(--accent-border); color:var(--accent); }
+        .pill.active { border-color:var(--accent); color:var(--accent); background:var(--accent-dim); }
+        .pill:disabled { opacity: 0.4; cursor: not-allowed; }
+        
+        .param { display:flex; flex-direction:column; gap:3px; }
+        .param label { font-size:10.5px; color:var(--muted); letter-spacing:.5px; text-transform:uppercase; }
+        .param input {
+            width:62px; background:var(--bg-input);
+            border:1px solid var(--border); color:var(--text);
+            padding:5px 8px; border-radius:6px; font-size:13px; text-align:center;
+        }
+        .param input[type=text] { width:72px; }
+        .param input:focus { outline:none; border-color:var(--accent-border); }
+        .btn-row { display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin-top:12px; }
+        button {
+            padding:8px 18px; border:none; border-radius:7px;
+            cursor:pointer; font-size:13px; font-weight:700;
+            transition:all .18s; letter-spacing:.3px;
+        }
+        button:disabled { opacity:.35; cursor:not-allowed; pointer-events:none; }
+        #startBtn  { background:#1565c0; color:#fff; }
+        #startBtn:hover:not(:disabled)  { background:#1976d2; }
+        #playBtn   { background:var(--accent); color:#000; display:none; }
+        #playBtn:hover   { filter:brightness(1.1); }
+        #saveBtn   { background:#e65100; color:#fff; display:none; }
+        #saveBtn:hover   { background:#f57c00; }
+        #exportBtn { background:#6a1b9a; color:#fff; display:none; }
+        #exportBtn:hover { background:#8e24aa; }
+        #clearBtn  { background:#d32f2f; color:#fff; }
+        #clearBtn:hover { background:#f44336; }
+
+        .hint { font-size:11px; color:var(--muted); }
+        .kbd { display:inline-block; font-size:10px; background:rgba(255,255,255,0.1);
+            border:1px solid var(--border); border-radius:3px; padding:1px 5px; color:#bbb; }
+        #statusText {
+            font-family:'Consolas','Courier New',monospace; font-size:12.5px;
+            color:var(--accent); background:rgba(0,0,0,0.5);
+            border:1px solid rgba(0,230,118,0.1); border-radius:6px;
+            padding:8px 12px; margin-top:12px; min-height:40px;
+            white-space:pre-wrap; line-height:1.55;
+        }
+        .progress-row { display:flex; align-items:center; gap:8px; margin-top:10px; }
+        .time { font-size:11px; color:var(--muted); font-variant-numeric:tabular-nums; min-width:40px; }
+        input[type="range"] { flex:1; accent-color:var(--accent); cursor:pointer; height:4px; }
+        #exportArea { display:none; margin-top:10px; }
+        #asciiRender {
+            background:#000; max-width:98vw; max-height:65vh; object-fit:contain;
+            border:1px solid rgba(255,255,255,0.05); border-radius:4px; display:block;
+            box-shadow:0 0 60px rgba(0,230,118,0.07), 0 0 0 1px rgba(0,0,0,0.5);
+            image-rendering: crisp-edges;
+        }
+        #asciiRender:fullscreen { max-width:100vw; max-height:100vh; border:none; border-radius:0; }
+        #modeBadge {
+            display:none; position:fixed; top:0; left:50%; transform:translateX(-50%);
+            background:rgba(0,0,0,0.65); color:var(--accent); font-size:11px;
+            font-family:monospace; padding:2px 12px; border-radius:0 0 8px 8px;
+            pointer-events:none; z-index:100;
+        }
+        #srtStatus { font-size:11px; color:var(--muted); margin-top:4px; }
+    </style>
+    <script src="./coi-serviceworker.js"></script>
+    <script src="./ffmpeg.min.js"></script>
+</head>
+<body>
+
+<div id="fileProtocolBanner" class="panel" style="display:none;width:min(800px,98vw);border:1px solid rgba(255,82,82,0.55);background:rgba(48,18,18,0.96);margin-bottom:12px;">
+    <div class="panel-title" style="color:#ff8a80;">必须用 HTTP 打开本页</div>
+    <p style="font-size:12px;line-height:1.65;color:#ffccbc;">
+        当前是 <strong>file://</strong>，WASM / Service Worker 无法工作，会长时间停在「系统初始化中」。<br><br>
+        请在本文件夹双击 <strong>run_vidascii-git.bat</strong>，再访问：<br>
+        <span class="kbd">http://localhost:8000/index.html</span><br><br>
+        若在博客仓库里用 Hugo 预览：<br>
+        <span class="kbd">http://localhost:1313/scripts/vid2ascii-gif/</span><br><br>
+        详见同目录 <strong>README-本地运行.md</strong>。
+    </p>
+</div>
+<script>
+(function () {
+    if (location.protocol === 'file:') {
+        var b = document.getElementById('fileProtocolBanner');
+        if (b) b.style.display = 'block';
+    }
+})();
+</script>
+
+<div class="panel" style="padding:12px 18px;margin-bottom:10px;">
+    <div style="display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center;font-size:12px;color:var(--muted);">
+        <a href="/" style="color:var(--accent);text-decoration:none;font-weight:600;">← 博客首页</a>
+        <span aria-hidden="true">|</span>
+        <a href="/projects/" style="color:var(--accent);text-decoration:none;font-weight:600;">我的项目</a>
+        <span aria-hidden="true">|</span>
+        <a href="/scripts/ascii-generator/guide.html" style="color:var(--accent);text-decoration:none;font-weight:600;">Python 版说明</a>
+    </div>
+</div>
+
+<div class="panel">
+    <div class="panel-title">ASCII 字符视频引擎 v2 · Enhanced</div>
+
+    <div class="row" style="gap:16px;">
+        <div class="col import-section">
+            <div class="section-title">▶ 方案 A: 导入并解析新视频</div>
+            <div class="fg">
+                <label>📹 本地视频文件</label>
+                <input type="file" id="videoInput" accept="video/*" disabled>
+            </div>
+        </div>
+        <div class="col import-section">
+            <div class="section-title">▶ 方案 B: 导入已有存档</div>
+            <div class="fg">
+                <label>📦 存档文件 (.asciivid)</label>
+                <input type="file" id="historyInput" accept=".asciivid">
+            </div>
+            <div class="fg">
+                <label>🎵 恢复音频 (配合存档)</label>
+                <input type="file" id="historyAudioInput" accept="video/*,audio/*">
+            </div>
+        </div>
+    </div>
+
+    <div class="row" style="margin-top:12px;">
+        <div class="col">
+            <div class="fg">
+                <label>💬 外挂字幕 (可选，支持随时载入)</label>
+                <input type="file" id="srtInput" accept=".srt">
+                <div id="srtStatus">未加载字幕</div>
+            </div>
+        </div>
+    </div>
+
+    <hr class="sep">
+
+    <div class="row" style="align-items:flex-end; gap:18px; flex-wrap:wrap;">
+        <div class="col-auto">
+            <div style="font-size:10.5px;color:var(--muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px;">渲染模式</div>
+            <div class="mode-row">
+                <button class="pill active" id="modeGray">🔲 灰度</button>
+                <button class="pill" id="modeColor">🎨 彩色</button>
+            </div>
+        </div>
+        <div class="param"><label>采样帧率</label><input type="number" id="frameInput" value="15" min="1" max="60"></div>
+        <div class="param"><label>字符列数</label><input type="number" id="widthInput" value="160" min="40" max="320"></div>
+        <div class="param"><label>字体 px</label><input type="number" id="fontSizeInput" value="10" min="6" max="20"></div>
+    </div>
+
+    <div class="btn-row">
+        <button id="startBtn" disabled>🚀 开始解析</button>
+        <button id="playBtn">▶ 播放</button>
+        <button id="saveBtn">💾 存档</button>
+        <button id="exportBtn">🎬 导出 MP4</button>
+        <button id="clearBtn">🗑️ 清空与重置</button>
+        <span class="hint" style="margin-left: auto;">
+            <span class="kbd">F</span> 全屏&ensp;
+            <span class="kbd">Space</span> 暂停&ensp;
+            <span class="kbd">← →</span> ±5s
+        </span>
+    </div>
+
+    <div id="exportArea">
+        <hr class="sep">
+        <div class="row" style="align-items:flex-end;gap:14px;">
+            <div class="param"><label>CRF 质量</label><input type="number" id="crfInput" value="26" min="0" max="51"></div>
+            <div class="param"><label>音频码率</label><input type="text" id="audioBitrateInput" value="128k"></div>
+        </div>
+    </div>
+
+    <div id="statusText">系统初始化中，请稍候…</div>
+
+    <div class="progress-row">
+        <span class="time" id="timeCurrent">00:00</span>
+        <input type="range" id="progressBar" min="0" max="100" value="0" step="0.05" disabled>
+        <span class="time" id="timeTotal">00:00</span>
+    </div>
+</div>
+
+<canvas id="asciiRender"></canvas>
+<div id="modeBadge"></div>
+
+<script type="module">
+"use strict";
+
+// 字符集 (按视觉感知亮度排序，由暗到明亮)
+// 黑色背景下：明亮的像素会被替换为密集的字符，暗色像素会被替换为空格
+// const CHARS = " .`^\",:;Il!i><~+_-?][}{1)(|/tfjrxnuvczXYUJCLQ0OZmwqpdbkhao*#MW&8%B@$";
+const CHARS = " .'`^\",:;Il!i><~+_-?][}{1)(|/tfjrxnuvczXYUJCLQ0OZmwqpdbkhao*#MW&8%B@$";
+const CLEN  = CHARS.length;
+
+
+// DOM 元素获取
+const $ = id => document.getElementById(id);
+const videoInput     = $('videoInput');
+const historyInput   = $('historyInput');
+const histAudioInput = $('historyAudioInput');
+const srtInput       = $('srtInput');
+const startBtn       = $('startBtn');
+const playBtn        = $('playBtn');
+const saveBtn        = $('saveBtn');
+const exportBtn      = $('exportBtn');
+const clearBtn       = $('clearBtn');
+const exportArea     = $('exportArea');
+const statusEl       = $('statusText');
+const srtStatusEl    = $('srtStatus');
+const canvas         = $('asciiRender');
+const ctx            = canvas.getContext('2d');
+const pb             = $('progressBar');
+const tcEl           = $('timeCurrent');
+const ttEl           = $('timeTotal');
+const modeGrayBtn    = $('modeGray');
+const modeColorBtn   = $('modeColor');
+const modeBadge      = $('modeBadge');
+
+// 全局状态变量
+let ffmpeg      = null;
+let sysReady    = false;
+let curMode     = 'gray';   // 'gray' | 'color'
+let CHAR_W      = 6;        // 每个字符的像素宽度
+let LINE_H      = 10;       // 每行的高度（等于字体大小）
+
+let frames      = [];       // 存放每帧的 ASCII 字符串
+let colors      = null;     // 存放彩色模式的 RGB 数据
+let fps         = 15;
+let acols       = 0;        // ASCII 列数 (提取时的像素宽度)
+let arows       = 0;        // ASCII 行数 (提取时的像素高度)
+let fingerp     = 'default';
+let audioFile   = null;
+
+let subs        = [];       // 解析后的字幕数据
+let playing     = false;
+let paused      = false;
+let audio       = null;
+let rafId       = null;
+let silentStart = 0;
+let totDur      = 0;
+let seekLsn     = null;     // 进度条拖动监听器
+
+let toastMsg    = '';
+let toastTick   = 0;
+
+// 颜色字符串缓存 (量化到4位/通道，最多缓存 4096 个字符串以提升性能)
+const CC = new Map();
+function qc(r, g, b) {
+    const qr = r & 0xF0, qg = g & 0xF0, qb = b & 0xF0;
+    const k = (qr << 16) | (qg << 8) | qb;
+    let s = CC.get(k);
+    if (!s) { s = `rgb(${qr},${qg},${qb})`; CC.set(k, s); }
+    return s;
+}
+
+// 辅助格式化函数
+const fmt = s => isNaN(s) ? '00:00'
+    : `${Math.floor(s/60).toString().padStart(2,'0')}:${Math.floor(s%60).toString().padStart(2,'0')}`;
+const setStatus = m => statusEl.textContent = m;
+const disIO = d => [videoInput, historyInput, histAudioInput, srtInput, clearBtn].forEach(e => e.disabled = d);
+// const fontStyle = () => `${parseInt($('fontSizeInput').value)||10}px monospace`;
+const fontStyle = () => `bold ${parseInt($('fontSizeInput').value)||10}px "Consolas", "Monaco", "Courier New", monospace`;
+
+/*
+function measureChar() {
+    ctx.font = fontStyle();
+    // 宽度 + 1px 间距
+    CHAR_W = ctx.measureText('M').width + 1; 
+    // 行高 + 2px 间距
+    LINE_H = (parseInt($('fontSizeInput').value) || 10) + 2; 
+}
+*/
+
+function measureChar() {
+    ctx.font = fontStyle();
+    CHAR_W = ctx.measureText('M').width;
+    // 采用与 Python 源码一致的严格比例：高永远是宽的 2 倍
+    LINE_H = CHAR_W * 2; 
+}
+const getSub = t => subs.find(s => t >= s.s && t <= s.e)?.t || null;
+
+// 清空与重置功能
+clearBtn.addEventListener('click', () => {
+    stopPlay();
+    // 清空文件输入
+    videoInput.value = ''; 
+    historyInput.value = ''; 
+    histAudioInput.value = ''; 
+    srtInput.value = '';
+    
+    // 重置核心变量
+    audioFile = null; 
+    frames = []; 
+    colors = null; 
+    subs = [];
+    
+    // 重置按钮与 UI 状态
+    startBtn.disabled = true; 
+    startBtn.style.display = 'inline-block';
+    ['playBtn','saveBtn','exportBtn'].forEach(id => $(id).style.display='none');
+    exportArea.style.display = 'none';
+    
+    // 恢复模式切换按钮
+    modeGrayBtn.disabled = false; 
+    modeColorBtn.disabled = false;
+    
+    // 重置字幕状态提示
+    srtStatusEl.textContent = '未加载字幕'; 
+    srtStatusEl.style.color = 'var(--muted)';
+    
+    // 清理画布和进度条
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    pb.value = 0; pb.disabled = true; 
+    tcEl.textContent = '00:00'; ttEl.textContent = '00:00';
+    
+    setStatus('🧹 已清空所有导入文件与状态。请重新选择方案 A 或 B。');
+});
+
+// SRT 字幕解析器
+srtInput.addEventListener('change', e => {
+    const f = e.target.files[0]; if (!f) {
+        srtStatusEl.textContent = '未加载字幕';
+        srtStatusEl.style.color = 'var(--muted)';
+        subs = [];
+        return;
+    }
+    const fr = new FileReader();
+    fr.onload = ev => {
+        subs = [];
+        const re = /\d+\r?\n(\d{2}:\d{2}:\d{2}[,.]\d{3}) --> (\d{2}:\d{2}:\d{2}[,.]\d{3})\r?\n([\s\S]*?)(?=\r?\n\r?\n\d+|\s*$)/g;
+        const pt = t => { const [h,m,s]=t.replace(',','.').split(':'); return +h*3600+ +m*60+ +s; };
+        let m;
+        while ((m = re.exec(ev.target.result)) !== null)
+            subs.push({ s:pt(m[1]), e:pt(m[2]), t:m[3].trim().replace(/\r?\n/g,' ') });
+        srtStatusEl.textContent = `✅ 已成功加载 ${subs.length} 条字幕`;
+        srtStatusEl.style.color = 'var(--accent)';
+    };
+    fr.readAsText(f);
+});
+
+// 模式切换监听
+modeGrayBtn.addEventListener('click', () => {
+    curMode = 'gray';
+    modeGrayBtn.classList.add('active'); modeColorBtn.classList.remove('active');
+});
+modeColorBtn.addEventListener('click', () => {
+    curMode = 'color';
+    modeColorBtn.classList.add('active'); modeGrayBtn.classList.remove('active');
+});
+
+// 系统初始化
+(async () => {
+    try {
+        await document.fonts.ready;
+        measureChar();
+        const { FFmpeg } = window.FFmpegWASM;
+        ffmpeg = new FFmpeg();
+        ffmpeg.on('progress', ({ progress }) => {
+            if (!isNaN(progress)) setStatus(`FFmpeg 引擎: ${Math.round(progress*100)}%`);
+        });
+        await ffmpeg.load({ coreURL: './ffmpeg-core.js', wasmURL: './ffmpeg-core.wasm' });
+        sysReady = true;
+        videoInput.disabled = false;
+        setStatus('✅ 引擎初始化就绪！\n您可以选择【方案 A】解析新视频 ➜ 或选择【方案 B】直接播放已有存档\n📌 快捷键提示: F=全屏  Space=暂停  ←→=快进/后退 5 秒');
+    } catch (err) { setStatus('❌ 初始化失败: ' + err.message); }
+})();
+
+// 文件输入事件监听 (互斥处理)
+videoInput.addEventListener('change', () => {
+    if (!videoInput.files.length || !sysReady) return;
+    
+    // 互斥操作：自动清理【方案 B】可能存在的残留状态
+    historyInput.value = ''; 
+    histAudioInput.value = '';
+    frames = []; colors = null; 
+    stopPlay();
+    modeGrayBtn.disabled = false; 
+    modeColorBtn.disabled = false;
+
+    audioFile = videoInput.files[0];
+    fingerp = `${audioFile.name}_${audioFile.size}`;
+    startBtn.disabled = false;
+    startBtn.style.display = 'inline-block';
+    ['playBtn','saveBtn','exportBtn'].forEach(id => $(id).style.display='none');
+    exportArea.style.display = 'none';
+    setStatus(`已挂载视频: ${audioFile.name}\n请调整下方参数后点击【🚀 开始解析】`);
+});
+
+histAudioInput.addEventListener('change', e => {
+    if (e.target.files.length) {
+        audioFile = e.target.files[0];
+        setStatus(`🎵 存档外挂音频已就绪: ${audioFile.name}`);
+    }
+});
+
+historyInput.addEventListener('change', e => {
+    const f = e.target.files[0]; if (!f) return;
+    
+    // 互斥操作：自动清理【方案 A】的挂载状态
+    videoInput.value = ''; 
+    audioFile = null; 
+    frames = []; colors = null; 
+    stopPlay();
+
+    startBtn.style.display = 'none';
+    setStatus('📦 正在读取并解包存档数据…');
+    const fr = new FileReader();
+    fr.onload = ev => {
+        try {
+            loadData(JSON.parse(ev.target.result));
+            
+            // 根据存档属性，更新并【锁定】模式按钮
+            modeGrayBtn.disabled = true;
+            modeColorBtn.disabled = true;
+            if (colors) {
+                curMode = 'color';
+                modeColorBtn.classList.add('active'); modeGrayBtn.classList.remove('active');
+            } else {
+                curMode = 'gray';
+                modeGrayBtn.classList.add('active'); modeColorBtn.classList.remove('active');
+            }
+
+            setStatus(`✅ 存档加载成功！共 ${frames.length} 帧 · 渲染模式：${colors?'🎨 彩色':'🔲 灰度'}\n请点击【▶ 播放】`);
+            showPlayUI();
+        } catch (err) { setStatus('❌ 存档解析失败: 可能是文件损坏或版本不符。' + err.message); }
+    };
+    fr.readAsText(f);
+});
+
+// 核心解析逻辑
+startBtn.addEventListener('click', async () => {
+    if (!audioFile) return;
+    startBtn.disabled = true; disIO(true); stopPlay();
+    fps = parseInt($('frameInput').value) || 15;
+    const cols = parseInt($('widthInput').value) || 160;
+    const isColor = curMode === 'color';
+    measureChar();
+    const vName = audioFile.name.replace(/\s+/g, '_');
+    try {
+        // 探测视频原始宽高比
+        setStatus('🔍 正在探测源视频规格…');
+        const vEl = document.createElement('video');
+        vEl.src = URL.createObjectURL(audioFile);
+        await new Promise(r => { vEl.onloadedmetadata = r; vEl.onerror = r; });
+        const vAR = (vEl.videoWidth && vEl.videoHeight) ? vEl.videoWidth/vEl.videoHeight : 16/9;
+        vEl.src = '';
+
+        // 计算 ASCII 矩阵行数，以确保最终排版维持原视频画面比例
+        const rows = Math.max(8, Math.round(cols * CHAR_W / (LINE_H * vAR)));
+        acols = cols; arows = rows;
+        setStatus(`📐 排版矩阵: ${cols}列 × ${rows}行  (比例约 ${vAR.toFixed(2)})\n正在向虚拟系统写入文件…`);
+
+        await ffmpeg.writeFile(vName, new Uint8Array(await audioFile.arrayBuffer()));
+        setStatus(`🎞 FFmpeg 视频抽帧中 (${fps}fps, 分辨率 ${cols}×${rows})…`);
+        await ffmpeg.exec(['-i', vName, '-r', fps.toString(), '-vf', `scale=${cols}:${rows}:flags=area`, 'frame_%05d.png']);
+
+        setStatus(isColor ? '🎨 正在进行彩色像素量化与字符映射…' : '🔲 正在进行灰度计算与字符映射…');
+        frames = []; colors = isColor ? [] : null;
+
+        const offC = document.createElement('canvas');
+        offC.width = cols; offC.height = rows;
+        const offX = offC.getContext('2d', { willReadFrequently: true });
+
+        for (let fi = 1; ; fi++) {
+            const fname = `frame_${fi.toString().padStart(5,'0')}.png`;
+            let got = false;
+            try {
+                const fdata = await ffmpeg.readFile(fname); got = true;
+                const img = new Image();
+                await new Promise(r => { img.onload = r; img.src = URL.createObjectURL(new Blob([fdata.buffer],{type:'image/png'})); });
+                offX.drawImage(img, 0, 0, cols, rows);
+                const px = offX.getImageData(0, 0, cols, rows).data;
+
+                let str = '';
+                const clr = isColor ? new Uint8Array(cols * rows * 3) : null;
+                for (let y = 0; y < rows; y++) {
+                    for (let x = 0; x < cols; x++) {
+                        const i4 = (y*cols+x)*4;
+                        const R=px[i4], G=px[i4+1], B=px[i4+2];
+                        // 采用参考源码的 np.mean 平均值法
+                        const mean = (R + G + B) / 3;
+                        str += CHARS[Math.min(Math.floor(mean / 255 * CLEN), CLEN - 1)];
+                        if (clr) { const c3=(y*cols+x)*3; clr[c3]=R; clr[c3+1]=G; clr[c3+2]=B; }
+                    }
+                    str += '\n';
+                }
+                frames.push(str);
+                if (clr) colors.push(clr);
+                await ffmpeg.deleteFile(fname);
+                if (fi%20===0) setStatus(`${isColor?'🎨':'🔲'} 映射进度：已处理 ${fi} 帧…`);
+            } catch { if (!got) break; }
+        }
+
+        await ffmpeg.deleteFile(vName);
+        setStatus(`✅ 解析大功告成！共计 ${frames.length} 帧 · ${isColor?'🎨 彩色':'🔲 灰度'}\n可以点击【▶ 播放】或【💾 存档】`);
+        showPlayUI();
+    } catch (err) {
+        setStatus('❌ 解析过程中断: ' + err.message);
+        startBtn.disabled = false;
+    } finally { disIO(false); }
+});
+
+// 画面与字符渲染核心
+function renderFrame(idx, t, tgt=ctx, w=canvas.width, h=canvas.height) {
+    tgt.clearRect(0,0,w,h);
+    tgt.fillStyle='#000'; tgt.fillRect(0,0,w,h);
+    tgt.font = fontStyle(); tgt.textAlign='left'; tgt.textBaseline='top';
+
+    const lines = frames[idx].split('\n');
+    const cols  = acols || (lines[0]?.length||0);
+    const cdata = colors?.[idx] || null;
+
+    if (cdata) {
+        // 彩色模式: 将同一行连续的同色字符进行合并渲染 (大幅减少 fillStyle 的切换，提升渲染性能)
+        for (let row=0; row<lines.length; row++) {
+            const line = lines[row]; if (!line.length) continue;
+            const y = row * LINE_H;
+            let gS=0, gC=null;
+            for (let col=0; col<=line.length; col++) {
+                const c = col<line.length
+                    ? qc(cdata[(row*cols+col)*3], cdata[(row*cols+col)*3+1], cdata[(row*cols+col)*3+2])
+                    : null;
+                if (c !== gC) {
+                    if (gC!==null && gS<col) { tgt.fillStyle=gC; tgt.fillText(line.slice(gS,col), gS*CHAR_W, y); }
+                    gC=c; gS=col;
+                }
+            }
+        }
+    } else {
+        // 替换灰度模式的渲染逻辑，加入赛博朋克发光特效
+        tgt.fillStyle = '#00e676';
+        tgt.shadowColor = 'rgba(0, 230, 118, 0.6)'; // 荧光绿发光
+        tgt.shadowBlur = 4; // 发光半径
+        
+        for (let i=0; i<lines.length; i++) {
+            if (lines[i].length) tgt.fillText(lines[i], 0, i*LINE_H);
+        }
+        
+        tgt.shadowBlur = 0; // 绘制完后必须重置阴影，避免影响后续的字幕渲染
+    }
+
+    // 绘制外挂字幕
+    const sub = getSub(t);
+    if (sub) {
+        tgt.font='bold 20px sans-serif'; tgt.textAlign='center'; tgt.textBaseline='bottom';
+        const tw = tgt.measureText(sub).width;
+        tgt.fillStyle='rgba(0,0,0,0.75)'; tgt.fillRect(w/2-tw/2-12,h-50,tw+24,30);
+        tgt.fillStyle='#fff'; tgt.fillText(sub,w/2,h-24);
+        tgt.textAlign='left'; tgt.textBaseline='top';
+    }
+
+    // 绘制右上角提示 (Toast)
+    if (toastTick>0) {
+        tgt.font='13px sans-serif'; tgt.textAlign='right'; tgt.textBaseline='top';
+        tgt.fillStyle='rgba(255,220,60,0.95)';
+        tgt.fillText(toastMsg, w-12, 10);
+        toastTick--;
+        tgt.textAlign='left'; tgt.textBaseline='top';
+    }
+}
+
+function setupCanvas() {
+    measureChar();
+    const fl = frames[0]?.split('\n')[0]||'';
+    canvas.width  = (acols||fl.length) * CHAR_W;
+    canvas.height = (arows||(frames[0]?.split('\n').length||0)) * LINE_H;
+}
+
+// 播放控制引擎
+function stopPlay() {
+    playing=false; paused=false;
+    cancelAnimationFrame(rafId);
+    if (audio) { audio.pause(); audio=null; }
+}
+
+function makeLoop() {
+    function loop() {
+        if (!playing) return;
+        const t = audio ? audio.currentTime : (performance.now()-silentStart)/1000;
+        const fi = Math.min(Math.max(0,Math.floor(t*fps)), frames.length-1);
+        pb.value = (t/totDur)*100;
+        tcEl.textContent=fmt(t); ttEl.textContent=fmt(totDur);
+        renderFrame(fi, t);
+        if (t < totDur && (!audio || !audio.ended)) {
+            rafId = requestAnimationFrame(loop);
+        } else {
+            playing=false; paused=false;
+            playBtn.textContent='🔄 重新播放';
+            setStatus('▶ 播放完毕。您可以拖动进度条，或者点击【🔄 重新播放】。');
+        }
+    }
+    return loop;
+}
+
+function startPlay(seekTo=0) {
+    if (!frames.length) return;
+    stopPlay(); measureChar(); setupCanvas();
+    totDur = frames.length / fps;
+    pb.disabled=false; pb.value=(seekTo/totDur)*100;
+
+    if (audioFile) {
+        audio = new Audio(URL.createObjectURL(audioFile));
+        audio.currentTime = seekTo;
+        audio.play().catch(()=>{});
+    }
+    silentStart = performance.now() - seekTo*1000;
+    playing=true; paused=false;
+
+    // 进度条拖拽防重置监听 (移除旧的以避免事件累积)
+    if (seekLsn) pb.removeEventListener('input', seekLsn);
+    seekLsn = e => {
+        const t = (e.target.value/100)*totDur;
+        if (audio) audio.currentTime=t;
+        silentStart = performance.now()-t*1000;
+        tcEl.textContent=fmt(t);
+        if (!playing) { const fi=Math.min(Math.floor(t*fps),frames.length-1); renderFrame(fi,t); }
+    };
+    pb.addEventListener('input', seekLsn);
+
+    modeBadge.textContent = colors ? '🎨 彩色模式' : '🔲 灰度模式';
+    modeBadge.style.display = 'block';
+    playBtn.textContent='⏸ 暂停';
+    setStatus(`${colors?'🎨 彩色':'🔲 灰度'} 播放中…  (快捷操作：Space 暂停 | ←→ 跳 5 秒 | F 全屏)`);
+    rafId = requestAnimationFrame(makeLoop());
+}
+
+function pausePlay() {
+    playing=false; paused=true;
+    cancelAnimationFrame(rafId);
+    if (audio) audio.pause();
+    playBtn.textContent='▶ 继续';
+    setStatus('⏸ 播放已暂停。按下 Space 键或点击【▶ 继续】恢复。');
+}
+
+function resumePlay() {
+    if (!frames.length) return;
+    const elapsed = audio ? audio.currentTime : Math.max(0,(performance.now()-silentStart)/1000);
+    if (elapsed >= totDur) { startPlay(0); return; }
+    if (audio) audio.play().catch(()=>{});
+    silentStart = performance.now()-elapsed*1000;
+    playing=true; paused=false;
+    playBtn.textContent='⏸ 暂停';
+    setStatus(`${colors?'🎨 彩色':'🔲 灰度'} 播放恢复中…`);
+    rafId = requestAnimationFrame(makeLoop());
+}
+
+// 统一的按钮点击处理，避免注册重复监听
+playBtn.onclick = () => {
+    if (playing)      pausePlay();
+    else if (paused)  resumePlay();
+    else              startPlay(0);
+};
+
+// 展开播放相关的 UI 控件
+function showPlayUI() {
+    startBtn.style.display='none';
+    playBtn.style.display=saveBtn.style.display=exportBtn.style.display='inline-block';
+    exportArea.style.display='block';
+    playBtn.textContent='▶ 播放'; paused=false;
+    setupCanvas();
+    ttEl.textContent=fmt(frames.length/fps);
+    pb.value=0; pb.disabled=false;
+    if (frames.length>0) renderFrame(0, 0);
+}
+
+// 存档序列化与读取功能
+const u8b64 = u8 => { let s=''; for(let i=0;i<u8.length;i++) s+=String.fromCharCode(u8[i]); return btoa(s); };
+const b64u8 = b64 => { const s=atob(b64),u=new Uint8Array(s.length); for(let i=0;i<s.length;i++) u[i]=s.charCodeAt(i); return u; };
+
+function loadData(data) {
+    fingerp  = data.fingerprint||'unknown';
+    fps      = data.fps||15;
+    acols    = data.cols||0;
+    arows    = data.rows||0;
+    frames   = data.frames||[];
+    colors   = (data.mode==='color' && data.colors) ? data.colors.map(b64u8) : null;
+}
+
+saveBtn.addEventListener('click', () => {
+    if (!frames.length) return;
+    setStatus('💾 正在打包并压缩数据，请稍候…');
+    setTimeout(() => {
+        try {
+            const obj = { version:2, fingerprint:fingerp, fps, cols:acols, rows:arows,
+                mode: colors?'color':'gray', frames };
+            if (colors) obj.colors = colors.map(u8b64);
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(new Blob([JSON.stringify(obj)],{type:'application/json'}));
+            a.download = `${fingerp.split('_')[0]||'ascii'}.asciivid`;
+            a.click();
+            setStatus('✅ 存档文件已触发下载！');
+        } catch(err) { setStatus('❌ 存档失败: 内存或数据过大 '+err.message); }
+    }, 50);
+});
+
+// 导出 MP4 视频引擎
+exportBtn.addEventListener('click', async () => {
+    if (!frames.length||!ffmpeg) return;
+    stopPlay(); disIO(true); exportBtn.disabled=true;
+    measureChar(); setupCanvas();
+    const crf = $('crfInput').value||'26';
+    const abr = $('audioBitrateInput').value||'128k';
+    const aOut = 'xaudio.aac';
+    const eC = document.createElement('canvas');
+    eC.width=canvas.width; eC.height=canvas.height;
+    const eX = eC.getContext('2d');
+    try {
+        let hasAudio=false;
+        if (audioFile) {
+            setStatus('🎵 正在从原素材分离并转码音频轨道…');
+            const an=audioFile.name.replace(/\s+/g,'_');
+            await ffmpeg.writeFile(an, new Uint8Array(await audioFile.arrayBuffer()));
+            await ffmpeg.exec(['-i',an,'-vn','-c:a','aac','-b:a',abr,aOut]);
+            await ffmpeg.deleteFile(an); hasAudio=true;
+        }
+        for (let i=0;i<frames.length;i++) {
+            renderFrame(i, i/fps, eX, eC.width, eC.height);
+            const jpg = await new Promise(r => eC.toBlob(async b=>r(new Uint8Array(await b.arrayBuffer())),'image/jpeg',0.92));
+            await ffmpeg.writeFile(`out_${i.toString().padStart(5,'0')}.jpg`, jpg);
+            if (i%15===0) setStatus(`🎬 后期渲染与图像编码：正在处理第 ${i}/${frames.length} 帧`);
+        }
+        setStatus('⚙ 正在使用 libx264 引擎压制 MP4…');
+        const outN='ascii_out.mp4';
+        const args=['-framerate',fps.toString(),'-i','out_%05d.jpg'];
+        if (hasAudio) args.push('-i',aOut);
+        args.push('-c:v','libx264','-preset','ultrafast','-crf',crf,'-pix_fmt','yuv420p','-shortest',outN);
+        await ffmpeg.exec(args);
+        const mp4=await ffmpeg.readFile(outN);
+        const a=document.createElement('a');
+        a.href=URL.createObjectURL(new Blob([mp4.buffer],{type:'video/mp4'}));
+        a.download=`ASCII_${Date.now()}.mp4`; a.click();
+        
+        // 清理缓存
+        for(let i=0;i<frames.length;i++) await ffmpeg.deleteFile(`out_${i.toString().padStart(5,'0')}.jpg`).catch(()=>{});
+        if(hasAudio) await ffmpeg.deleteFile(aOut).catch(()=>{});
+        await ffmpeg.deleteFile(outN).catch(()=>{});
+        
+        setStatus('✅ MP4 导出成功并已开始下载！');
+    } catch(err) { setStatus('❌ 导出流程中断: '+err.message); }
+    finally { disIO(false); exportBtn.disabled=false; }
+});
+
+// 快捷键侦听
+document.addEventListener('keydown', e => {
+    if (e.target.tagName==='INPUT') return; // 如果在输入框内则不触发快捷键
+    if (e.key==='f'||e.key==='F') {
+        e.preventDefault();
+        if (!document.fullscreenElement) canvas.requestFullscreen().catch(()=>{});
+        else document.exitFullscreen();
+    }
+    if (e.key===' ') {
+        e.preventDefault();
+        if (playBtn.style.display!=='none') playBtn.click();
+    }
+    if ((e.key==='ArrowLeft'||e.key==='ArrowRight') && totDur>0) {
+        e.preventDefault();
+        const delta = e.key==='ArrowLeft' ? -5 : 5;
+        const cur = audio ? audio.currentTime : Math.max(0,(performance.now()-silentStart)/1000);
+        const newT = Math.max(0, Math.min(totDur, cur+delta));
+        if (audio) audio.currentTime=newT;
+        silentStart = performance.now()-newT*1000;
+        pb.value=(newT/totDur)*100; tcEl.textContent=fmt(newT);
+        if (!playing) { renderFrame(Math.min(Math.floor(newT*fps),frames.length-1), newT); }
+        toastMsg=`${delta>0?'⏩':'⏪'} ${delta>0?'+':''}${delta}s`; toastTick=70;
+    }
+});
+
+document.addEventListener('fullscreenchange', () => {
+    modeBadge.style.display = (document.fullscreenElement && frames.length) ? 'block' : 'none';
+});
+</script>
+</body>
+</html>

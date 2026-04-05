@@ -1,0 +1,51 @@
+{{- define "main" }}
+<div class="projects-page-wrap">
+  <div class="projects-page">
+    <header class="page-header">
+      {{- partial "breadcrumbs.html" . }}
+      <h1>{{ .Title }}</h1>
+      {{- if .Description }}
+      <div class="post-description">{{ .Description | markdownify }}</div>
+      {{- end }}
+    </header>
+
+    {{- if .Content }}
+    <div class="post-content projects-page-intro">
+      {{- $content := .Content -}}
+      {{- if not (.Param "disableAnchoredHeadings") }}
+      {{- partial "anchored_headings.html" $content -}}
+      {{- else }}{{ $content }}{{ end }}
+    </div>
+    {{- end }}
+
+    {{- with site.Data.projects }}
+    {{- with .items }}
+    <div class="projects-hub">
+      {{- range . }}
+      <article class="project-card">
+        <span class="project-card__status">{{ .status }}</span>
+        <h2 class="project-card__title">{{ .title }}</h2>
+        <p class="project-card__summary">{{ .summary }}</p>
+        {{- with .stack }}
+        <ul class="project-card__stack">
+          {{- range . }}
+          <li>{{ . }}</li>
+          {{- end }}
+        </ul>
+        {{- end }}
+        <div class="project-card__actions">
+          {{- with .demoUrl }}
+          <a class="project-card__btn project-card__btn--demo" href="{{ . | relURL }}" target="_blank" rel="noopener noreferrer">Demo</a>
+          {{- end }}
+          {{- with .docsUrl }}
+          <a class="project-card__btn project-card__btn--docs" href="{{ . | relURL }}" target="_blank" rel="noopener noreferrer">Docs</a>
+          {{- end }}
+        </div>
+      </article>
+      {{- end }}
+    </div>
+    {{- end }}
+    {{- end }}
+  </div>
+</div>
+{{- end }}

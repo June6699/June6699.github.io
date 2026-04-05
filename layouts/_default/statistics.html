@@ -47,8 +47,8 @@
   <section class="stat-section">
     <h2>时间线</h2>
     <ul class="stat-timeline">
-      {{- with index $oldest 0 }}<li>最早文章：<a href="{{ .Permalink }}">{{ .Title }}</a>（{{ .Date.Format "2006-01-02" }}）</li>{{- end }}
-      {{- with index $newest 0 }}<li>最新文章：<a href="{{ .Permalink }}">{{ .Title }}</a>（{{ .Date.Format "2006-01-02" }}）</li>{{- end }}
+      {{- with index $oldest 0 }}<li>最早文章：<a href="{{ .RelPermalink }}">{{ .Title }}</a>（{{ .Date.Format "2006-01-02" }}）</li>{{- end }}
+      {{- with index $newest 0 }}<li>最新文章：<a href="{{ .RelPermalink }}">{{ .Title }}</a>（{{ .Date.Format "2006-01-02" }}）</li>{{- end }}
     </ul>
   </section>
 
@@ -67,7 +67,7 @@
           {{- end }}
         {{- end }}
         {{- with site.GetPage (printf "/tags/%s" $termName) }}
-          <li><a href="{{ .Permalink }}">{{ .LinkTitle }} <sup>{{ $exactCount }}</sup></a></li>
+          <li><a href="{{ .RelPermalink }}">{{ .LinkTitle }} <sup>{{ $exactCount }}</sup></a></li>
         {{- end }}
       {{- end }}
     </ul>
@@ -77,7 +77,7 @@
     <h2>最新文章</h2>
     <ul class="stat-posts-list">
       {{- range first 10 $posts.ByDate.Reverse }}
-      <li><a href="{{ .Permalink }}">{{ .Title }}</a> <span class="stat-date">{{ .Date.Format "2006-01-02" }}</span></li>
+      <li><a href="{{ .RelPermalink }}">{{ .Title }}</a> <span class="stat-date">{{ .Date.Format "2006-01-02" }}</span></li>
       {{- end }}
     </ul>
   </section>
@@ -86,24 +86,9 @@
     <h2>按年归档</h2>
     <ul class="stat-archives">
       {{- range $posts.GroupByDate "2006" }}
-      <li><a href="{{ site.BaseURL }}posts/#{{ .Key }}">{{ .Key }}</a> <sup>{{ len .Pages }}</sup></li>
+      <li><a href="{{ "posts/" | relLangURL }}#{{ .Key }}">{{ .Key }}</a> <sup>{{ len .Pages }}</sup></li>
       {{- end }}
     </ul>
   </section>
 </div>
-
-<style>
-.statistics-page { max-width: 720px; margin: 0 auto; }
-.stat-cards { display: flex; gap: 1rem; margin: 1.5rem 0; flex-wrap: wrap; }
-.stat-card { background: var(--entry); border-radius: 8px; padding: 1.25rem 1.5rem; min-width: 120px; text-align: center; border: 1px solid var(--border); }
-.stat-number { display: block; font-size: 1.75rem; font-weight: 700; color: var(--primary); }
-.stat-label { font-size: 0.9rem; color: var(--secondary); }
-.stat-section { margin: 2rem 0; }
-.stat-section h2 { font-size: 1.1rem; margin-bottom: 0.75rem; color: var(--secondary); }
-.statistics-page .terms-tags { list-style: none; padding: 0; display: flex; flex-wrap: wrap; gap: 0.5rem; }
-.statistics-page .terms-tags a { padding: 0.35rem 0.75rem; background: var(--entry); border-radius: 6px; border: 1px solid var(--border); }
-.stat-posts-list, .stat-archives, .stat-timeline { list-style: none; padding: 0; }
-.stat-posts-list li, .stat-archives li, .stat-timeline li { margin: 0.4rem 0; }
-.stat-date { color: var(--secondary); font-size: 0.9rem; margin-left: 0.5rem; }
-</style>
 {{- end }}

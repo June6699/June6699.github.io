@@ -4,8 +4,7 @@
   {{- partial "index_profile.html" . }}
 {{- else }}
 
-{{- $centerBundle := ne .Section "projects" }}
-{{- if $centerBundle }}<div class="page-with-sidebar">{{ end }}
+<div class="page-with-sidebar">
 <div class="list-with-sidebar">
   <div class="list-main">
     {{- if .IsHome }}
@@ -13,7 +12,7 @@
       {{- if $img }}
       <section class="home-hero">
         <div class="home-hero-inner">
-          <img class="home-hero-img" src="{{ $img | absURL }}" alt="home hero" loading="lazy" />
+          <img class="home-hero-img" src="{{ $img | relURL }}" alt="home hero" loading="lazy" />
           <div class="home-hero-text">
             <h1 class="home-hero-title">{{ site.Params.homeHeroTitle | default site.Title }}</h1>
             {{- with site.Params.homeHeroSubtitle }}
@@ -77,7 +76,7 @@
           {{- partial "post_meta.html" . -}}
         </footer>
         {{- end }}
-        <a class="entry-link" aria-label="post link to {{ .Title | plainify }}" href="{{ .Permalink }}"></a>
+        <a class="entry-link" aria-label="post link to {{ .Title | plainify }}" href="{{ .RelPermalink }}"></a>
       </article>
     {{- end }}
 
@@ -85,10 +84,10 @@
     <footer class="page-footer">
       <nav class="pagination">
         {{- if $paginator.HasPrev }}
-        <a class="prev" href="{{ $paginator.Prev.URL | absURL }}">«&nbsp;{{ i18n "prev_page" }}</a>
+        <a class="prev" href="{{ $paginator.Prev.URL | relLangURL }}">«&nbsp;{{ i18n "prev_page" }}</a>
         {{- end }}
         {{- if $paginator.HasNext }}
-        <a class="next" href="{{ $paginator.Next.URL | absURL }}">{{ i18n "next_page" }}&nbsp;»</a>
+        <a class="next" href="{{ $paginator.Next.URL | relLangURL }}">{{ i18n "next_page" }}&nbsp;»</a>
         {{- end }}
       </nav>
     </footer>
@@ -97,7 +96,7 @@
 
   {{- partial "site_sidebar.html" . -}}
 </div>
-{{- if $centerBundle }}</div>{{ end }}
+</div>
 
 {{- end }}{{/* end profileMode */}}
 

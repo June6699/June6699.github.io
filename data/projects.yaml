@@ -1,0 +1,13 @@
+items:
+  - title: "ASCII Generator（Python）"
+    summary: "图片/视频转 ASCII，依赖 OpenCV 与 Pillow。含环境配置、命令示例与脚本下载路径。"
+    stack: ["Python", "OpenCV", "Pillow"]
+    status: "Local Tool"
+    demoUrl: ""
+    docsUrl: "/scripts/ascii-generator/guide.html"
+  - title: "ASCII 字符视频引擎（浏览器）"
+    summary: "本地选视频即可解析、播放、存档与导出 MP4。克隆到本地时请用 static/scripts/vid2ascii-gif 下脚本或说明启动，勿直接双击 HTML。"
+    stack: ["JavaScript", "FFmpeg", "WASM"]
+    status: "Browser Demo"
+    demoUrl: "/scripts/vid2ascii-gif/index.html"
+    docsUrl: "/scripts/vid2ascii-gif/guide.html"

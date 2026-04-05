@@ -1,0 +1,69 @@
+{{- define "main" }}
+{{- $passwordHash := getenv "HUGO_MOMENTS_PASSWORD_HASH" | strings.TrimSpace -}}
+{{- $recoveryEmail := (getenv "HUGO_MOMENTS_RECOVERY_EMAIL" | strings.TrimSpace) | default (site.Params.sidebarEmail | default "") -}}
+{{- $sessionSeed := $passwordHash | default "missing-password-hash" -}}
+
+<section class="moments-shell" data-moments-gate-root data-password-hash="{{ $passwordHash }}" data-session-key="moments-access-{{ slicestr $sessionSeed 0 12 }}" data-recovery-email="{{ $recoveryEmail }}">
+  <header class="moments-hero">
+    <div class="moments-hero__copy">
+      <p class="moments-hero__eyebrow">Private Stream</p>
+      <h1>{{ .Title }}</h1>
+      {{- if .Description }}
+      <p class="moments-hero__lead">{{ .Description }}</p>
+      {{- end }}
+      {{- if .Content }}
+      <div class="moments-hero__intro post-content">{{ .Content }}</div>
+      {{- end }}
+    </div>
+  </header>
+
+  <section class="moments-gate" data-moments-gate-panel>
+    <div class="moments-gate__card">
+      <p class="moments-gate__eyebrow">Access Gate</p>
+      <h2>输入口令后查看动态流</h2>
+      <p class="moments-gate__text">密码不会以明文写进模板，页面只拿到构建时注入的哈希值。动态内容源目录是 <code>content/moments/</code>。</p>
+
+      <form class="moments-gate__form" data-moments-gate-form>
+        <label class="moments-gate__label" for="moments-password">访问口令</label>
+        <input id="moments-password" class="moments-gate__input" type="password" autocomplete="current-password" placeholder="请输入动态口令" required />
+
+        <label class="moments-gate__remember">
+          <input type="checkbox" data-moments-remember />
+          记住这次设备访问
+        </label>
+
+        <div class="moments-gate__actions">
+          <button class="moments-gate__button" type="submit">进入动态</button>
+          <button class="moments-gate__link" type="button" data-moments-forgot>忘记密码</button>
+        </div>
+      </form>
+
+      <form class="moments-gate__recovery" data-moments-recovery-form hidden>
+        <label class="moments-gate__label" for="moments-email">邮箱找回</label>
+        <input id="moments-email" class="moments-gate__input" type="email" placeholder="输入你的邮箱地址" required />
+        <div class="moments-gate__actions">
+          <button class="moments-gate__button moments-gate__button--ghost" type="submit">发起邮件</button>
+        </div>
+        <p class="moments-gate__hint">纯静态站无法直接做站内验证码校验，这里会调用默认邮件客户端，向站长邮箱发起找回请求。</p>
+      </form>
+
+      <p class="moments-gate__status" data-moments-status aria-live="polite"></p>
+    </div>
+  </section>
+
+  <section class="moments-feed" data-moments-feed hidden>
+    {{- range .RegularPages.ByDate.Reverse }}
+      {{- partial "moments_card.html" . -}}
+    {{- else }}
+    <article class="moments-card moments-card--empty">
+      <div class="moments-card__body">
+        <h2 class="moments-card__title">还没有动态</h2>
+        <p class="moments-empty__text">请在 <code>content/moments/</code> 下新增 Markdown 条目。</p>
+      </div>
+    </article>
+    {{- end }}
+  </section>
+
+  <script defer src="{{ "/js/moments-gate.js" | relURL }}"></script>
+</section>
+{{- end }}

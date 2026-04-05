@@ -1,0 +1,53 @@
+{{- $srcPage := . -}}
+<article class="moments-card">
+  <div class="moments-card__rail">
+    <time class="moments-card__date" datetime="{{ $srcPage.Date.Format "2006-01-02T15:04:05Z07:00" }}">{{ $srcPage.Date.Format "01/02" }}</time>
+    <span class="moments-card__year">{{ $srcPage.Date.Format "2006" }}</span>
+  </div>
+
+  <div class="moments-card__body">
+    <div class="moments-card__meta">
+      <span class="moments-stamp">{{ $srcPage.Date.Format "2006-01-02 15:04" }}</span>
+      {{- with $srcPage.Params.place }}
+      <span class="moments-chip">{{ . }}</span>
+      {{- end }}
+      {{- with $srcPage.Params.mood }}
+      <span class="moments-chip moments-chip--accent">{{ . }}</span>
+      {{- end }}
+    </div>
+
+    <h2 class="moments-card__title">
+      <a href="{{ $srcPage.RelPermalink }}">{{ $srcPage.Title }}</a>
+    </h2>
+
+    <div class="moments-card__content post-content">
+      {{ $srcPage.Content }}
+    </div>
+
+    {{- with $srcPage.Params.photos }}
+    <div class="moments-gallery">
+      {{- range . }}
+      {{- $img := . -}}
+      {{- if and (not (strings.HasPrefix $img "http://")) (not (strings.HasPrefix $img "https://")) -}}
+        {{- $img = $img | relURL -}}
+      {{- end -}}
+      <figure class="moments-gallery__item">
+        <img src="{{ $img }}" alt="{{ $srcPage.Title }}" loading="lazy" />
+      </figure>
+      {{- end }}
+    </div>
+    {{- end }}
+
+    {{- with $srcPage.Params.tags }}
+    <ul class="moments-tags">
+      {{- range . }}
+      <li>{{ . }}</li>
+      {{- end }}
+    </ul>
+    {{- end }}
+
+    {{- if ne ($srcPage.Lastmod.Format "2006-01-02 15:04") ($srcPage.Date.Format "2006-01-02 15:04") }}
+    <p class="moments-card__updated">更新于 {{ $srcPage.Lastmod.Format "2006-01-02 15:04" }}</p>
+    {{- end }}
+  </div>
+</article>

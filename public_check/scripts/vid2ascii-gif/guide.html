@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>ASCII 字符视频引擎 · 本地运行说明</title>
+    <style>
+        :root {
+            --accent: #00e676;
+            --accent-dim: rgba(0,230,118,0.12);
+            --accent-border: rgba(0,230,118,0.35);
+            --bg-panel: rgba(12,12,12,0.93);
+            --border: rgba(255,255,255,0.08);
+            --text: #e4e4e4;
+            --muted: #9e9e9e;
+            --code-bg: rgba(0,0,0,0.55);
+        }
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            background: #000 url('./background.jpg') no-repeat center center fixed;
+            background-size: cover;
+            color: var(--text);
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            display: flex; flex-direction: column; align-items: center;
+            padding: 18px 10px 48px;
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+        body::before {
+            content: ''; position: fixed; inset: 0;
+            background: rgba(0,0,0,0.84); z-index: -1;
+        }
+        .top-bar {
+            width: min(800px, 98vw);
+            display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between;
+            gap: 10px; margin-bottom: 14px;
+        }
+        .top-bar a {
+            color: var(--accent);
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 600;
+        }
+        .top-bar a:hover { text-decoration: underline; }
+        .panel {
+            background: var(--bg-panel);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px 22px;
+            margin-bottom: 14px;
+            backdrop-filter: blur(14px);
+            width: min(800px, 98vw);
+        }
+        h1 {
+            font-size: 1.35rem;
+            font-weight: 700;
+            margin-bottom: 12px;
+            letter-spacing: 0.02em;
+        }
+        h2 {
+            font-size: 0.95rem;
+            color: var(--accent);
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            margin: 22px 0 10px;
+            padding-bottom: 6px;
+            border-bottom: 1px solid var(--border);
+        }
+        h2:first-of-type { margin-top: 0; }
+        p { margin: 10px 0; color: var(--text); }
+        p.lead { color: var(--muted); font-size: 0.95rem; }
+        strong { color: #fff; font-weight: 600; }
+        ol, ul { margin: 10px 0 10px 1.25rem; color: var(--muted); }
+        li { margin: 6px 0; }
+        li strong { color: var(--text); }
+        pre {
+            margin: 12px 0;
+            padding: 12px 14px;
+            background: var(--code-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            overflow-x: auto;
+            font-size: 13px;
+            line-height: 1.45;
+        }
+        code { font-family: ui-monospace, 'Cascadia Code', Consolas, monospace; color: #b2ffb2; }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 14px 0;
+            font-size: 0.9rem;
+        }
+        th, td {
+            border: 1px solid var(--border);
+            padding: 10px 12px;
+            text-align: left;
+        }
+        th {
+            background: var(--accent-dim);
+            color: var(--accent);
+            font-weight: 600;
+            font-size: 0.78rem;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+        }
+        td { color: var(--muted); }
+        td code { color: #7dffb0; font-size: 0.85em; }
+        .note {
+            margin-top: 16px;
+            padding: 10px 12px;
+            border-left: 3px solid var(--accent-border);
+            background: rgba(0,230,118,0.06);
+            border-radius: 0 8px 8px 0;
+            font-size: 0.88rem;
+            color: var(--muted);
+        }
+        .note a { color: var(--accent); }
+    </style>
+</head>
+<body>
+    <div class="top-bar">
+        <a href="./index.html">← 打开演示 Demo</a>
+        <a href="./README-本地运行.md" download>下载 README（.md 源文件）</a>
+    </div>
+
+    <article class="panel">
+        <h1>ASCII 字符视频引擎 · 本地运行说明</h1>
+        <p class="lead">本目录依赖 <strong>FFmpeg WASM</strong> 与 <strong>COI Service Worker</strong>。浏览器安全策略要求页面必须通过 <strong>HTTP/HTTPS</strong> 提供，<strong>不能</strong>用资源管理器双击 <code>index.html</code>（<code>file://</code> 协议）。</p>
+
+        <h2>Windows：一键启动（推荐）</h2>
+        <ol>
+            <li>确认已安装 Python 3，且可在终端执行 <code>python</code>。</li>
+            <li>在本目录双击 <strong><code>run_vidascii-git.bat</code></strong>。</li>
+            <li>在浏览器打开：<strong><code>http://localhost:8000/index.html</code></strong></li>
+        </ol>
+        <p class="lead">关闭黑窗口即停止服务。</p>
+
+        <h2>手动启动 HTTP 服务</h2>
+        <p>在本目录执行：</p>
+        <pre><code>python -m http.server 8000</code></pre>
+        <p>然后访问 <code>http://localhost:8000/index.html</code>。</p>
+
+        <h2>放在本博客（Hugo）里预览</h2>
+        <p>在博客仓库根目录：</p>
+        <pre><code>hugo server</code></pre>
+        <p>浏览器访问：<strong><code>http://localhost:1313/scripts/vid2ascii-gif/</code></strong>（或你配置的端口）。</p>
+        <p class="lead">线上 GitHub Pages 为 HTTPS，一般可直接打开对应路径，无需再开 Python 服务。</p>
+
+        <h2>同目录必备文件（除 <code>history</code> 示例外）</h2>
+        <table>
+            <thead>
+                <tr><th>文件</th><th>说明</th></tr>
+            </thead>
+            <tbody>
+                <tr><td><code>index.html</code></td><td>页面</td></tr>
+                <tr><td><code>coi-serviceworker.js</code></td><td>跨域隔离 / SharedArrayBuffer</td></tr>
+                <tr><td><code>ffmpeg.min.js</code></td><td>FFmpeg 封装</td></tr>
+                <tr><td><code>ffmpeg-core.js</code> / <code>ffmpeg-core.wasm</code></td><td>核心</td></tr>
+                <tr><td><code>814.ffmpeg.js</code></td><td>UMD 分包，部分环境下加载需要</td></tr>
+                <tr><td><code>background.jpg</code></td><td>背景图</td></tr>
+                <tr><td><code>run_vidascii-git.bat</code></td><td>本地 <code>http.server</code></td></tr>
+            </tbody>
+        </table>
+        <p class="lead">若初始化失败，请打开开发者工具 (F12) → <strong>Network</strong>，确认上述文件均为 <strong>200</strong>（无 404）。</p>
+
+        <h2>重新下载依赖（可选）</h2>
+        <p>见同目录 <a href="./download-ffmpeg-assets.md" style="color:var(--accent);"><code>download-ffmpeg-assets.md</code></a>（PowerShell 下载脚本示例）。该文件仍为 Markdown 源码，建议在编辑器中打开。</p>
+
+        <div class="note">说明页 HTML 与 <code>README-本地运行.md</code> 内容同步维护；需要纯文本可复制时可用顶部「下载 README」。</div>
+    </article>
+</body>
+</html>

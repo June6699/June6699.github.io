@@ -32,7 +32,7 @@
       {{- end }}
       {{- with site.GetPage (printf "/%s/%s" .Type $termName) }}
       <li>
-        <a href="{{ .Permalink }}" class="term-pill term-pill--{{ $exactCount }}">
+        <a href="{{ .RelPermalink }}" class="term-pill term-pill--{{ $exactCount }}">
           <span class="term-name">{{ .Name }}</span>
           <span class="term-count">{{ $exactCount }}</span>
         </a>
@@ -58,27 +58,12 @@
       {{- end }}
       {{- with site.GetPage (printf "/%s/%s" .Type $termName) }}
       <li>
-        <a href="{{ .Permalink }}">{{ .Name }} <sup>{{ $exactCount }}</sup></a>
+        <a href="{{ .RelPermalink }}">{{ .Name }} <sup>{{ $exactCount }}</sup></a>
       </li>
       {{- end }}
       {{- end }}
     </ul>
   </section>
 </div>
-
-<style>
-.terms-page { max-width: 820px; margin: 0 auto; }
-.terms-intro { color: var(--secondary); margin-bottom: 1.5rem; }
-.terms-subtitle { font-size: 1rem; margin: 1.25rem 0 0.75rem; color: var(--primary); }
-.terms-by-count .terms-tags--by-count,
-.terms-by-name .terms-tags--alpha { list-style: none; padding: 0; display: flex; flex-wrap: wrap; gap: 0.5rem; }
-.terms-tags a { padding: 0.4rem 0.85rem; background: var(--entry); border-radius: 8px; border: 1px solid var(--border); color: var(--secondary); }
-.terms-tags a:hover { background: var(--tertiary); color: var(--theme); border-color: var(--primary); }
-.term-pill { display: inline-flex; align-items: center; gap: 0.35rem; }
-.term-pill--1 { font-size: 0.9rem; }
-.term-pill--2,
-.term-pill--3 { font-size: 1rem; }
-.term-count { background: var(--primary); color: var(--theme); padding: 0.1em 0.4em; border-radius: 999px; font-size: 0.8em; }
-</style>
 
 {{- end }}
