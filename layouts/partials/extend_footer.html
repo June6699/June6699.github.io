@@ -122,6 +122,24 @@
 </script>
 {{- end }}
 
+{{- /* 首页侧栏标签导航：展开一组时收起其余（不依赖 <details name> 的旧浏览器亦可） */ -}}
+{{- if .IsHome -}}
+<script>
+(function () {
+    var wrap = document.querySelector('.sidebar-tag-nav__scroll');
+    if (!wrap) return;
+    wrap.addEventListener('toggle', function (e) {
+        var el = e.target;
+        if (!el.matches || !el.matches('details.sidebar-tag-nav__group')) return;
+        if (!el.open) return;
+        wrap.querySelectorAll('details.sidebar-tag-nav__group').forEach(function (d) {
+            if (d !== el) d.open = false;
+        });
+    }, true);
+})();
+</script>
+{{- end -}}
+
 {{- /* Pretext runtime：仅当页面存在 data-pretext-* 标记时才会实际工作 */ -}}
 <script type="module" src="/js/pretext-runtime.js"></script>
 

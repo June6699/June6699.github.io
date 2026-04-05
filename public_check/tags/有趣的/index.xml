@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>有趣的 on June's Blog</title><link>https://June6699.github.io/tags/%E6%9C%89%E8%B6%A3%E7%9A%84/</link><description>Recent content in 有趣的 on June's Blog</description><generator>Hugo</generator><language>zh-cn</language><lastBuildDate>Fri, 03 Apr 2026 00:00:00 +0000</lastBuildDate><atom:link href="https://June6699.github.io/tags/%E6%9C%89%E8%B6%A3%E7%9A%84/index.xml" rel="self" type="application/rss+xml"/><item><title>Pretext 实时重排互动实验</title><link>https://June6699.github.io/posts/pretext-demo/</link><pubDate>Fri, 03 Apr 2026 00:00:00 +0000</pubDate><guid>https://June6699.github.io/posts/pretext-demo/</guid><description>&lt;p&gt;这个页面不再只是“换背景色”，而是做成真正可交互的 &lt;a href="https://github.com/chenglou/pretext"&gt;pretext&lt;/a&gt; 实验：你可以拖动滑块，实时改变文本容器宽度，观察行数和高度的动态变化。&lt;/p&gt;
-&lt;h3 id="pretext-demo-扩展展示"&gt;Pretext Demo 扩展展示&lt;/h3&gt;
-&lt;h4 id="shrinkwrap-showdown紧凑宽度"&gt;Shrinkwrap Showdown（紧凑宽度）&lt;/h4&gt;
-&lt;h5 id="演示效果"&gt;演示效果&lt;/h5&gt;
-&lt;div class="pretext-demo"&gt;
-&lt;section class="pretext-page"&gt;
-&lt;div class="pretext-card"&gt;
-&lt;p class="pretext-intro"&gt;左侧是普通块级文本，右侧启用 pretext 的气泡收紧，行数尽量保持一致但宽度更紧凑。&lt;/p&gt;</description></item></channel></rss>

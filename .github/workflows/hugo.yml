@@ -29,6 +29,9 @@ jobs:
           hugo-version: "latest"
           extended: true
 
+      - name: Sync images to static/images
+        run: python scripts/sync_images.py
+
       - name: Build with Hugo
         env:
           GITALK_CLIENT_ID: ${{ secrets.GITALK_CLIENT_ID }}

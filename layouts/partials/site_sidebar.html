@@ -31,6 +31,110 @@
     </div>
   </section>
 
+  {{- if .IsHome }}
+  {{- /* 一级标签 = 不含「/」的整名，或「/」前段；每篇文章对每个一级只计 1 次 */ -}}
+  {{- $rootCount := newScratch -}}
+  {{- range site.RegularPages -}}
+    {{- if in site.Params.mainSections .Type -}}
+      {{- $seen := slice -}}
+      {{- with .Params.tags -}}
+        {{- range . -}}
+          {{- $t := . -}}
+          {{- $root := $t -}}
+          {{- if strings.Contains $t "/" -}}
+            {{- $root = index (split $t "/") 0 -}}
+          {{- end -}}
+          {{- if not (in $seen $root) -}}
+            {{- $seen = $seen | append $root -}}
+          {{- end -}}
+        {{- end -}}
+      {{- end -}}
+      {{- range $seen -}}
+        {{- $k := printf "rc_%s" . -}}
+        {{- $rootCount.Set $k (add ($rootCount.Get $k | default 0) 1) -}}
+      {{- end -}}
+    {{- end -}}
+  {{- end -}}
+  {{- $roots := slice -}}
+  {{- range $_, $tax := site.Taxonomies.tags -}}
+    {{- $t := $tax.Page.Title -}}
+    {{- $root := $t -}}
+    {{- if strings.Contains $t "/" -}}
+      {{- $root = index (split $t "/") 0 -}}
+    {{- end -}}
+    {{- if not (in $roots $root) -}}
+      {{- $roots = $roots | append $root -}}
+    {{- end -}}
+  {{- end -}}
+  {{- $rootRows := slice -}}
+  {{- range $roots -}}
+    {{- $c := $rootCount.Get (printf "rc_%s" .) | default 0 -}}
+    {{- if ge $c 1 -}}
+      {{- $rootRows = $rootRows | append (dict "root" . "count" $c) -}}
+    {{- end -}}
+  {{- end -}}
+  {{- /* 子列表只含「root/子路径」词条，不再重复列出与一级同名的根标签；一级数字优先用根词条 len(Pages)（与标签归档页一致），无根词条时用去重篇数 */ -}}
+  {{- $tagNav := newScratch -}}
+  {{- range $rootRows -}}
+    {{- $r := .root -}}
+    {{- $pfx := printf "%s/" $r -}}
+    {{- $items := slice -}}
+    {{- $termPages := 0 -}}
+    {{- $rootLink := "" -}}
+    {{- range $_, $tax := site.Taxonomies.tags -}}
+      {{- $title := $tax.Page.Title -}}
+      {{- if eq $title $r -}}
+        {{- $termPages = len $tax.Pages -}}
+        {{- $rootLink = $tax.Page.RelPermalink -}}
+      {{- else if strings.HasPrefix $title $pfx -}}
+        {{- $items = $items | append (dict "title" $title "permalink" $tax.Page.RelPermalink "count" (len $tax.Pages)) -}}
+      {{- end -}}
+    {{- end -}}
+    {{- $umbrella := $rootCount.Get (printf "rc_%s" $r) | default 0 -}}
+    {{- $sumc := $umbrella -}}
+    {{- if gt $termPages 0 -}}
+      {{- $sumc = $termPages -}}
+    {{- end -}}
+    {{- $tagNav.Set $r (dict "children" (sort $items "count" "desc") "summaryCount" $sumc "rootLink" $rootLink) -}}
+  {{- end -}}
+  <section class="sidebar-card sidebar-tag-nav">
+    <h3 class="sidebar-title sidebar-tag-nav__heading">标签导航</h3>
+    <p class="sidebar-tag-nav__tip">一级按下属文章数排序；点行展开子标签（同时只展开一组）</p>
+    <div class="sidebar-tag-nav__scroll">
+      {{- range sort $rootRows "count" "desc" -}}
+        {{- $root := .root -}}
+        {{- $pfx := printf "%s/" $root -}}
+        {{- $nav := $tagNav.Get $root | default dict -}}
+        {{- $childItems := index $nav "children" | default slice -}}
+        {{- $sumc := index $nav "summaryCount" | default .count -}}
+        {{- $rootLink := index $nav "rootLink" | default "" -}}
+        {{- if gt (len $childItems) 0 -}}
+        <details class="sidebar-tag-nav__group" name="sidebar-tag-nav">
+          <summary class="sidebar-tag-nav__group-sum">
+            <span class="sidebar-tag-nav__root">{{ $root }}</span>
+            <span class="sidebar-tag-nav__tot">{{ $sumc }}</span>
+            <span class="sidebar-tag-nav__group-chev" aria-hidden="true">▸</span>
+          </summary>
+          <ul class="sidebar-tag-nav__sub">
+            {{- range $childItems -}}
+            {{- $disp := strings.TrimPrefix $pfx .title -}}
+            <li>
+              <a class="sidebar-tag-nav__sublink" href="{{ .permalink }}">{{ $disp }}<span class="sidebar-tag-nav__subc">{{ .count }}</span></a>
+            </li>
+            {{- end -}}
+          </ul>
+        </details>
+        {{- else if $rootLink -}}
+        <a class="sidebar-tag-nav__flat" href="{{ $rootLink }}">
+          <span class="sidebar-tag-nav__root">{{ $root }}</span>
+          <span class="sidebar-tag-nav__tot">{{ $sumc }}</span>
+        </a>
+        {{- end -}}
+      {{- end -}}
+    </div>
+  </section>
+  {{- end }}
+
   {{- $hideTags := and .IsHome (site.Params.sidebarHideTagsOnHome | default false) -}}
   {{- if not $hideTags }}
   <section class="sidebar-card sidebar-tags">

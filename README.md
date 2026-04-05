@@ -40,10 +40,11 @@ GitHub Actions 已在工作流中读取仓库 **Secrets**：`GITALK_CLIENT_ID`�
 
 - 文章：`content/posts/卜算子·自嘲.md`（保留可见文件名，不用 index.md）
 - **正文里图片路径**：`./images/卜算子·自嘲/xxx.png`（相对路径，和文件名一致）
-- 图片存两处（**只用一个 static 目录**，不重复）：
-  - `content/posts/images/卜算子·自嘲/` → Typora 打开 md 时 `./images/` 即指向这里，**本地能看图**
-  - 运行 `scripts/sync_images.py` 同步到 `static/images/卜算子·自嘲/` → 正文里 `./images/` 会输出为 `/images/卜算子·自嘲/xxx`，**网页能看图**
-- 全站图片统一在 `static/images/`（含 `header_img/` 与各文章子目录），不再使用 `static/posts/images/`。
+- **图片只提交在 `content` 里**（`static/images/` 由脚本生成，已 `.gitignore`，避免仓库双份）：
+  - 文章：`content/posts/images/<与 md 对应的子目录>/` → 本地打开 `content/posts/某文.md` 时写 `./images/子目录/xxx.png` **能看图**
+  - 动态：`content/moments/` 下放图，`photos` 写 `图名.png` 或 `./图名.png`
+  - 构建前运行 **`python scripts/sync_images.py`**（`run_server.bat` 会自动跑）→ 复制到 `static/images/`，网页用 `/images/...` **能看图**
+- 全站共用图（头图、侧栏等）放在 **`content/posts/images/header_img/`** 等子目录即可，勿再单独维护一套 `static/images` 进 Git。
 
 ## 迁移脚本
 

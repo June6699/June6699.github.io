@@ -178,6 +178,149 @@
     border-color: var(--primary);
 }
 
+/* 首页侧栏：竖排一级标签（按下属文章数排序），<details> 展开子标签 */
+.sidebar-tag-nav__heading {
+    margin-bottom: 0.35rem;
+}
+.sidebar-tag-nav__tip {
+    margin: 0 0 0.5rem 0;
+    font-size: 0.72rem;
+    line-height: 1.45;
+    color: var(--muted);
+}
+.sidebar-tag-nav__scroll {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    max-height: min(42vh, 320px);
+    min-height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    overscroll-behavior: contain;
+    touch-action: pan-y;
+    -webkit-overflow-scrolling: touch;
+    padding: 0.1rem 0 0.05rem 0;
+    scrollbar-width: thin;
+    scrollbar-color: color-mix(in srgb, var(--accent) 35%, var(--border) 65%) transparent;
+}
+.sidebar-tag-nav__scroll::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+.sidebar-tag-nav__scroll::-webkit-scrollbar-track {
+    background: color-mix(in srgb, var(--theme) 92%, transparent 8%);
+    border-radius: 4px;
+}
+.sidebar-tag-nav__scroll::-webkit-scrollbar-thumb {
+    background: color-mix(in srgb, var(--accent) 40%, var(--border) 60%);
+    border-radius: 4px;
+}
+.sidebar-tag-nav__group {
+    flex-shrink: 0;
+    border: 1px solid color-mix(in srgb, var(--border) 90%, transparent 10%);
+    border-radius: 8px;
+    background: color-mix(in srgb, var(--theme) 40%, var(--entry) 60%);
+    overflow: hidden;
+}
+
+/* 仅存在根标签、无「根/子」子项时：整行链到归档，样式与 summary 一致 */
+a.sidebar-tag-nav__flat {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.38rem 0.45rem;
+    font-size: 0.84rem;
+    text-decoration: none;
+    color: inherit;
+    border: 1px solid color-mix(in srgb, var(--border) 90%, transparent 10%);
+    border-radius: 8px;
+    background: color-mix(in srgb, var(--theme) 40%, var(--entry) 60%);
+    box-sizing: border-box;
+}
+
+a.sidebar-tag-nav__flat:hover {
+    border-color: color-mix(in srgb, var(--accent) 35%, var(--border) 65%);
+    background: color-mix(in srgb, var(--accent) 6%, var(--entry) 94%);
+}
+.sidebar-tag-nav__group > summary {
+    list-style: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.38rem 0.45rem;
+    font-size: 0.84rem;
+    user-select: none;
+}
+.sidebar-tag-nav__group > summary::-webkit-details-marker {
+    display: none;
+}
+.sidebar-tag-nav__group-sum:focus {
+    outline: 2px solid color-mix(in srgb, var(--accent) 50%, transparent);
+    outline-offset: -1px;
+}
+.sidebar-tag-nav__root {
+    flex: 1;
+    min-width: 0;
+    font-weight: 600;
+    color: var(--primary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.sidebar-tag-nav__tot {
+    flex: 0 0 auto;
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: var(--accent);
+    font-variant-numeric: tabular-nums;
+}
+.sidebar-tag-nav__group-chev {
+    flex: 0 0 auto;
+    font-size: 0.6rem;
+    color: var(--muted);
+    transition: transform 0.16s ease;
+}
+.sidebar-tag-nav__group[open] .sidebar-tag-nav__group-chev {
+    transform: rotate(90deg);
+}
+.sidebar-tag-nav__sub {
+    list-style: none;
+    margin: 0;
+    padding: 0.15rem 0.35rem 0.45rem 0.55rem;
+    border-top: 1px solid color-mix(in srgb, var(--border) 85%, transparent 15%);
+}
+.sidebar-tag-nav__sub li {
+    margin: 0;
+    padding: 0;
+}
+.sidebar-tag-nav__sublink {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.35rem;
+    padding: 0.22rem 0.15rem;
+    font-size: 0.78rem;
+    color: var(--secondary);
+    text-decoration: none;
+    border-radius: 4px;
+}
+.sidebar-tag-nav__sublink:hover {
+    color: var(--accent);
+    background: color-mix(in srgb, var(--accent) 8%, transparent 92%);
+}
+.sidebar-tag-nav__subc {
+    flex-shrink: 0;
+    font-size: 0.68rem;
+    font-weight: 600;
+    color: var(--muted);
+    font-variant-numeric: tabular-nums;
+}
+.sidebar-tag-nav__sublink:hover .sidebar-tag-nav__subc {
+    color: var(--accent);
+}
+
 .home-hero {
     margin: 0.5rem 0 1.25rem 0;
 }
@@ -420,9 +563,17 @@
     transition: width 80ms linear;
 }
 
-/* 顶栏下阴影更自然 */
+/* 顶栏：吸顶，长文任意位置可点到右上角主题/菜单（略向上滚即可与顶栏对齐） */
 .header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: var(--theme);
     box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+}
+
+:root[data-theme="dark"] .header {
+    background: var(--theme);
 }
 
 .main .first-entry,

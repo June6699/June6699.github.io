@@ -20,9 +20,13 @@ googleAnalytics = "G-S7DXV0QV58"
   [security.funcs]
     getenv = ['^HUGO_', '^CI$', '^GITALK_']
 
-# 排除 content/posts/images（junction），避免 Windows 下 read 报错
+# 排除：文章图目录、动态目录下的位图（仅作源文件，由 scripts/sync_images.py 复制到 static/images）
 [build]
-  ignoreFiles = ["content/posts/images", "content/posts/images/"]
+  ignoreFiles = [
+    "content/posts/images",
+    "content/posts/images/",
+    "content/moments/.*\\.(?i)(png|jpg|jpeg|webp|gif|bmp|avif)$",
+  ]
 # 「未来日期」文章：默认 hugo 不会生成（见 hugo list future）。请在 hugo / hugo server 命令中加 --buildFuture，
 # 已写入 run_server.bat 与 .github/workflows/hugo.yml。
 

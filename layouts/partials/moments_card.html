@@ -28,8 +28,12 @@
     <div class="moments-gallery">
       {{- range . }}
       {{- $img := . -}}
-      {{- if and (not (strings.HasPrefix $img "http://")) (not (strings.HasPrefix $img "https://")) -}}
+      {{- if or (strings.HasPrefix $img "http://") (strings.HasPrefix $img "https://") -}}
+      {{- else if strings.HasPrefix $img "/" -}}
         {{- $img = $img | relURL -}}
+      {{- else -}}
+        {{- $path := strings.TrimPrefix "./" $img -}}
+        {{- $img = printf "/images/moments/%s" $path | relURL -}}
       {{- end -}}
       <figure class="moments-gallery__item">
         <img src="{{ $img }}" alt="{{ $srcPage.Title }}" loading="lazy" />

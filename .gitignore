@@ -1,6 +1,10 @@
 # Hugo
 /public/
 /resources/_gen/
+/public_check/
+
+# 由 scripts/sync_images.py 生成（唯一源：content/posts/images、content/moments 内图片）
+/static/images/
 
 # OS
 .DS_Store

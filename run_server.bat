@@ -35,7 +35,7 @@ if not "%~1"=="" (
   )
 )
 
-echo Syncing content/posts/images -^> static/images ...
+echo Syncing images: content/posts/images + content/moments -^> static/images ...
 python scripts\sync_images.py
 if errorlevel 1 (
   echo [ERROR] sync_images.py failed. Check Python and paths above.
