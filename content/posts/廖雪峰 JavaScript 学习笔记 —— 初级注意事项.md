@@ -1,5 +1,5 @@
 ---
-title: 一些简单的初级注意事项
+title: JavaScript简单的初级注意事项
 author: June
 date: 2026-04-06
 tags: 
@@ -517,3 +517,180 @@ parseInt('30');
 console.log('count = ' + count); // 3
 ```
 
+
+
+### 2.8 高阶函数
+
+`JavaScript`的函数其实都指向某个变量。既然变量可以指向函数，函数的参数能接收变量，那么一个函数就可以接收另一个函数作为参数，这种函数就称之为高阶函数。
+
+
+
+#### 2.8.1 map/reduce
+
+如果你读过`Google`的那篇大名鼎鼎的论文“[MapReduce: Simplified Data Processing on Large Clusters](https://research.google/pubs/mapreduce-simplified-data-processing-on-large-clusters/)”，你就能大概明白`map/reduce`的概念。
+
+`MapReduce` 就是：
+**把超级大的数据，先拆开来并行算（Map），再把结果汇总到一起（Reduce）**
+
+假如你有 **100 亿行日志**，要统计：
+- 每个单词出现多少次
+- 每个IP访问了多少次
+- 每个商品卖了多少
+
+
+但问题来了：
+
+- 数据怎么切分？
+- 机器之间怎么传数据？
+- 某台机器挂了怎么办？
+- 结果怎么合到一起？
+
+
+
+经典例子：统计单词次数（WordCount）
+
+#### Map（映射）
+
+把一大段文本，**拆成很多小片段**，丢给很多机器并行处理。每台机器做一件简单的事，遇到一个词，就输出 `(单词, 1)`，比如一句话：`"I love JS I love MapReduce"`，map 之后输出：
+
+```
+(I, 1)
+(love, 1)
+(JS, 1)
+(I, 1)
+(love, 1)
+(MapReduce, 1)
+```
+
+
+
+#### Shuffle（洗牌，系统自动做）
+系统自动把**相同 key 的数据，分到同一台机器**。比如所有 `I` 放一起，所有 `love` 放一起：
+
+```
+I: [1, 1]
+love: [1, 1]
+JS: [1]
+MapReduce: [1]
+```
+
+
+
+#### Reduce（归约）
+
+每台机器拿到一组相同 key 的数据，做**聚合**，把一堆 1 加起来。
+
+```
+I: 1+1 = 2
+love: 1+1 = 2
+JS: 1
+MapReduce: 1
+```
+
+- JS `array.map()`：逐个处理元素，输出新数组 → 对应分布式 Map
+  
+- JS `array.reduce()`：把一堆值聚合成一个结果 → 对应分布式 Reduce
+
+Google 那篇论文，就是把这个简单思路，**放大到几千台机器的大数据场景**。
+
+![image-20260406214608194](./images/廖雪峰 JavaScript 学习笔记 —— 初级注意事项/image-20260406214608194.png)
+
+```javascript
+let arr = [1, 3, 5, 7, 9];
+arr.reduce(function (x, y) {
+    return x * 10 + y;
+}); // 13579
+```
+
+
+
+一个作业：字符串转数字
+
+```javascript
+function string2int(s) {
+    let res = [];
+    return s.split("").reduce(function(first, second) {
+        return first * 10 + second * 1;
+    }, 0);
+}
+
+s="12345";
+console.log(string2int(s));
+// 12345
+
+// 测试:
+if (string2int('0') === 0 && string2int('12345') === 12345 && string2int('12300') === 12300) {
+    if (string2int.toString().indexOf('parseInt') !== -1) {
+        console.log('请勿使用parseInt()!');
+    } else if (string2int.toString().indexOf('Number') !== -1) {
+        console.log('请勿使用Number()!');
+    } else {
+        console.log('测试通过!');
+    }
+}
+else {
+    console.log('测试失败!');
+}
+
+```
+
+
+
+### 2.9 map与parseInt
+
+#### 2.9.1. 错误代码
+```javascript
+let arr = ['1', '2', '3'];
+let r;
+r = arr.map(parseInt);
+console.log(r);
+```
+
+```javascript
+[1, NaN, NaN]
+```
+
+#### 2.9.2 核心错误原因分析
+##### 2.9.2.1 map 回调函数的传参规则
+
+`map` 遍历数组时，会**自动向回调函数传递3个参数**：
+
+1. 当前元素的值
+2. 当前元素的索引
+3. 原数组本身
+
+##### 2.9.2.2 parseInt 函数的参数规则
+`parseInt` 是原生转换函数，接收**两个必填参数**：
+1. 待转换的字符串
+2. 基数（进制数，如10代表十进制、2代表二进制）
+
+##### 2.9.2.3 逐次执行过程拆解
+`arr.map(parseInt)` 等价于把索引当成进制传给 `parseInt`，执行流程：
+
+1. `parseInt('1', 0)`：基数0默认按十进制解析 → 结果 `1`
+2. `parseInt('2', 1)`：基数1为无效进制 → 结果 `NaN`
+3. `parseInt('3', 2)`：基数2（二进制），但`3`不是有效二进制数 → 结果 `NaN`
+
+
+
+#### 2.9.3 正确使用方法
+#### 1. 显式指定十进制调用 parseInt
+通过箭头函数包裹，**固定进制为10**，屏蔽索引干扰：
+```javascript
+let arr = ['1', '2', '3'];
+let r = arr.map(x => parseInt(x, 10));
+console.log(r); // [1, 2, 3]
+```
+
+#### 2. 直接使用 Number 函数（推荐）
+`Number` 函数只接收1个参数，不受 `map` 索引影响，更简洁：
+
+```javascript
+let arr = ['1', '2', '3'];
+let r = arr.map(Number);
+console.log(r); // [1, 2, 3]
+```
+
+1. 禁止直接用 `arr.map(parseInt)`，会因**索引被当作进制**导致转换失败
+2. 用 `parseInt` 必须通过箭头函数**手动传参+指定十进制**
+3. 简单字符串转数字，优先用 `arr.map(Number)`，无参数陷阱
