@@ -2,8 +2,9 @@
 title: 一些简单的初级注意事项
 author: June
 date: 2026-04-06
-tags: - 学习
-      - 学习/前端
+tags: 
+  - 学习
+  - 学习/前端
 ---
 
 ## 1、快速入门阶段
@@ -42,6 +43,8 @@ let xiaohong = {
 
 
 ### 1.3 Map和Set、Iterable
+
+#### 1.3.1 Map
 
 - `Map`可以用来快速使用两个`array`创建一个`object`
 
@@ -87,6 +90,8 @@ names.map((name, index) => [name, scores[index]])
 
 
 
+#### 1.3.2 Set
+
 - `Set`类似`python`元组，自动过滤重复元素
 
 ```javascript
@@ -127,6 +132,8 @@ for (let x of a) {
 
 
 
+#### 1.3.3 forEach
+
 - 更好的方式是直接使用`iterable`内置的`forEach`方法，它接收一个函数，每次迭代就自动回调该函数
 
 ```javascript
@@ -146,4 +153,32 @@ C, index = 2
 ```
 
 
+
+```javascript
+// Set与Array类似，但Set没有索引，因此回调函数的前两个参数都是元素本身：
+let s = new Set(['A', 'B', 'C']);
+s.forEach(function (element, sameElement, set) {
+    console.log(element);
+});
+
+// Map的回调函数参数依次为value、key和map本身：
+let m = new Map([[1, 'x'], [2, 'y'], [3, 'z']]);
+m.forEach(function (value, key, map) {
+    console.log(value);
+});
+```
+
+
+
+## 2、函数
+
+```javascript
+function abs(x) {
+    if (x >= 0) {
+        return x;
+    } else {
+        return -x;
+    }
+}
+```
 
