@@ -5,8 +5,9 @@
 {{- with getenv "HUGO_MOMENTS_RECOVERY_EMAIL" | strings.TrimSpace }}{{ $rs.Set "recovery" . }}{{ end -}}
 {{- $recoveryEmail := $rs.Get "recovery" | strings.TrimSpace -}}
 {{- $sessionSeed := $passwordHash | default "missing-password-hash" -}}
+{{- $buildNonce := now.Unix -}}
 
-<section class="moments-shell moments-shell--single" data-moments-gate-root data-password-hash="{{ $passwordHash }}" data-session-key="moments-access-{{ slicestr $sessionSeed 0 12 }}" data-recovery-email="{{ $recoveryEmail }}">
+<section class="moments-shell moments-shell--single" data-moments-gate-root data-password-hash="{{ $passwordHash }}" data-session-key="moments-access-{{ slicestr $sessionSeed 0 12 }}-{{ $buildNonce }}" data-recovery-email="{{ $recoveryEmail }}">
   <header class="moments-hero moments-hero--compact">
     <div class="moments-hero__copy">
       <p class="moments-hero__eyebrow">Private Stream</p>
@@ -25,7 +26,7 @@
         <input id="moments-password-single" class="moments-gate__input" type="password" autocomplete="current-password" placeholder="请输入动态口令" required />
         <label class="moments-gate__remember">
           <input type="checkbox" data-moments-remember />
-          记住这次设备访问
+          仅本次会话记住（约 30 分钟）
         </label>
         <div class="moments-gate__actions">
           <button class="moments-gate__button" type="submit">进入动态</button>

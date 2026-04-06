@@ -10,34 +10,41 @@
 {{- end }}
 
 <div class="terms-page">
-  {{- $termsAlpha := .Data.Terms.Alphabetical }}
-  {{- $termsCount := .Data.Terms.ByCount }}
-  {{- $total := len $termsAlpha }}
+  {{- $posts := where site.RegularPages "Section" "posts" }}
+  {{- $excludeTerms := slice "日常" "博客" }}
+  {{- $publicTagCount := newScratch }}
+  {{- range $posts }}
+    {{- with .Params.tags }}
+      {{- range . }}
+        {{- $t := . | string -}}
+        {{- if in $excludeTerms $t -}}{{- continue -}}{{- end -}}
+        {{- $publicTagCount.Set (printf "pc_%s" $t) (add ($publicTagCount.Get (printf "pc_%s" $t) | default 0) 1) -}}
+      {{- end }}
+    {{- end }}
+  {{- end }}
+  {{- $terms := slice }}
+  {{- range $_, $taxonomy := site.Taxonomies.tags }}
+    {{- $t := $taxonomy.Page.Title -}}
+    {{- if in $excludeTerms $t -}}{{- continue -}}{{- end -}}
+    {{- $c := $publicTagCount.Get (printf "pc_%s" $t) | default 0 -}}
+    {{- if gt $c 0 -}}
+      {{- $terms = $terms | append (dict "name" $taxonomy.Page.LinkTitle "raw" $t "rel" $taxonomy.Page.RelPermalink "count" $c) -}}
+    {{- end -}}
+  {{- end }}
+  {{- $total := len $terms }}
 
   <p class="terms-intro">共 <strong>{{ $total }}</strong> 个标签，点击进入该标签下的文章。</p>
 
   <section class="terms-by-count">
     <h2 class="terms-subtitle">按热度</h2>
     <ul class="terms-tags terms-tags--by-count">
-      {{- range $termsCount }}
-      {{- $termName := .Name }}
-      {{- $termKey := lower $termName }}
-      {{- $exactCount := 0 }}
-      {{- range site.RegularPages }}
-        {{- with .Params.tags }}
-          {{- range . }}
-            {{- if eq (lower .) $termKey }}{{ $exactCount = add $exactCount 1 }}{{ end }}
-          {{- end }}
-        {{- end }}
-      {{- end }}
-      {{- with site.GetPage (printf "/%s/%s" $.Section $termName) }}
+      {{- range sort $terms "count" "desc" }}
       <li>
-        <a href="{{ .RelPermalink }}" class="term-pill term-pill--{{ $exactCount }}">
-          <span class="term-name">{{ .LinkTitle }}</span>
-          <span class="term-count">{{ $exactCount }}</span>
+        <a href="{{ .rel }}" class="term-pill term-pill--{{ .count }}">
+          <span class="term-name">{{ .name }}</span>
+          <span class="term-count">{{ .count }}</span>
         </a>
       </li>
-      {{- end }}
       {{- end }}
     </ul>
   </section>
@@ -45,22 +52,10 @@
   <section class="terms-by-name">
     <h2 class="terms-subtitle">按名称</h2>
     <ul class="terms-tags terms-tags--alpha">
-      {{- range $termsAlpha }}
-      {{- $termName := .Name }}
-      {{- $termKey := lower $termName }}
-      {{- $exactCount := 0 }}
-      {{- range site.RegularPages }}
-        {{- with .Params.tags }}
-          {{- range . }}
-            {{- if eq (lower .) $termKey }}{{ $exactCount = add $exactCount 1 }}{{ end }}
-          {{- end }}
-        {{- end }}
-      {{- end }}
-      {{- with site.GetPage (printf "/%s/%s" $.Section $termName) }}
+      {{- range sort $terms "name" "asc" }}
       <li>
-        <a href="{{ .RelPermalink }}">{{ .LinkTitle }} <sup>{{ $exactCount }}</sup></a>
+        <a href="{{ .rel }}">{{ .name }} <sup>{{ .count }}</sup></a>
       </li>
-      {{- end }}
       {{- end }}
     </ul>
   </section>

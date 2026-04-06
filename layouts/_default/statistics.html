@@ -8,9 +8,29 @@
 
 <div class="statistics-page">
   {{- $posts := where site.RegularPages "Section" "posts" }}
+  {{- $excludeTerms := slice "日常" "博客" }}
+  {{- $publicTagCount := newScratch }}
   {{- $total := len $posts }}
   {{- $.Scratch.Set "totalChars" 0 }}
   {{- range $posts }}{{ $.Scratch.Add "totalChars" (countrunes (plainify .Content)) }}{{ end }}
+  {{- range $posts }}
+    {{- with .Params.tags }}
+      {{- range . }}
+        {{- $t := . | string -}}
+        {{- if in $excludeTerms $t -}}{{- continue -}}{{- end -}}
+        {{- $publicTagCount.Set (printf "pc_%s" $t) (add ($publicTagCount.Get (printf "pc_%s" $t) | default 0) 1) -}}
+      {{- end }}
+    {{- end }}
+  {{- end }}
+  {{- $publicTags := slice }}
+  {{- range $_, $taxonomy := site.Taxonomies.tags }}
+    {{- $t := $taxonomy.Page.Title -}}
+    {{- if in $excludeTerms $t -}}{{- continue -}}{{- end -}}
+    {{- $c := $publicTagCount.Get (printf "pc_%s" $t) | default 0 -}}
+    {{- if gt $c 0 -}}
+      {{- $publicTags = $publicTags | append (dict "name" $taxonomy.Page.LinkTitle "rel" $taxonomy.Page.RelPermalink "count" $c) -}}
+    {{- end -}}
+  {{- end }}
   {{- $totalChars := $.Scratch.Get "totalChars" }}
   {{- $currentYear := now.Year }}
   {{- $postsThisYear := where $posts "Date.Year" $currentYear }}
@@ -23,7 +43,7 @@
       <span class="stat-label">文章总数</span>
     </div>
     <div class="stat-card">
-      <span class="stat-number">{{ len site.Taxonomies.tags }}</span>
+      <span class="stat-number">{{ len $publicTags }}</span>
       <span class="stat-label">标签数</span>
     </div>
     {{- with site.Params.siteBirthDate }}
@@ -55,20 +75,8 @@
   <section class="stat-section">
     <h2>热门标签</h2>
     <ul class="terms-tags tag-cloud">
-      {{- range first 20 site.Taxonomies.tags.ByCount }}
-        {{- $termName := .Name -}}
-        {{- $termKey := lower $termName -}}
-        {{- $exactCount := 0 -}}
-        {{- range $posts }}
-          {{- with .Params.tags }}
-            {{- range . }}
-              {{- if eq (lower .) $termKey }}{{ $exactCount = add $exactCount 1 }}{{ end }}
-            {{- end }}
-          {{- end }}
-        {{- end }}
-        {{- with site.GetPage (printf "/tags/%s" $termName) }}
-          <li><a href="{{ .RelPermalink }}">{{ .LinkTitle }} <sup>{{ $exactCount }}</sup></a></li>
-        {{- end }}
+      {{- range first 20 (sort $publicTags "count" "desc") }}
+        <li><a href="{{ .rel }}">{{ .name }} <sup>{{ .count }}</sup></a></li>
       {{- end }}
     </ul>
   </section>

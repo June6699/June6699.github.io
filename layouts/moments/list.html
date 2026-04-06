@@ -5,8 +5,9 @@
 {{- with getenv "HUGO_MOMENTS_RECOVERY_EMAIL" | strings.TrimSpace }}{{ $rs.Set "recovery" . }}{{ end -}}
 {{- $recoveryEmail := $rs.Get "recovery" | strings.TrimSpace -}}
 {{- $sessionSeed := $passwordHash | default "missing-password-hash" -}}
+{{- $buildNonce := now.Unix -}}
 
-<section class="moments-shell" data-moments-gate-root data-password-hash="{{ $passwordHash }}" data-session-key="moments-access-{{ slicestr $sessionSeed 0 12 }}" data-recovery-email="{{ $recoveryEmail }}">
+<section class="moments-shell" data-moments-gate-root data-password-hash="{{ $passwordHash }}" data-session-key="moments-access-{{ slicestr $sessionSeed 0 12 }}-{{ $buildNonce }}" data-recovery-email="{{ $recoveryEmail }}">
   <header class="moments-hero">
     <div class="moments-hero__copy">
       <p class="moments-hero__eyebrow">Private Stream</p>
@@ -24,7 +25,7 @@
     <div class="moments-gate__card">
       <p class="moments-gate__eyebrow">Access Gate</p>
       <h2>输入口令后查看动态流</h2>
-      <p class="moments-gate__text">密码不会以明文写进模板，页面只拿到构建时注入的哈希值。动态内容源目录是 <code>content/moments/</code>。</p>
+      <p class="moments-gate__text">页面内只保存构建时注入的口令哈希。动态源目录仍然是 <code>content/moments/</code>。</p>
 
       <form class="moments-gate__form" data-moments-gate-form>
         <label class="moments-gate__label" for="moments-password">访问口令</label>
@@ -32,7 +33,7 @@
 
         <label class="moments-gate__remember">
           <input type="checkbox" data-moments-remember />
-          记住这次设备访问
+          仅本次会话记住（约 30 分钟）
         </label>
 
         <div class="moments-gate__actions">
@@ -47,24 +48,56 @@
         <div class="moments-gate__actions">
           <button class="moments-gate__button moments-gate__button--ghost" type="submit">发起邮件</button>
         </div>
-        <p class="moments-gate__hint">纯静态站无法直接做站内验证码校验，这里会调用默认邮件客户端，向站长邮箱发起找回请求。</p>
+        <p class="moments-gate__hint">纯静态站只能调用默认邮件客户端发起找回请求，不能在站内完成真实邮箱校验。</p>
       </form>
 
       <p class="moments-gate__status" data-moments-status aria-live="polite"></p>
     </div>
   </section>
 
-  <section class="moments-feed" data-moments-feed hidden>
-    {{- range .RegularPages.ByDate.Reverse }}
-      {{- partial "moments_card.html" . -}}
-    {{- else }}
+  <section class="moments-vlayout" data-moments-feed hidden>
+    {{- $pages := .RegularPages.ByDate.Reverse -}}
+    {{- if gt (len $pages) 0 -}}
+    <aside class="moments-vtimeline" data-moments-vtimeline>
+      <div class="moments-vtimeline__head">
+        <p class="moments-vtimeline__eyebrow">Timeline</p>
+        <div class="moments-vtimeline__modes" role="tablist" aria-label="时间轴粒度">
+          <button class="moments-vtimeline__mode" type="button" data-v-mode="year">年</button>
+          <button class="moments-vtimeline__mode is-active" type="button" data-v-mode="month">月</button>
+          <button class="moments-vtimeline__mode" type="button" data-v-mode="day">日</button>
+        </div>
+      </div>
+      <div class="moments-vtimeline__body">
+        <ul class="moments-vtimeline__list" data-v-list></ul>
+      </div>
+    </aside>
+
+    <div class="moments-vstage" data-moments-stage>
+      {{- range $idx, $p := $pages -}}
+      {{- $aid := printf "moment-%d" $idx -}}
+      <section
+        id="{{ $aid }}"
+        class="moments-feed__item"
+        data-moment-id="{{ $aid }}"
+        data-moment-ts="{{ $p.Date.Unix }}"
+        data-moment-year="{{ $p.Date.Format "2006" }}"
+        data-moment-month="{{ $p.Date.Format "2006-01" }}"
+        data-moment-day="{{ $p.Date.Format "2006-01-02" }}"
+        data-moment-weekday="{{ $p.Date.Weekday }}"
+        data-moment-title="{{ $p.Title }}"
+      >
+        {{- partial "moments_card.html" $p -}}
+      </section>
+      {{- end -}}
+    </div>
+    {{- else -}}
     <article class="moments-card moments-card--empty">
       <div class="moments-card__body">
         <h2 class="moments-card__title">还没有动态</h2>
         <p class="moments-empty__text">请在 <code>content/moments/</code> 下新增 Markdown 条目。</p>
       </div>
     </article>
-    {{- end }}
+    {{- end -}}
   </section>
 
   <script defer src="{{ "/js/moments-gate.js" | relURL }}"></script>

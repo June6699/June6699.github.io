@@ -1,8 +1,9 @@
 {{- $src := .Destination -}}
-{{- /* 文章：./images/... → /images/...（源在 content/posts/images） */ -}}
-{{- if hasPrefix $src "./images/" -}}
-  {{- $src = replace $src "./images/" "/images/" -}}
-{{- else if and (eq .Page.Section "moments") (hasPrefix $src "./") -}}
+{{- /* 动态优先：./xxx → /images/moments/xxx（源在 content/moments） */ -}}
+{{- if and (eq .Page.Section "moments") (hasPrefix $src "./") -}}
   {{- $src = printf "/images/moments/%s" (strings.TrimPrefix "./" $src) -}}
+{{- /* 文章：./images/... → /images/...（源在 content/posts/images） */ -}}
+{{- else if hasPrefix $src "./images/" -}}
+  {{- $src = replace $src "./images/" "/images/" -}}
 {{- end -}}
 <img src="{{ $src }}"{{ with .PlainText }} alt="{{ . }}"{{ end }}{{ with .Title }} title="{{ . }}"{{ end }} loading="lazy" />

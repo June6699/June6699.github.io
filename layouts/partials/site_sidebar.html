@@ -1,4 +1,18 @@
 <aside class="site-sidebar">
+  {{- $excludeTerms := slice "日常" "博客" -}}
+  {{- $posts := where site.RegularPages "Section" "posts" -}}
+  {{- $termCount := newScratch -}}
+  {{- range $posts -}}
+    {{- with .Params.tags -}}
+      {{- range . -}}
+        {{- $t := . | string -}}
+        {{- if in $excludeTerms $t -}}
+          {{- continue -}}
+        {{- end -}}
+        {{- $termCount.Set (printf "tc_%s" $t) (add ($termCount.Get (printf "tc_%s" $t) | default 0) 1) -}}
+      {{- end -}}
+    {{- end -}}
+  {{- end -}}
   <section class="sidebar-card sidebar-about">
     <div class="sidebar-about-row">
       {{- with site.Params.sidebarAvatar }}
@@ -32,17 +46,22 @@
   </section>
 
   {{- if .IsHome }}
-  {{- /* 一级标签 = 不含「/」的整名，或「/」前段；每篇文章对每个一级只计 1 次 */ -}}
+  {{- /* 仅统计公开文章（posts），并排除私密/示例标签 */ -}}
   {{- $rootCount := newScratch -}}
-  {{- range site.RegularPages -}}
-    {{- if in site.Params.mainSections .Type -}}
+  {{- range $posts -}}
       {{- $seen := slice -}}
       {{- with .Params.tags -}}
         {{- range . -}}
-          {{- $t := . -}}
+          {{- $t := . | string -}}
+          {{- if in $excludeTerms $t -}}
+            {{- continue -}}
+          {{- end -}}
           {{- $root := $t -}}
           {{- if strings.Contains $t "/" -}}
             {{- $root = index (split $t "/") 0 -}}
+          {{- end -}}
+          {{- if in $excludeTerms $root -}}
+            {{- continue -}}
           {{- end -}}
           {{- if not (in $seen $root) -}}
             {{- $seen = $seen | append $root -}}
@@ -53,17 +72,26 @@
         {{- $k := printf "rc_%s" . -}}
         {{- $rootCount.Set $k (add ($rootCount.Get $k | default 0) 1) -}}
       {{- end -}}
-    {{- end -}}
   {{- end -}}
   {{- $roots := slice -}}
-  {{- range $_, $tax := site.Taxonomies.tags -}}
-    {{- $t := $tax.Page.Title -}}
-    {{- $root := $t -}}
-    {{- if strings.Contains $t "/" -}}
-      {{- $root = index (split $t "/") 0 -}}
-    {{- end -}}
-    {{- if not (in $roots $root) -}}
-      {{- $roots = $roots | append $root -}}
+  {{- range $posts -}}
+    {{- with .Params.tags -}}
+      {{- range . -}}
+        {{- $t := . | string -}}
+        {{- if in $excludeTerms $t -}}
+          {{- continue -}}
+        {{- end -}}
+        {{- $root := $t -}}
+        {{- if strings.Contains $t "/" -}}
+          {{- $root = index (split $t "/") 0 -}}
+        {{- end -}}
+        {{- if in $excludeTerms $root -}}
+          {{- continue -}}
+        {{- end -}}
+        {{- if not (in $roots $root) -}}
+          {{- $roots = $roots | append $root -}}
+        {{- end -}}
+      {{- end -}}
     {{- end -}}
   {{- end -}}
   {{- $rootRows := slice -}}
@@ -73,28 +101,29 @@
       {{- $rootRows = $rootRows | append (dict "root" . "count" $c) -}}
     {{- end -}}
   {{- end -}}
-  {{- /* 子列表只含「root/子路径」词条，不再重复列出与一级同名的根标签；一级数字优先用根词条 len(Pages)（与标签归档页一致），无根词条时用去重篇数 */ -}}
+  {{- /* 子列表只含「root/子路径」词条，不再重复列出与一级同名的根标签 */ -}}
   {{- $tagNav := newScratch -}}
   {{- range $rootRows -}}
     {{- $r := .root -}}
     {{- $pfx := printf "%s/" $r -}}
     {{- $items := slice -}}
-    {{- $termPages := 0 -}}
     {{- $rootLink := "" -}}
     {{- range $_, $tax := site.Taxonomies.tags -}}
       {{- $title := $tax.Page.Title -}}
+      {{- if in $excludeTerms $title -}}
+        {{- continue -}}
+      {{- end -}}
+      {{- $count := $termCount.Get (printf "tc_%s" $title) | default 0 -}}
+      {{- if le $count 0 -}}
+        {{- continue -}}
+      {{- end -}}
       {{- if eq $title $r -}}
-        {{- $termPages = len $tax.Pages -}}
         {{- $rootLink = $tax.Page.RelPermalink -}}
       {{- else if strings.HasPrefix $title $pfx -}}
-        {{- $items = $items | append (dict "title" $title "permalink" $tax.Page.RelPermalink "count" (len $tax.Pages)) -}}
+        {{- $items = $items | append (dict "title" $title "count" $count) -}}
       {{- end -}}
     {{- end -}}
-    {{- $umbrella := $rootCount.Get (printf "rc_%s" $r) | default 0 -}}
-    {{- $sumc := $umbrella -}}
-    {{- if gt $termPages 0 -}}
-      {{- $sumc = $termPages -}}
-    {{- end -}}
+    {{- $sumc := $rootCount.Get (printf "rc_%s" $r) | default 0 -}}
     {{- $tagNav.Set $r (dict "children" (sort $items "count" "desc") "summaryCount" $sumc "rootLink" $rootLink) -}}
   {{- end -}}
   <section class="sidebar-card sidebar-tag-nav">
@@ -118,8 +147,15 @@
           <ul class="sidebar-tag-nav__sub">
             {{- range $childItems -}}
             {{- $disp := strings.TrimPrefix $pfx .title -}}
+            {{- $childLink := "" -}}
+            {{- with site.GetPage (printf "/tags/%s" .title) -}}
+              {{- $childLink = .RelPermalink -}}
+            {{- end -}}
+            {{- if not $childLink -}}
+              {{- continue -}}
+            {{- end -}}
             <li>
-              <a class="sidebar-tag-nav__sublink" href="{{ .permalink }}">{{ $disp }}<span class="sidebar-tag-nav__subc">{{ .count }}</span></a>
+              <a class="sidebar-tag-nav__sublink" href="{{ $childLink }}">{{ $disp }}<span class="sidebar-tag-nav__subc">{{ .count }}</span></a>
             </li>
             {{- end -}}
           </ul>
@@ -141,10 +177,14 @@
     <h3 class="sidebar-title">热门标签</h3>
     <div class="sidebar-tags-list">
       {{- $items := slice -}}
-      {{- range $termName, $taxonomy := site.Taxonomies.tags -}}
-        {{- $count := len $taxonomy.Pages -}}
-        {{- if ge $count 2 -}}
-          {{- $items = $items | append (dict "title" $taxonomy.Page.Title "permalink" $taxonomy.Page.RelPermalink "count" $count) -}}
+      {{- range $_, $taxonomy := site.Taxonomies.tags -}}
+        {{- $t := $taxonomy.Page.Title -}}
+        {{- if in $excludeTerms $t -}}
+          {{- continue -}}
+        {{- end -}}
+        {{- $c := $termCount.Get (printf "tc_%s" $t) | default 0 -}}
+        {{- if ge $c 2 -}}
+          {{- $items = $items | append (dict "title" $taxonomy.Page.LinkTitle "permalink" $taxonomy.Page.RelPermalink "count" $c) -}}
         {{- end -}}
       {{- end -}}
       {{- range first 12 (sort $items "count" "desc") -}}
