@@ -1,11 +1,23 @@
 ---
-title: JavaScript简单的初级注意事项
+title: JavaScript学习笔记：入门+函数
 author: June
 date: 2026-04-06
 tags: 
   - 学习
   - 学习/前端
+  - 学习/前端/JavaScript
 ---
+
+## 0、一些链接
+> [!IMPORTANT]
+>
+> 文档手册：[JavaScript 和 HTML DOM 参考手册 | 菜鸟教程](https://www.runoob.com/jsref/jsref-tutorial.html)
+>
+> 廖雪峰（本笔记来源）：[廖雪峰 JavaScript教程](https://liaoxuefeng.com/books/javascript)
+>
+> 菜鸟教程：[JavaScript 教程 | 菜鸟教程](https://www.runoob.com/js/js-tutorial.html)
+
+
 
 ## 1、快速入门阶段
 
@@ -750,21 +762,257 @@ console.log(r);
 
 
 
-### 2.10.3 非要用`filter`处理对象
+#### 2.10.3 非要用`filter`处理对象
 
 ```javascript
 const obj = {
     name: "xujun",
     age: 15,
     school: "SICAU",
+    null: false,
 };
 
 // obj --> array
 const objToArray = Object.entries(obj); 
 
 objToArray.filter(function (element, index, self) {
-    // 正确的模板字符串 + 正确的console
-    return console.log(`元素: ${element}，索引: ${index}，原数组:`, self);
+    console.log(`元素: ${element}，索引: ${index}，原数组:`, self); 
+    // 注意self在模版字符串外面
+    return element[1]; // 注意这里必须加索引，不然每次的element是一个数组，如['null', false]，他是true的
 });
+console.log(obj);
 ```
 
+
+
+#### 2.10.4 找素数
+
+```javascript
+function get_primes(arr) {
+    const result = arr.filter(function (x) {
+        if (x === 2) {
+            return true; //2 是素数
+        } else if (x === 1) {
+            return false; // 1 不是素数
+        }
+
+        const max = Math.sqrt(x);           // 用当前数x的平方根，不是数组最大值！
+        for (let i = 2; i <= max; i++) {    // i从2开始
+        //for (let i = 2; i * i <= x; i++) {   评论区看到的，这个方便
+            if (x % i === 0) {              // 取模判断整除（最标准）
+                return false;               // 能整除 → 不是质数，直接过滤
+            }
+        }
+        return true; // 循环结束都没整除 → 是质数，保留
+    });
+    return result;  // 返回筛选后的质数数组
+}
+
+let
+    x,
+    r,
+    arr = [];
+for (x = 1; x < 100; x++) {
+    arr.push(x);
+}
+
+r = get_primes(arr);
+if (r.toString() === [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97].toString()) {
+    console.log('测试通过!');
+} else {
+    console.log('测试失败: ' + r.toString());
+}
+```
+
+
+
+### 2.11 sort
+
+`Array`的`sort()`方法默认把所有元素先转换为String再排序。
+
+> [!CAUTION]
+>
+> 奇怪的结果：
+> - `'10'`排在`'2'`的前面，因为字符`'1'`比字符`'2'`的ASCII码小。
+> - `apple`在`Google`后面（确实如此，但是顺序是实力从强到弱还是从弱到强？）
+
+```javascript
+['Google', 'apple', 'Microsoft'].sort(); // ['Google', 'Microsoft", 'apple']
+
+[10, 20, 1, 2].sort(); // [1, 10, 2, 20]
+```
+
+
+
+> [!NOTE]
+>
+> 最后友情提示，`sort()`方法会直接对`Array`进行修改，它返回的结果仍是当前`Array`：
+
+```javascript
+let a1 = ['B', 'A', 'C'];
+let a2 = a1.sort();
+a1; // ['A', 'B', 'C']
+a2; // ['A', 'B', 'C']
+a1 === a2; // true, a1和a2是同一对象
+```
+
+
+
+### 2.12 forEach
+
+`forEach()`和`map()`类似，它也把每个元素依次作用于传入的函数，但不会返回新的数组。`forEach()`常用于遍历数组，因此，传入的函数不需要返回值：
+
+```javascript
+let arr = ['Apple', 'pear', 'orange'];
+arr.forEach(x=>console.log(x)); // 依次打印每个元素
+```
+
+
+
+### 2.13 闭包函数 `Closure`
+
+高阶函数：将函数作为参数
+
+闭包函数：将函数作为返回值，可以就可以让他不会立刻执行，只有再次调用才会执行。
+
+```javascript
+function lazy_sum(arr) {
+    let sum = function () {
+        return arr.reduce(function (x, y) {
+            return x + y;
+        });
+    }
+    return sum;
+}
+let f = lazy_sum([1, 2, 3, 4, 5]); // function sum()
+```
+
+
+
+> [!IMPORTANT]
+>
+> 返回闭包时牢记的一点就是：返回函数不要引用任何循环变量，或者后续会发生变化的变量。
+>
+> 因为这种闭包的返回函数是最后执行的，他每次指向的循环变量是最后一次循环的那个变量，而非循环中的变量。
+
+错误示范（这里面的`i`都是3：
+
+```javascript
+function count() {
+    let arr = [];
+    for (var i=1; i<=3; i++) {
+        arr.push(function () {
+            return i * i;
+        });
+    }
+    return arr;
+}
+
+let results = count();
+let [f1, f2, f3] = results;
+f1(); // 16
+f2(); // 16
+f3(); // 16
+```
+
+
+
+#### 正确示范方法一：
+
+把`i`参数传给函数，然后把这个参数保存在闭包里面，而且这里使用了一个立即执行的函数语法
+
+```javascript
+(function (x) {
+    return x * x;
+})(3); // 9
+```
+
+```javascript
+function count() {
+    let arr = [];
+    for (var i=1; i<=3; i++) {
+        arr.push((function (n) {
+            return function () {
+                return n * n;
+            }
+        })(i));
+    }
+    return arr;
+}
+
+let [f1, f2, f3] = count();
+
+f1(); // 1
+f2(); // 4
+f3(); // 9
+```
+
+
+
+#### 正确示范方法二：
+
+跟错误示范里面差别在`var`和`let`
+
+| 循环声明 | 作用域             | 闭包捕获 | f1() | f2() | f3() |
+| -------- | ------------------ | -------- | ---- | ---- | ---- |
+| `var i`  | 函数作用域（共用） | 同一个 i | 16   | 16   | 16   |
+| `let i`  | 块级作用域（独立） | 独立的 i | 1    | 4    | 9    |
+
+```javascript
+function count() {
+    let arr = [];
+    for (let i=1; i<=3; i++) {
+        arr.push(function () {
+            return i * i;
+        });
+    }
+    return arr;
+}
+let [f1, f2, f3] = count();
+f1(); // 16
+```
+
+
+
+### 2.14 箭头函数
+
+```javascript
+(x, y, ...rest) => {
+    let i, sum = x + y;
+    for (i=0; i<rest.length; i++) {
+        sum += rest[i];
+    }
+    return sum;
+}
+```
+
+箭头函数看上去是匿名函数的一种简写，但实际上，箭头函数和匿名函数有个明显的区别：箭头函数内部的`this`是词法作用域，由上下文确定。
+
+回顾[前面的例子](https://june6699.github.io/posts/%E5%BB%96%E9%9B%AA%E5%B3%B0-javascript-%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0--%E5%88%9D%E7%BA%A7%E6%B3%A8%E6%84%8F%E4%BA%8B%E9%A1%B9/#271-%e5%8f%a4%e8%80%81%e6%96%b9%e6%b3%95)，由于JavaScript函数对`this`绑定的错误处理，下面的例子无法得到预期结果：
+
+```javascript
+let obj = {
+    birth: 1990,
+    getAge: function () {
+        let b = this.birth; // 1990
+        let fn = function () {
+            return new Date().getFullYear() - this.birth; // this指向window或undefined
+        };
+        return fn();
+    }
+};
+```
+
+现在，箭头函数完全修复了`this`的指向，`this`总是指向词法作用域，也就是外层调用者`obj`：
+
+```javascript
+let obj = {
+    birth: 1990,
+    getAge: function () {
+        let b = this.birth; // 1990
+        let fn = () => new Date().getFullYear() - this.birth; // this指向obj对象
+        return fn();
+    }
+};
+obj.getAge(); // 25
+```

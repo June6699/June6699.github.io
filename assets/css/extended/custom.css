@@ -1050,6 +1050,16 @@ a.sidebar-tag-nav__flat:hover {
     max-width: min(960px, 100%);
 }
 
+/* 锚点跳转为 sticky 顶栏预留空间，避免标题被顶栏遮住 */
+.post-content h1[id],
+.post-content h2[id],
+.post-content h3[id],
+.post-content h4[id],
+.post-content h5[id],
+.post-content h6[id] {
+    scroll-margin-top: calc(var(--header-height, 60px) + 1rem);
+}
+
 /* ========== 拼音/注音 <rt> ========== */
 .post-content rt {
     font-size: 0.75em;
