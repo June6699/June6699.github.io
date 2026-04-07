@@ -1,0 +1,20 @@
+{{- $labels := dict
+  "note" "注意"
+  "tip" "建议"
+  "important" "重要"
+  "warning" "警示"
+  "caution" "注意风险"
+-}}
+{{- if eq .Type "alert" -}}
+  {{- $alertType := lower .AlertType -}}
+  {{- $alertLabel := or (index $labels $alertType) (title $alertType) -}}
+  {{- partial "callout.html" (dict
+    "type" $alertType
+    "title" (or .AlertTitle $alertLabel)
+    "body" .Text
+  ) -}}
+{{- else -}}
+  <blockquote>
+    {{ .Text }}
+  </blockquote>
+{{- end -}}

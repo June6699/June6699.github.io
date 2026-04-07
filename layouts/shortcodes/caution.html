@@ -5,7 +5,7 @@
   {{- $title = .Get 0 -}}
 {{- end -}}
 {{- partial "callout.html" (dict
-  "type" "reminder"
+  "type" "caution"
   "title" $title
   "body" (.Inner | markdownify)
 ) -}}

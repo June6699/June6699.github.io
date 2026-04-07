@@ -1,4 +1,11 @@
-<div class="callout callout-note">
-  <p class="callout-label">[!NOTE] 注意</p>
-  <div class="callout-body">{{ .Inner | markdownify }}</div>
-</div>
+{{- $title := "" -}}
+{{- if .IsNamedParams -}}
+  {{- $title = .Get "title" -}}
+{{- else if ge (len .Params) 1 -}}
+  {{- $title = .Get 0 -}}
+{{- end -}}
+{{- partial "callout.html" (dict
+  "type" "note"
+  "title" $title
+  "body" (.Inner | markdownify)
+) -}}

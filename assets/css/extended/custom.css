@@ -1382,81 +1382,142 @@ a.sidebar-tag-nav__flat:hover {
 
 /* ========== Typora 风格 callout（短代码 {{< important >}} 等）========== */
 .post-content .callout {
+    --callout-accent: #64748b;
+    --callout-bg: rgba(100, 116, 139, 0.1);
+    --callout-title-color: #334155;
+    --callout-body-color: var(--content);
     margin: 1.25rem 0;
-    padding: 1rem 1.25rem;
-    border-radius: 0 8px 8px 0;
-    border-left: 4px solid;
+    padding: 1rem 1.2rem 1rem 1.25rem;
+    border-radius: 0 16px 16px 0;
+    border-left: 4px solid var(--callout-accent);
+    background:
+        linear-gradient(
+            135deg,
+            color-mix(in srgb, var(--callout-bg) 82%, var(--entry) 18%),
+            color-mix(in srgb, var(--callout-bg) 94%, var(--entry) 6%)
+        );
+    color: var(--callout-body-color);
+    box-shadow: 0 10px 24px rgba(15, 23, 42, 0.06);
 }
-.post-content .callout .callout-label {
-    margin: 0 0 0.5rem 0;
-    font-weight: 700;
-    font-size: 0.95rem;
+.post-content .callout .callout-head {
+    margin: 0 0 0.65rem 0;
+    display: flex;
+    gap: 0.72rem;
+    align-items: center;
+}
+.post-content .callout .callout-icon {
+    display: inline-flex;
+    width: 1.4rem;
+    height: 1.4rem;
+    flex: 0 0 auto;
+    color: var(--callout-accent);
+}
+.post-content .callout .callout-icon svg {
+    width: 100%;
+    height: 100%;
+    stroke: currentColor;
+    fill: none;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+.post-content .callout .callout-title {
+    color: var(--callout-title-color);
+    font-size: 1rem;
+    font-weight: 800;
+    line-height: 1.3;
 }
 .post-content .callout .callout-body {
     margin: 0;
     font-size: 0.95rem;
+    color: inherit;
+    line-height: 1.8;
 }
 .post-content .callout .callout-body p:first-child { margin-top: 0; }
 .post-content .callout .callout-body p:last-child { margin-bottom: 0; }
 
-/* IMPORTANT 重要 - 蓝/深蓝 */
+/* IMPORTANT 重要 - 紫 */
 .post-content .callout-important {
-    border-left-color: #3182ce;
-    background: #e6f0fa;
-    color: #2c5282;
+    --callout-accent: #7c3aed;
+    --callout-bg: rgba(124, 58, 237, 0.12);
+    --callout-title-color: #6d28d9;
+    --callout-body-color: #4c1d95;
 }
 :root[data-theme="dark"] .post-content .callout-important {
-    border-left-color: #63b3ed;
-    background: rgba(49, 130, 206, 0.15);
-    color: #90cdf4;
+    --callout-accent: #a78bfa;
+    --callout-bg: rgba(167, 139, 250, 0.16);
+    --callout-title-color: #c4b5fd;
+    --callout-body-color: #e9ddff;
 }
 
-/* WARNING 警告 - 橙/琥珀 */
+/* WARNING 警示 - 琥珀 */
 .post-content .callout-warning {
-    border-left-color: #d69e2e;
-    background: #faf3e6;
-    color: #744210;
+    --callout-accent: #d97706;
+    --callout-bg: rgba(217, 119, 6, 0.12);
+    --callout-title-color: #b45309;
+    --callout-body-color: #78350f;
 }
 :root[data-theme="dark"] .post-content .callout-warning {
-    border-left-color: #ecc94b;
-    background: rgba(214, 158, 46, 0.15);
-    color: #f6e05e;
+    --callout-accent: #fbbf24;
+    --callout-bg: rgba(251, 191, 36, 0.16);
+    --callout-title-color: #fcd34d;
+    --callout-body-color: #fde68a;
+}
+
+/* CAUTION 注意风险 - 红 */
+.post-content .callout-caution {
+    --callout-accent: #dc2626;
+    --callout-bg: rgba(220, 38, 38, 0.1);
+    --callout-title-color: #b91c1c;
+    --callout-body-color: #7f1d1d;
+}
+:root[data-theme="dark"] .post-content .callout-caution {
+    --callout-accent: #f87171;
+    --callout-bg: rgba(248, 113, 113, 0.14);
+    --callout-title-color: #fca5a5;
+    --callout-body-color: #fecaca;
 }
 
 /* NOTE 注意 */
 .post-content .callout-note {
-    border-left-color: #718096;
-    background: #edf2f7;
-    color: #2d3748;
+    --callout-accent: #2563eb;
+    --callout-bg: rgba(37, 99, 235, 0.1);
+    --callout-title-color: #1d4ed8;
+    --callout-body-color: #1e3a8a;
 }
 :root[data-theme="dark"] .post-content .callout-note {
-    border-left-color: #a0aec0;
-    background: rgba(113, 128, 150, 0.15);
-    color: #e2e8f0;
+    --callout-accent: #60a5fa;
+    --callout-bg: rgba(96, 165, 250, 0.14);
+    --callout-title-color: #93c5fd;
+    --callout-body-color: #dbeafe;
 }
 
 /* TIP 建议 - 绿 */
 .post-content .callout-tip {
-    border-left-color: #38a169;
-    background: #e6fffa;
-    color: #234e52;
+    --callout-accent: #059669;
+    --callout-bg: rgba(5, 150, 105, 0.12);
+    --callout-title-color: #047857;
+    --callout-body-color: #134e4a;
 }
 :root[data-theme="dark"] .post-content .callout-tip {
-    border-left-color: #68d391;
-    background: rgba(56, 161, 105, 0.15);
-    color: #9ae6b4;
+    --callout-accent: #34d399;
+    --callout-bg: rgba(52, 211, 153, 0.15);
+    --callout-title-color: #6ee7b7;
+    --callout-body-color: #ccfbf1;
 }
 
-/* REMINDER 提醒 - 紫 */
+/* REMINDER 提醒 - 青 */
 .post-content .callout-reminder {
-    border-left-color: #805ad5;
-    background: #faf5ff;
-    color: #44337a;
+    --callout-accent: #0891b2;
+    --callout-bg: rgba(8, 145, 178, 0.12);
+    --callout-title-color: #0f766e;
+    --callout-body-color: #164e63;
 }
 :root[data-theme="dark"] .post-content .callout-reminder {
-    border-left-color: #b794f4;
-    background: rgba(128, 90, 213, 0.15);
-    color: #d6bcfa;
+    --callout-accent: #22d3ee;
+    --callout-bg: rgba(34, 211, 238, 0.14);
+    --callout-title-color: #67e8f9;
+    --callout-body-color: #cffafe;
 }
 
 /* ========== 中国诗：节日祝福 / 札记 / 诗句 + 释义 ========== */

@@ -1,4 +1,11 @@
-<div class="callout callout-tip">
-  <p class="callout-label">[!TIP] 建议</p>
-  <div class="callout-body">{{ .Inner | markdownify }}</div>
-</div>
+{{- $title := "" -}}
+{{- if .IsNamedParams -}}
+  {{- $title = .Get "title" -}}
+{{- else if ge (len .Params) 1 -}}
+  {{- $title = .Get 0 -}}
+{{- end -}}
+{{- partial "callout.html" (dict
+  "type" "tip"
+  "title" $title
+  "body" (.Inner | markdownify)
+) -}}

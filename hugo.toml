@@ -31,6 +31,9 @@ googleAnalytics = "G-S7DXV0QV58"
 # 已写入 run_server.bat 与 .github/workflows/hugo.yml。
 
 # 允许正文中的 Raw HTML（诗词等 div/class）并屏蔽相关警告
+[markup.goldmark.extensions.extras.mark]
+  enable = true
+
 [markup.goldmark.renderer]
   unsafe = true
 ignoreLogs = ["warning-goldmark-raw-html"]

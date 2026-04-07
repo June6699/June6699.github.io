@@ -694,3 +694,77 @@ console.log(r); // [1, 2, 3]
 1. 禁止直接用 `arr.map(parseInt)`，会因**索引被当作进制**导致转换失败
 2. 用 `parseInt` 必须通过箭头函数**手动传参+指定十进制**
 3. 简单字符串转数字，优先用 `arr.map(Number)`，无参数陷阱
+
+
+
+### 2.10 filter
+
+==filter只能在数组上用==。
+
+和`map()`类似，`Array`的`filter()`也接收一个函数。和`map()`不同的是，`filter()`把传入的函数依次作用于每个元素，然后根据返回值是`true`还是`false`决定保留还是丢弃该元素。
+
+所以`iilter`需要的函数里面必须返回的是`true`或者`false`值以供判断。
+
+
+
+#### 2.10.1 去空字符串
+
+把一个`Array`中的空字符串删掉，可以这么写：
+
+```javascript
+let arr = ['A', '', 'B', null, undefined, 'C', '  '];
+let r = arr.filter(function (s) {
+    return s && s.trim(); // 注意：IE9以下的版本没有trim()方法
+});
+r; // ['A', 'B', 'C']
+```
+
+- `trim()` 方法用于删除字符串的头尾空白符，空白符包括：空格、制表符 tab、换行符等其他空白符等。
+
+- `trim()` 方法不会改变原始字符串。
+
+- `trim()` 方法不适用于 `null`, `undefined`, `Number` 类型。
+
+
+
+#### 2.10.2 去重复元素
+
+利用`filter`，可以巧妙地去除`Array`的重复元素：
+
+```javascript
+let
+    r,
+    arr = ['apple', 'strawberry', 'banana', 'pear', 'apple', 'orange', 'orange', 'strawberry'];
+
+r = arr.filter(function (element, index, self) {
+    return self.indexOf(element) === index;
+});
+
+console.log(r);
+```
+
+- 函数中的参数`element`来自每次对`arr`的遍历，`index`是这个遍历拿到的参数在arr的索引（当前索引），`self`指代`arr`本身。
+- 尽管`arr`遍历只能拿到一个参数，但是`index`、`self`这些是自己出来的，所以不会保参数未定义的的错误。
+- 但是这只是对于数组`array`有的，对于对象这种没有索引的，他是没用的。
+- `indexOf`可以拿到该元素在参数（此处是`self`，即`arr`）里面的第一次出现的位置。
+
+
+
+### 2.10.3 非要用`filter`处理对象
+
+```javascript
+const obj = {
+    name: "xujun",
+    age: 15,
+    school: "SICAU",
+};
+
+// obj --> array
+const objToArray = Object.entries(obj); 
+
+objToArray.filter(function (element, index, self) {
+    // 正确的模板字符串 + 正确的console
+    return console.log(`元素: ${element}，索引: ${index}，原数组:`, self);
+});
+```
+
