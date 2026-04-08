@@ -1,0 +1,118 @@
+openclaw.json and models.json useful provider snippet
+
+1) ~/.openclaw/openclaw.json
+
+{
+  "agents": {
+    "defaults": {
+      "model": {
+        "primary": "custom-api-vibelearning-top/gpt-5.4"
+      },
+      "models": {
+        "custom-api-vibelearning-top/gpt-5.4": {},
+        "vibe-coding-codex/gpt-5.4": {}
+      }
+    }
+  },
+  "models": {
+    "providers": {
+      "custom-api-vibelearning-top": {
+        "baseUrl": "http://127.0.0.1:18080/v1",
+        "apiKey": "sk-REPLACE_ME",
+        "api": "openai-responses",
+        "models": [
+          {
+            "id": "gpt-5.4",
+            "name": "gpt-5.4 (Custom Provider)",
+            "reasoning": false,
+            "input": ["text"],
+            "cost": {
+              "input": 0,
+              "output": 0,
+              "cacheRead": 0,
+              "cacheWrite": 0
+            },
+            "contextWindow": 128000,
+            "maxTokens": 4096,
+            "api": "openai-responses"
+          }
+        ]
+      },
+      "vibe-coding-codex": {
+        "baseUrl": "http://127.0.0.1:18080/v1",
+        "apiKey": "sk-REPLACE_ME",
+        "api": "openai-responses",
+        "models": [
+          {
+            "id": "gpt-5.4",
+            "name": "gpt-5.4 (Custom Provider)",
+            "reasoning": false,
+            "input": ["text"],
+            "cost": {
+              "input": 0,
+              "output": 0,
+              "cacheRead": 0,
+              "cacheWrite": 0
+            },
+            "contextWindow": 128000,
+            "maxTokens": 4096,
+            "api": "openai-responses"
+          }
+        ]
+      }
+    }
+  }
+}
+
+2) ~/.openclaw/agents/main/agent/models.json
+
+{
+  "providers": {
+    "custom-api-vibelearning-top": {
+      "baseUrl": "http://127.0.0.1:18080/v1",
+      "apiKey": "sk-REPLACE_ME",
+      "api": "openai-responses",
+      "models": [
+        {
+          "id": "gpt-5.4",
+          "name": "gpt-5.4 (Custom Provider)",
+          "reasoning": false,
+          "input": ["text"],
+          "cost": {
+            "input": 0,
+            "output": 0,
+            "cacheRead": 0,
+            "cacheWrite": 0
+          },
+          "contextWindow": 128000,
+          "maxTokens": 4096,
+          "api": "openai-responses"
+        }
+      ]
+    },
+    "vibe-coding-codex": {
+      "baseUrl": "http://127.0.0.1:18080/v1",
+      "apiKey": "sk-REPLACE_ME",
+      "api": "openai-responses",
+      "models": [
+        {
+          "id": "gpt-5.4",
+          "name": "gpt-5.4 (Custom Provider)",
+          "reasoning": false,
+          "input": ["text"],
+          "cost": {
+            "input": 0,
+            "output": 0,
+            "cacheRead": 0,
+            "cacheWrite": 0
+          },
+          "contextWindow": 128000,
+          "maxTokens": 4096,
+          "api": "openai-responses"
+        }
+      ]
+    }
+  }
+}
+
+Replace sk-REPLACE_ME with your own key.

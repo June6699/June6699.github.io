@@ -1016,3 +1016,54 @@ let obj = {
 };
 obj.getAge(); // 25
 ```
+
+> [!IMPORTANT]
+>
+> 1. **对象的普通方法（外层函数）** → `this` 指向 **调用它的对象（obj）**
+> 2. **嵌套的普通函数（内部显式函数）** → 单独执行时，`this` 丢失绑定 → 指向 **window / undefined**
+> 3. **嵌套的箭头函数** → **没有自己的 this**，直接继承外层的 `this` → 指向 **obj**
+
+
+
+### 2.15 标签函数
+
+标签函数和普通函数的定义区别仅仅在于参数,它接收的参数是 JS 引擎**自动传入**的 `[静态文本数组, 插值1, 插值2, ...]`。
+
+如果我们想对数据库进行修改，完全可以定义一个标签函数如下：
+
+```javascript
+function update(strings, ...exps) {
+    let sql = strings.join('?');
+    // 执行数据库更新
+    // TODO:
+}
+```
+
+函数调用可以简化为带标签的模板字符串：
+
+```javascript
+let id = 123;
+let age = 21;
+let score = 'A';
+
+update`UPDATE users SET age=${age}, score=${score} WHERE id=${id}`;
+```
+
+
+
+### 2.16 生成器
+
+生成器（generator）是ES6标准引入的新的数据类型。一个生成器看上去像一个函数，但可以返回多次。
+
+generator跟函数很像，定义如下：
+
+注意多出的`*`号），并且，除了`return`语句，还可以用`yield`返回多次。
+
+```javascript
+function* foo(x) {
+    yield x + 1;
+    yield x + 2;
+    return x + 3;
+}
+```
+

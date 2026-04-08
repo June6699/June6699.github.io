@@ -1,0 +1,13 @@
+[Unit]
+Description=OpenClaw VibeLearning compatibility proxy
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/python3 /root/.local/bin/openclaw-vibelearning-proxy.py
+Restart=always
+RestartSec=2
+
+[Install]
+WantedBy=default.target
