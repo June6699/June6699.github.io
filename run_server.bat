@@ -51,18 +51,47 @@ if errorlevel 1 (
   exit /b 1
 )
 
-echo Starting Hugo server (http://localhost:1313/) ...
-echo Press Ctrl+C to stop the server.
-REM Force local baseURL; change port here and in hugo server line if needed.
+echo Stopping any existing Hugo server instances...
+taskkill /F /IM hugo.exe >nul 2>&1
+
+set "HUGO_SERVER_PORT=1313"
+call :can_bind_port %HUGO_SERVER_PORT%
+if errorlevel 1 (
+  echo [WARN] Port 1313 is unavailable on this system. Trying fallback ports...
+  for %%P in (4210 1314 4321 8080) do (
+    call :can_bind_port %%P
+    if not errorlevel 1 (
+      set "HUGO_SERVER_PORT=%%P"
+      goto :port_ready
+    )
+  )
+  echo [ERROR] Could not find an available localhost port for Hugo.
+  pause
+  exit /b 1
+)
+
+:port_ready
 if defined HUGO_MOMENTS_PASSWORD_HASH (
   echo Moments gate hash loaded.
 ) else (
   echo [WARN] HUGO_MOMENTS_PASSWORD_HASH not set. Moments page will stay locked.
 )
-set "HUGO_BASEURL=http://localhost:1313/"
-hugo server -D --buildFuture --baseURL "http://localhost:1313/" --appendPort=false --disableFastRender
+
+set "HUGO_BASEURL=http://localhost:%HUGO_SERVER_PORT%/"
+echo.
+echo   Hugo server starting on:
+echo   %HUGO_BASEURL%
+echo.
+echo Press Ctrl+C to stop the server.
+hugo server -D --buildFuture --baseURL "%HUGO_BASEURL%" --appendPort=false --disableFastRender --port %HUGO_SERVER_PORT%
 if errorlevel 1 (
   echo [ERROR] Hugo failed to start. See messages above.
   pause
   exit /b 1
 )
+
+goto :eof
+
+:can_bind_port
+powershell -NoProfile -Command "try { $listener=[System.Net.Sockets.TcpListener]::new([System.Net.IPAddress]::Loopback, %~1); $listener.Start(); $listener.Stop(); exit 0 } catch { exit 1 }" >nul 2>&1
+exit /b %errorlevel%

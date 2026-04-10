@@ -1,0 +1,43 @@
+Syncing images: content/posts/images + content/moments -> static/images ...
+[sync_images] content/posts/images -> static/images ��51 ���ļ���
+[sync_images] content/moments/*.(ͼ) -> static/images/moments ��2 ���ļ���
+Syncing my_icons -> static (favicons) ...
+[sync_icons] synced:
+  - C:\Files\��Ŀ\June6699.github.io\my_icons\favicon.ico -> C:\Files\��Ŀ\June6699.github.io\static\favicon.ico
+  - C:\Files\��Ŀ\June6699.github.io\my_icons\favicon.png -> C:\Files\��Ŀ\June6699.github.io\static\favicon.png (+ variants)
+[WARN] Port 1313 is unavailable on this system. Trying fallback ports...
+Starting Hugo server (http://localhost:4321/) ...
+Press Ctrl+C to stop the server.
+Moments gate hash loaded.
+[WARN] Using fallback port 4321. Open http://localhost:4321/
+Watching for changes in C:/Files/项目/June6699.github.io/assets/css, C:/Files/项目/June6699.github.io/content/{moments,posts,projects}, C:/Files/项目/June6699.github.io/data, C:/Files/项目/June6699.github.io/layouts/{_default,moments,partials,projects,shortcodes,...}, C:/Files/项目/June6699.github.io/static/{css,images,js,scripts}, C:/Files/项目/June6699.github.io/themes/PaperMod/assets/{css,js}, C:/Files/项目/June6699.github.io/themes/PaperMod/i18n, C:/Files/项目/June6699.github.io/themes/PaperMod/layouts/{_default,partials,shortcodes}
+Watching for config changes in C:\Files\项目\June6699.github.io\hugo.toml
+Start building sites … 
+hugo v0.157.0-7747abbb316b03c8f353fd3be62d5011fa883ee6+extended windows/amd64 BuildDate=2026-02-25T16:38:33Z VendorInfo=gohugoio
+
+
+                  │ ZH  
+──────────────────┼─────
+ Pages            │ 111 
+ Paginator pages  │   4 
+ Non-page files   │  53 
+ Static files     │ 126 
+ Processed images │   0 
+ Aliases          │  32 
+ Cleaned          │   0 
+
+Built in 1347 ms
+Environment: "development"
+Serving pages from disk
+Web Server is available at http://localhost:4321/ (bind address 127.0.0.1) 
+Press Ctrl+C to stop
+
+Change of Static files detected, rebuilding site (#1).
+2026-04-10 01:01:10.944 +0800
+Syncing \images to \
+Syncing \images\moments to \
+
+Change detected, rebuilding site (#2).
+2026-04-10 01:01:14.451 +0800
+Web Server is available at http://localhost:4321/ (bind address 127.0.0.1)
+Rebuilt in 1985 ms

@@ -570,3 +570,21 @@ cd openclaw-qqbot
 bash ./scripts/upgrade-via-source.sh --appid {你的APPID} --secret {你的APPKey}
 ```
 
+
+
+一些`qqbot`的skills安装
+
+```bash
+openclaw skills install rss-monitor
+openclaw skills install site-monitor
+openclaw skills install openclaw-github-assistant
+openclaw skills install browser-automation
+
+# 已经安装的
+# site-monitor
+# openclaw-github-assistant
+# browser-automation
+
+openclaw skills update --all
+```
+
