@@ -16,3 +16,5 @@ Hey，我是**徐子昂**，一个苦逼的研究生。
 
 - [GitHub](https://github.com/June6699/June6699.github.io)
 - [bilibili](https://space.bilibili.com/663114638?spm_id_from=333.1007.0.0)
+- 邮箱：3439394104@qq.com
+
