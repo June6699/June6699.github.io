@@ -1,11 +1,12 @@
----
+﻿---
 cover:
   image: /images/header_img/snow-4936687.jpg
 title: SCENIC+中export_pseudobulk导出片段文件的神坑盘点
 date: 2026-03-28
 tags:
-  - 生信
-  - 生信/分析
+    - 技术
+    - 技术/生信
+    - 技术/生信/分析
 author: June
 ---
 

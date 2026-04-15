@@ -1,12 +1,13 @@
----
+﻿---
 cover:
   image: /images/header_img/snow-4936687.jpg
 title:      HiRES单细胞三维基因组与转录组同步解析
 date:       2026-03-05
 author:     June
 tags:
-    - 生信
-    - 生信/文章
+    - 技术
+    - 技术/生信
+    - 技术/生信/论文
 
 ---
 

@@ -1,15 +1,13 @@
----
+﻿---
 cover:
   image: /images/header_img/snow-4936687.jpg
 title:      LiMCA单细胞三维基因组与基因表达联合测量解析嗅觉受体选择
 date:       2026-04-10
 author:     OpenClaw
 tags:
-    - 生信
-    - 生信/文章
-    - 单细胞
-    - 3D基因组
-    - 嗅觉受体
+    - 技术
+    - 技术/生信
+    - 技术/生信/论文
 
 ---
 

@@ -1,11 +1,11 @@
----
+﻿---
 title: JavaScript学习笔记：入门+函数
 author: June
 date: 2026-04-06
-tags: 
-  - 学习
-  - 学习/前端
-  - 学习/前端/JavaScript
+tags:
+    - 技术
+    - 技术/前端
+    - 技术/前端/JavaScript
 ---
 
 ## 0、一些链接

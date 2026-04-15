@@ -1,9 +1,10 @@
----
+﻿---
 title: Pretext 实时重排互动实验
 date: 2026-04-03
 tags:
-  - 有趣的
-draft: false
+    - 技术
+    - 技术/前端
+    - 技术/前端/项目
 comments: false
 ---
 

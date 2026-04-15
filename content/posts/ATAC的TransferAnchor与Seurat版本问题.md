@@ -1,9 +1,10 @@
----
+﻿---
 title: "SnapATAC与Seurat版本兼容性问题"
 date: 2026-03-18
 tags:
-  - 生信
-  - 生信/分析
+    - 技术
+    - 技术/生信
+    - 技术/生信/分析
 draft: false
 ---
 

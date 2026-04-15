@@ -1,9 +1,10 @@
----
+﻿---
 title:      rsync-win的安装
 date:       2026-03-28
 author:     June
 tags:
-    - 记录
+    - 技术
+    - 技术/工具
 ---
 
 ### 问题

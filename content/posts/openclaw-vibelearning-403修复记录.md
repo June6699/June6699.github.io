@@ -1,13 +1,12 @@
----
+﻿---
 title: OpenClaw 连接 VibeLearning 出现 HTTP 403 的真正修复记录
 subtitle: 真正生效的修复不是换 key，而是在 OpenClaw 前面加一层兼容代理改写 User-Agent
 date: 2026-04-08
 author: Codex
 tags:
-  - OpenClaw
-  - WSL
-  - API
-  - 故障排查
+    - 技术
+    - 技术/AI
+    - 技术/AI/工具
 ---
 
 阅读说明：本文已按层级加入编号，格式为「一级标题：`1、标题`」「二级标题：`1.1 标题`」「三级标题：`1.1.1 标题`」，方便快速定位章节。

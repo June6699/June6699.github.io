@@ -1,8 +1,10 @@
----
+﻿---
 title: "CC Switch 导入 API Key 使用 Claude/Codex"
 date: 2026-04-04
 tags:
-  - 记录
+    - 技术
+    - 技术/AI
+    - 技术/AI/工具
 ---
 
 

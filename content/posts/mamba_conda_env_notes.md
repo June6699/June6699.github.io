@@ -1,11 +1,11 @@
----
+﻿---
 title: Conda/Mamba 环境管理踩坑记录与最佳实践
 subtitle: 一次关于 PATH 被激活脚本改坏的真实排查
 date: 2026-04-12
 author: June
 tags:
-  - 生信
-  - 生信/分析
+    - 技术
+    - 技术/工具
 ---
 
 这篇主要记一个很容易误判的问题：`mamba activate` 之后，`top`、`find` 这类系统命令突然“消失”了。  

@@ -1,9 +1,11 @@
----
+﻿---
 title: "本地化动态 ASCII 字符视频渲染系统"
 date: 2026-04-03
 author: June
 tags:
-  - 记录
+    - 技术
+    - 技术/前端
+    - 技术/前端/项目
 draft: false
 ---
 

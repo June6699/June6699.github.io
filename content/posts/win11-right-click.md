@@ -1,4 +1,4 @@
----
+﻿---
 cover:
   image: /images/header_img/flower-7958117_1920.jpg
 title:      如何解决Win11右键菜单冗余的问题
@@ -6,7 +6,8 @@ subtitle:   Win11右键菜单经常会出现`正在加载中`的问题，本文�
 date:       2026-01-26
 author:     June
 tags:
-    - Windows
+    - 技术
+    - 技术/工具
 
 ---
 

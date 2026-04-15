@@ -1,12 +1,12 @@
----
+﻿---
 title:    廖雪峰 JavaScript 学习笔记 —— 数字精度
 subtitle: 为什么整数安全范围是 ±2⁵³？
 date:     2026-03-15
 author:   June
 tags:
-          - 学习
-          - 学习/前端
-          - 学习/前端/JavaScript
+    - 技术
+    - 技术/前端
+    - 技术/前端/JavaScript
 ---
 
 ## 1. 为什么整数安全范围是 ±2⁵³，而不是 ±2⁶³？

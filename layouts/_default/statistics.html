@@ -10,15 +10,30 @@
   {{- $posts := where site.RegularPages "Section" "posts" }}
   {{- $excludeTerms := slice "日常" "博客" }}
   {{- $publicTagCount := newScratch }}
+  {{- $topTagChars := newScratch }}
+  {{- $topTagPostCount := newScratch }}
   {{- $total := len $posts }}
   {{- $.Scratch.Set "totalChars" 0 }}
   {{- range $posts }}{{ $.Scratch.Add "totalChars" (countrunes (plainify .Content)) }}{{ end }}
+  {{- $topLevelTags := slice }}
   {{- range $posts }}
+    {{- $chars := countrunes (plainify .Content) -}}
+    {{- $seenTopTags := slice -}}
     {{- with .Params.tags }}
       {{- range . }}
         {{- $t := . | string -}}
         {{- if in $excludeTerms $t -}}{{- continue -}}{{- end -}}
         {{- $publicTagCount.Set (printf "pc_%s" $t) (add ($publicTagCount.Get (printf "pc_%s" $t) | default 0) 1) -}}
+        {{- $top := index (split $t "/") 0 -}}
+        {{- if in $excludeTerms $top -}}{{- continue -}}{{- end -}}
+        {{- if not (in $seenTopTags $top) -}}
+          {{- $seenTopTags = $seenTopTags | append $top -}}
+          {{- if not (in $topLevelTags $top) -}}
+            {{- $topLevelTags = $topLevelTags | append $top -}}
+          {{- end -}}
+          {{- $topTagChars.Set (printf "chars_%s" $top) (add ($topTagChars.Get (printf "chars_%s" $top) | default 0) $chars) -}}
+          {{- $topTagPostCount.Set (printf "posts_%s" $top) (add ($topTagPostCount.Get (printf "posts_%s" $top) | default 0) 1) -}}
+        {{- end -}}
       {{- end }}
     {{- end }}
   {{- end }}
@@ -32,6 +47,46 @@
     {{- end -}}
   {{- end }}
   {{- $totalChars := $.Scratch.Get "totalChars" }}
+  {{- $topTagRaw := slice }}
+  {{- range $topLevelTags }}
+    {{- $chars := $topTagChars.Get (printf "chars_%s" .) | default 0 -}}
+    {{- if gt $chars 0 -}}
+      {{- $topTagRaw = $topTagRaw | append (dict
+        "name" .
+        "chars" $chars
+        "posts" ($topTagPostCount.Get (printf "posts_%s" .) | default 0)
+      ) -}}
+    {{- end -}}
+  {{- end }}
+  {{- $topTagRaw = sort $topTagRaw "chars" "desc" }}
+  {{- $topTaggedCharsTotal := 0 }}
+  {{- range $topTagRaw }}{{- $topTaggedCharsTotal = add $topTaggedCharsTotal .chars -}}{{- end }}
+  {{- $palette := slice "#2563eb" "#f97316" "#14b8a6" "#8b5cf6" "#eab308" "#ef4444" "#0f766e" "#7c3aed" "#ec4899" "#84cc16" "#06b6d4" "#f59e0b" }}
+  {{- $topTagStats := slice }}
+  {{- $chartStops := slice }}
+  {{- $cursor := 0.0 }}
+  {{- range $i, $item := $topTagRaw }}
+    {{- $percent := 0.0 -}}
+    {{- if gt $topTaggedCharsTotal 0 -}}
+      {{- $percent = mul (div (float $item.chars) (float $topTaggedCharsTotal)) 100 -}}
+    {{- end -}}
+    {{- $startNum := (float $cursor) -}}
+    {{- $cursor = add (float $cursor) (float $percent) -}}
+    {{- $endNum := (float $cursor) -}}
+    {{- $color := index $palette (mod $i (len $palette)) -}}
+    {{- $topTagStats = $topTagStats | append (dict
+      "index" $i
+      "name" $item.name
+      "chars" $item.chars
+      "posts" $item.posts
+      "percent" $percent
+      "start" $startNum
+      "end" $endNum
+      "color" $color
+    ) -}}
+    {{- $chartStops = $chartStops | append (printf "%s %.2f%% %.2f%%" $color $startNum $endNum) -}}
+  {{- end }}
+  {{- $chartGradient := delimit $chartStops ", " }}
   {{- $currentYear := now.Year }}
   {{- $postsThisYear := where $posts "Date.Year" $currentYear }}
   {{- $oldest := $posts.ByDate | first 1 }}
@@ -72,6 +127,50 @@
     </ul>
   </section>
 
+  {{- if gt (len $topTagStats) 0 }}
+  <section class="stat-section">
+    <h2>一级标签字数分布</h2>
+    <div class="stat-pie-grid">
+      <div class="stat-pie-card">
+        <div class="stat-pie-shell">
+          <div
+            class="stat-pie-chart"
+            data-chart-segments='{{ $topTagStats | jsonify }}'
+            {{ if $chartGradient }}style="background: conic-gradient({{ $chartGradient }});"{{ end }}>
+            <div class="stat-pie-hole">
+              <span class="stat-pie-total">{{ $topTaggedCharsTotal }}</span>
+              <span class="stat-pie-caption">标签字符数</span>
+            </div>
+          </div>
+          <div class="stat-pie-tooltip" hidden></div>
+        </div>
+        <p class="stat-pie-note">按文章一级标签汇总字符数，子标签如 `诗/人物/柳宗元` 会归入 `诗`。</p>
+      </div>
+      <div class="stat-pie-legend">
+        <ol class="stat-tag-breakdown">
+          {{- range $topTagStats }}
+          <li>
+            <button type="button" class="stat-tag-item" data-stat-index="{{ .index }}" aria-pressed="false">
+              <span class="stat-tag-swatch" style="background-color: {{ .color }};"></span>
+              <div class="stat-tag-main">
+                <div class="stat-tag-head">
+                  <span class="stat-tag-name">{{ .name }}</span>
+                  <span class="stat-tag-percent">{{ printf "%.1f%%" .percent }}</span>
+                </div>
+                <div class="stat-tag-meta">
+                  <span>{{ .chars }} 字符</span>
+                  <span>{{ .posts }} 篇文章</span>
+                </div>
+              </div>
+            </button>
+          </li>
+          {{- end }}
+        </ol>
+      </div>
+    </div>
+  </section>
+  {{- end }}
+
   <section class="stat-section">
     <h2>热门标签</h2>
     <ul class="terms-tags tag-cloud">
@@ -99,4 +198,165 @@
     </ul>
   </section>
 </div>
+
+{{- if gt (len $topTagStats) 0 }}
+<script>
+(function () {
+  const chart = document.querySelector('.stat-pie-chart');
+  if (!chart) return;
+
+  const shell = chart.closest('.stat-pie-shell');
+  const card = chart.closest('.stat-pie-card');
+  const tooltip = shell ? shell.querySelector('.stat-pie-tooltip') : null;
+  const totalEl = chart.querySelector('.stat-pie-total');
+  const captionEl = chart.querySelector('.stat-pie-caption');
+  const legendButtons = Array.from(document.querySelectorAll('.stat-tag-item[data-stat-index]'));
+  const defaultTotal = totalEl ? totalEl.textContent : '';
+  const defaultCaption = captionEl ? captionEl.textContent : '';
+  let segments = [];
+
+  try {
+    segments = JSON.parse(chart.dataset.chartSegments || '[]');
+  } catch (err) {
+    console.error('Failed to parse statistics chart data.', err);
+    return;
+  }
+  if (!segments.length) return;
+
+  const holeRatio = 0.56;
+  let lockedIndex = -1;
+  let hoverIndex = -1;
+
+  function hexToRgba(hex, alpha) {
+    const value = hex.replace('#', '');
+    const normalized = value.length === 3
+      ? value.split('').map((c) => c + c).join('')
+      : value;
+    const int = parseInt(normalized, 16);
+    const r = (int >> 16) & 255;
+    const g = (int >> 8) & 255;
+    const b = int & 255;
+    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+  }
+
+  function effectiveIndex() {
+    return hoverIndex >= 0 ? hoverIndex : lockedIndex;
+  }
+
+  function updateCenter(index) {
+    if (!totalEl || !captionEl) return;
+    if (index < 0 || !segments[index]) {
+      totalEl.textContent = defaultTotal;
+      captionEl.textContent = defaultCaption;
+      return;
+    }
+    const item = segments[index];
+    totalEl.textContent = item.chars;
+    captionEl.textContent = `${item.name} · ${item.posts} 篇`;
+  }
+
+  function applyLegendState(activeIndex) {
+    legendButtons.forEach((button) => {
+      const idx = Number(button.dataset.statIndex);
+      const isActive = idx === activeIndex;
+      button.classList.toggle('is-active', isActive);
+      button.setAttribute('aria-pressed', lockedIndex === idx ? 'true' : 'false');
+    });
+  }
+
+  function renderChart(activeIndex) {
+    const gradient = segments.map((item, index) => {
+      const color = activeIndex < 0 || index === activeIndex
+        ? item.color
+        : hexToRgba(item.color, 0.18);
+      return `${color} ${item.start.toFixed(2)}% ${item.end.toFixed(2)}%`;
+    }).join(', ');
+    chart.style.background = `conic-gradient(${gradient})`;
+    applyLegendState(activeIndex);
+    updateCenter(activeIndex);
+  }
+
+  function showTooltip(item, event) {
+    if (!tooltip || !card) return;
+    tooltip.hidden = false;
+    tooltip.innerHTML = `
+      <strong>${item.name}</strong>
+      <span>${item.chars} 字符</span>
+      <span>${item.posts} 篇文章 · ${item.percent.toFixed(1)}%</span>
+    `;
+    const rect = card.getBoundingClientRect();
+    tooltip.style.left = `${event.clientX - rect.left}px`;
+    tooltip.style.top = `${event.clientY - rect.top}px`;
+  }
+
+  function hideTooltip() {
+    if (!tooltip) return;
+    tooltip.hidden = true;
+  }
+
+  function findSegmentIndex(event) {
+    const rect = chart.getBoundingClientRect();
+    const cx = rect.left + rect.width / 2;
+    const cy = rect.top + rect.height / 2;
+    const dx = event.clientX - cx;
+    const dy = event.clientY - cy;
+    const outerRadius = rect.width / 2;
+    const distance = Math.sqrt(dx * dx + dy * dy);
+    if (distance > outerRadius || distance < outerRadius * holeRatio) return -1;
+
+    let angle = Math.atan2(dy, dx) * 180 / Math.PI + 90;
+    if (angle < 0) angle += 360;
+    const percent = angle / 360 * 100;
+
+    for (let i = 0; i < segments.length; i += 1) {
+      const item = segments[i];
+      if (percent >= item.start && (percent < item.end || (i === segments.length - 1 && percent <= item.end + 0.0001))) {
+        return i;
+      }
+    }
+    return -1;
+  }
+
+  chart.addEventListener('mousemove', (event) => {
+    const index = findSegmentIndex(event);
+    hoverIndex = index;
+    renderChart(effectiveIndex());
+    if (index >= 0) showTooltip(segments[index], event);
+    else hideTooltip();
+  });
+
+  chart.addEventListener('mouseleave', () => {
+    hoverIndex = -1;
+    hideTooltip();
+    renderChart(effectiveIndex());
+  });
+
+  legendButtons.forEach((button) => {
+    const index = Number(button.dataset.statIndex);
+    button.addEventListener('click', () => {
+      lockedIndex = lockedIndex === index ? -1 : index;
+      renderChart(effectiveIndex());
+    });
+    button.addEventListener('mouseenter', () => {
+      hoverIndex = index;
+      renderChart(effectiveIndex());
+    });
+    button.addEventListener('mouseleave', () => {
+      hoverIndex = -1;
+      renderChart(effectiveIndex());
+    });
+    button.addEventListener('focus', () => {
+      hoverIndex = index;
+      renderChart(effectiveIndex());
+    });
+    button.addEventListener('blur', () => {
+      hoverIndex = -1;
+      renderChart(effectiveIndex());
+    });
+  });
+
+  renderChart(-1);
+})();
+</script>
+{{- end }}
 {{- end }}

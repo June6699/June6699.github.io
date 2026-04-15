@@ -1,11 +1,12 @@
----
+﻿---
 cover:
   image: /images/header_img/sun-family.jpg
 title:      Obsidian-Typora 图片及附件位置存放兼容设置
 date:       2026-04-11
 author:     June & Codex
 tags:
-    - 记录
+    - 技术
+    - 技术/工具
 ---
 
 ## 0、默认
