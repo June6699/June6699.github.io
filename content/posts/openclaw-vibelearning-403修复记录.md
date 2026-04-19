@@ -180,10 +180,15 @@ curl -i 'https://api.vibelearning.top/v1/responses' \
 
 真正修好这次 `403` 的有效方案只有一个：
 
-- 在 WSL 里跑一个本地兼容代理，监听 `127.0.0.1:18080`。
-- 代理把 OpenClaw 发来的请求原样转发到 `https://api.vibelearning.top`。
+- 如果你是通过 Windows 上的 `v2rayN` 给 WSL 提供代理网络，端口要以 `v2rayN -> 参数设置 -> 本地混合监听端口` 为准。我这台机器这里实际是 `51888`，不是旧稿里误写的 `18080`。也就是说，上图这个端口对应的是 `v2rayN` 的本地混合监听端口。
+
+![image-20260419151438235](./images/openclaw-vibelearning-403修复记录/image-20260419151438235.png)
+
+补一句避免混淆：上图里的 `51888` 是 Windows 侧 `v2rayN` 的代理端口；下文代码里出现的 `18080`，是我当时单独起的兼容代理示例端口，这两个端口不是一回事。
+
+- 代理把 `OpenClaw` 发来的请求原样转发到 `https://api.vibelearning.top`。
 - 只有当请求头里出现 `User-Agent: OpenAI/JS ...` 时，把它改写成 `curl/8.7.1`。
-- 再把 OpenClaw 的 provider `baseUrl` 改到 `http://127.0.0.1:18080/v1`。
+- 再把 `OpenClaw` 的 `provider` `baseUrl` 改到 `http://127.0.0.1:18080/v1`。
 
 链路变成这样：
 

@@ -76,7 +76,22 @@
 
   {{- if $useWideSidebar }}
   {{- if $hasToc }}
-    <aside class="toc-sidebar">
+    <button
+      class="toc-mobile-toggle"
+      type="button"
+      aria-controls="toc-sidebar-drawer"
+      aria-expanded="false"
+      aria-label="打开文章目录">
+      目录
+    </button>
+    <div class="toc-mobile-backdrop" aria-hidden="true"></div>
+    <aside class="toc-sidebar" id="toc-sidebar-drawer" aria-label="文章目录" aria-hidden="true">
+      <div class="toc-mobile-header">
+        <strong class="toc-mobile-title">文章目录</strong>
+        <button class="toc-mobile-close" type="button" aria-label="关闭文章目录">
+          关闭
+        </button>
+      </div>
       {{- partial "toc.html" . }}
     </aside>
   {{- else }}

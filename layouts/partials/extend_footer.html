@@ -6,6 +6,10 @@
     const postContent = document.querySelector('.post-content');
     if (!sidebar || !postContent) return;
 
+    const mobileToggle = document.querySelector('.toc-mobile-toggle');
+    const mobileBackdrop = document.querySelector('.toc-mobile-backdrop');
+    const mobileClose = document.querySelector('.toc-mobile-close');
+    const mobileQuery = window.matchMedia('(max-width: 920px)');
     const tocLinks = sidebar.querySelectorAll('.toc .inner a[href^="#"]');
     const headings = postContent.querySelectorAll('h1[id], h2[id], h3[id], h4[id], h5[id], h6[id]');
     if (!tocLinks.length || !headings.length) return;
@@ -20,6 +24,70 @@
             }
         });
     }
+
+    function setDrawerState(open) {
+        const isMobile = mobileQuery.matches && !!mobileToggle;
+        document.body.classList.toggle('toc-mobile-open', isMobile && open);
+        if (mobileToggle) {
+            mobileToggle.setAttribute('aria-expanded', isMobile && open ? 'true' : 'false');
+        }
+        if (isMobile) {
+            sidebar.setAttribute('aria-hidden', open ? 'false' : 'true');
+            if (open) {
+                sidebar.removeAttribute('inert');
+            } else {
+                sidebar.setAttribute('inert', '');
+            }
+        } else {
+            sidebar.removeAttribute('aria-hidden');
+            sidebar.removeAttribute('inert');
+        }
+    }
+
+    function closeDrawer() {
+        setDrawerState(false);
+    }
+
+    if (mobileToggle) {
+        mobileToggle.addEventListener('click', function() {
+            setDrawerState(true);
+        });
+    }
+
+    if (mobileBackdrop) {
+        mobileBackdrop.addEventListener('click', closeDrawer);
+    }
+
+    if (mobileClose) {
+        mobileClose.addEventListener('click', closeDrawer);
+    }
+
+    tocLinks.forEach(function(link) {
+        link.addEventListener('click', function() {
+            closeDrawer();
+        });
+    });
+
+    document.addEventListener('keydown', function(event) {
+        if (event.key === 'Escape' && document.body.classList.contains('toc-mobile-open')) {
+            closeDrawer();
+        }
+    });
+
+    function handleViewportChange() {
+        if (!mobileQuery.matches) {
+            closeDrawer();
+        } else {
+            setDrawerState(false);
+        }
+    }
+
+    if (typeof mobileQuery.addEventListener === 'function') {
+        mobileQuery.addEventListener('change', handleViewportChange);
+    } else if (typeof mobileQuery.addListener === 'function') {
+        mobileQuery.addListener(handleViewportChange);
+    }
+    window.addEventListener('resize', handleViewportChange, { passive: true });
 
     const observer = new IntersectionObserver(
         function(entries) {
@@ -58,6 +126,7 @@
 
     headings.forEach(function(h) { observer.observe(h); });
     window.addEventListener('scroll', onScroll, { passive: true });
+    setDrawerState(false);
     onScroll();
 })();
 </script>
