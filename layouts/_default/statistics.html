@@ -9,7 +9,7 @@
 <div class="statistics-page">
   {{- $posts := where site.RegularPages "Section" "posts" }}
   {{- $excludeTerms := slice "日常" "博客" }}
-  {{- $publicTagCount := newScratch }}
+  {{- $publicTags := partial "public_leaf_tags.html" . }}
   {{- $topTagChars := newScratch }}
   {{- $topTagPostCount := newScratch }}
   {{- $total := len $posts }}
@@ -23,7 +23,6 @@
       {{- range . }}
         {{- $t := . | string -}}
         {{- if in $excludeTerms $t -}}{{- continue -}}{{- end -}}
-        {{- $publicTagCount.Set (printf "pc_%s" $t) (add ($publicTagCount.Get (printf "pc_%s" $t) | default 0) 1) -}}
         {{- $top := index (split $t "/") 0 -}}
         {{- if in $excludeTerms $top -}}{{- continue -}}{{- end -}}
         {{- if not (in $seenTopTags $top) -}}
@@ -36,15 +35,6 @@
         {{- end -}}
       {{- end }}
     {{- end }}
-  {{- end }}
-  {{- $publicTags := slice }}
-  {{- range $_, $taxonomy := site.Taxonomies.tags }}
-    {{- $t := $taxonomy.Page.Title -}}
-    {{- if in $excludeTerms $t -}}{{- continue -}}{{- end -}}
-    {{- $c := $publicTagCount.Get (printf "pc_%s" $t) | default 0 -}}
-    {{- if gt $c 0 -}}
-      {{- $publicTags = $publicTags | append (dict "name" $taxonomy.Page.LinkTitle "rel" $taxonomy.Page.RelPermalink "count" $c) -}}
-    {{- end -}}
   {{- end }}
   {{- $totalChars := $.Scratch.Get "totalChars" }}
   {{- $topTagRaw := slice }}

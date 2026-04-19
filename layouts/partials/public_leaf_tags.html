@@ -1,0 +1,45 @@
+{{- $posts := where site.RegularPages "Section" "posts" -}}
+{{- $excludeTerms := slice "日常" "博客" -}}
+{{- $publicTagCount := newScratch -}}
+
+{{- range $posts }}
+  {{- with .Params.tags }}
+    {{- range . }}
+      {{- $t := . | string -}}
+      {{- if in $excludeTerms $t -}}{{- continue -}}{{- end -}}
+      {{- $publicTagCount.Set (printf "pc_%s" $t) (add ($publicTagCount.Get (printf "pc_%s" $t) | default 0) 1) -}}
+    {{- end }}
+  {{- end }}
+{{- end }}
+
+{{- $terms := slice -}}
+{{- $seenTerms := newScratch -}}
+{{- range $_, $taxonomy := site.Taxonomies.tags }}
+  {{- $t := $taxonomy.Page.Title -}}
+  {{- $rel := $taxonomy.Page.RelPermalink -}}
+  {{- if in $excludeTerms $t -}}{{- continue -}}{{- end -}}
+  {{- $c := $publicTagCount.Get (printf "pc_%s" $t) | default 0 -}}
+  {{- if and (gt $c 0) (not ($seenTerms.Get (printf "rel_%s" $rel))) -}}
+    {{- $seenTerms.Set (printf "rel_%s" $rel) true -}}
+    {{- $terms = $terms | append (dict "name" $taxonomy.Page.LinkTitle "raw" $t "rel" $rel "count" $c) -}}
+  {{- end -}}
+{{- end }}
+
+{{- $leafTerms := newScratch -}}
+{{- $leafTerms.Set "items" (slice) -}}
+
+{{- range $_, $term := $terms }}
+  {{- $state := newScratch -}}
+  {{- $state.Set "isLeaf" true -}}
+  {{- $prefix := printf "%s/" $term.raw -}}
+  {{- range $_, $other := $terms }}
+    {{- if and (ne $other.raw $term.raw) (hasPrefix $other.raw $prefix) -}}
+      {{- $state.Set "isLeaf" false -}}
+    {{- end -}}
+  {{- end }}
+  {{- if $state.Get "isLeaf" -}}
+    {{- $leafTerms.Add "items" (slice $term) -}}
+  {{- end -}}
+{{- end }}
+
+{{- return ($leafTerms.Get "items") -}}

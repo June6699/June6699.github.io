@@ -10,27 +10,7 @@
 {{- end }}
 
 <div class="terms-page">
-  {{- $posts := where site.RegularPages "Section" "posts" }}
-  {{- $excludeTerms := slice "日常" "博客" }}
-  {{- $publicTagCount := newScratch }}
-  {{- range $posts }}
-    {{- with .Params.tags }}
-      {{- range . }}
-        {{- $t := . | string -}}
-        {{- if in $excludeTerms $t -}}{{- continue -}}{{- end -}}
-        {{- $publicTagCount.Set (printf "pc_%s" $t) (add ($publicTagCount.Get (printf "pc_%s" $t) | default 0) 1) -}}
-      {{- end }}
-    {{- end }}
-  {{- end }}
-  {{- $terms := slice }}
-  {{- range $_, $taxonomy := site.Taxonomies.tags }}
-    {{- $t := $taxonomy.Page.Title -}}
-    {{- if in $excludeTerms $t -}}{{- continue -}}{{- end -}}
-    {{- $c := $publicTagCount.Get (printf "pc_%s" $t) | default 0 -}}
-    {{- if gt $c 0 -}}
-      {{- $terms = $terms | append (dict "name" $taxonomy.Page.LinkTitle "rel" $taxonomy.Page.RelPermalink "count" $c) -}}
-    {{- end -}}
-  {{- end }}
+  {{- $terms := partial "public_leaf_tags.html" . }}
   {{- $total := len $terms }}
 
   <p class="terms-intro">共 <strong>{{ $total }}</strong> 个标签，点击进入该标签下的文章。</p>
