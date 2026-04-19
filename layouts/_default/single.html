@@ -81,10 +81,11 @@
       type="button"
       aria-controls="toc-sidebar-drawer"
       aria-expanded="false"
+      onclick="document.body.classList.add('toc-mobile-open'); this.setAttribute('aria-expanded', 'true'); (function(sidebar){ if (!sidebar) return; sidebar.setAttribute('aria-hidden', 'false'); sidebar.removeAttribute('inert'); })(document.getElementById('toc-sidebar-drawer'));"
       aria-label="打开文章目录">
       目录
     </button>
-    <div class="toc-mobile-backdrop" aria-hidden="true"></div>
+    <div class="toc-mobile-backdrop" aria-hidden="true" onclick="document.body.classList.remove('toc-mobile-open'); (function(btn, sidebar){ if (btn) btn.setAttribute('aria-expanded', 'false'); if (!sidebar) return; sidebar.setAttribute('aria-hidden', 'true'); sidebar.setAttribute('inert', ''); })(document.querySelector('.toc-mobile-toggle'), document.getElementById('toc-sidebar-drawer'));"></div>
     <aside class="toc-sidebar" id="toc-sidebar-drawer" aria-label="文章目录" aria-hidden="true">
       <div class="toc-mobile-header">
         <strong class="toc-mobile-title">文章目录</strong>

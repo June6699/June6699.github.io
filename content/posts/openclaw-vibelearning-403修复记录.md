@@ -180,22 +180,20 @@ curl -i 'https://api.vibelearning.top/v1/responses' \
 
 真正修好这次 `403` 的有效方案只有一个：
 
-- 如果你是通过 Windows 上的 `v2rayN` 给 WSL 提供代理网络，端口要以 `v2rayN -> 参数设置 -> 本地混合监听端口` 为准。我这台机器这里实际是 `51888`，不是旧稿里误写的 `18080`。也就是说，上图这个端口对应的是 `v2rayN` 的本地混合监听端口。
+- 如果你是通过 Windows 上的 `v2rayN` 给 WSL 提供代理网络，端口要以 `v2rayN -> 参数设置 -> 本地混合监听端口` 为准。我这台机器这里实际是 `51888`，所以下文示例统一按 `51888` 来写；如果你的环境不同，把文中的端口替换成你自己的即可。
 
 ![image-20260419151438235](./images/openclaw-vibelearning-403修复记录/image-20260419151438235.png)
 
-补一句避免混淆：上图里的 `51888` 是 Windows 侧 `v2rayN` 的代理端口；下文代码里出现的 `18080`，是我当时单独起的兼容代理示例端口，这两个端口不是一回事。
-
 - 代理把 `OpenClaw` 发来的请求原样转发到 `https://api.vibelearning.top`。
 - 只有当请求头里出现 `User-Agent: OpenAI/JS ...` 时，把它改写成 `curl/8.7.1`。
-- 再把 `OpenClaw` 的 `provider` `baseUrl` 改到 `http://127.0.0.1:18080/v1`。
+- 再把 `OpenClaw` 的 `provider` `baseUrl` 改到 `http://127.0.0.1:51888/v1`。
 
 链路变成这样：
 
 ```text
 OpenClaw
     -> 本地 gateway
-    -> http://127.0.0.1:18080/v1
+    -> http://127.0.0.1:51888/v1
     -> 兼容代理改写 User-Agent
     -> https://api.vibelearning.top/v1
 ```
@@ -314,7 +312,7 @@ class ProxyHandler(BaseHTTPRequestHandler):
 
 
 if __name__ == "__main__":
-    server = ThreadingHTTPServer(("127.0.0.1", 18080), ProxyHandler)
+    server = ThreadingHTTPServer(("127.0.0.1", 51888), ProxyHandler)
     server.serve_forever()
 PY
 
@@ -372,7 +370,7 @@ systemctl --user status openclaw-vibelearning-proxy.service
 
 ```text
 原来: https://api.vibelearning.top/v1
-现在: http://127.0.0.1:18080/v1
+现在: http://127.0.0.1:51888/v1
 ```
 
 这次实际涉及的配置文件主要是：
@@ -399,7 +397,7 @@ bash ./openclaw-vibelearning-403-quick-restore.sh
 
 ```json
 {
-  "baseUrl": "http://127.0.0.1:18080/v1",
+  "baseUrl": "http://127.0.0.1:51888/v1",
   "apiKey": "sk-REPLACE_ME",
   "api": "openai-responses",
   "models": [

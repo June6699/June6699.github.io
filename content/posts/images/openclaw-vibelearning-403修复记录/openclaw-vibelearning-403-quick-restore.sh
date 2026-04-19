@@ -3,7 +3,7 @@ set -euo pipefail
 
 API_KEY="${VIBE_API_KEY:-}"
 UPSTREAM_URL="${OPENCLAW_VIBE_UPSTREAM:-https://api.vibelearning.top}"
-PROXY_PORT="${OPENCLAW_VIBE_PROXY_PORT:-18080}"
+PROXY_PORT="${OPENCLAW_VIBE_PROXY_PORT:-51888}"
 PROXY_BASE_URL="http://127.0.0.1:${PROXY_PORT}/v1"
 PROXY_SCRIPT="${HOME}/.local/bin/openclaw-vibelearning-proxy.py"
 SERVICE_FILE="${HOME}/.config/systemd/user/openclaw-vibelearning-proxy.service"

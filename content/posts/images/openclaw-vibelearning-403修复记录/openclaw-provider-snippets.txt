@@ -17,7 +17,7 @@ openclaw.json and models.json useful provider snippet
   "models": {
     "providers": {
       "custom-api-vibelearning-top": {
-        "baseUrl": "http://127.0.0.1:18080/v1",
+        "baseUrl": "http://127.0.0.1:51888/v1",
         "apiKey": "sk-REPLACE_ME",
         "api": "openai-responses",
         "models": [
@@ -39,7 +39,7 @@ openclaw.json and models.json useful provider snippet
         ]
       },
       "vibe-coding-codex": {
-        "baseUrl": "http://127.0.0.1:18080/v1",
+        "baseUrl": "http://127.0.0.1:51888/v1",
         "apiKey": "sk-REPLACE_ME",
         "api": "openai-responses",
         "models": [
@@ -69,7 +69,7 @@ openclaw.json and models.json useful provider snippet
 {
   "providers": {
     "custom-api-vibelearning-top": {
-      "baseUrl": "http://127.0.0.1:18080/v1",
+      "baseUrl": "http://127.0.0.1:51888/v1",
       "apiKey": "sk-REPLACE_ME",
       "api": "openai-responses",
       "models": [
@@ -91,7 +91,7 @@ openclaw.json and models.json useful provider snippet
       ]
     },
     "vibe-coding-codex": {
-      "baseUrl": "http://127.0.0.1:18080/v1",
+      "baseUrl": "http://127.0.0.1:51888/v1",
       "apiKey": "sk-REPLACE_ME",
       "api": "openai-responses",
       "models": [
