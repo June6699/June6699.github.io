@@ -25,16 +25,3 @@ tags:
  特别注意
 
 JavaScript的Date对象月份值从0开始，牢记0=1月，1=2月，2=3月，……，11=12月。
-
-```bat
-bash ./scripts/upgrade-via-source.sh --appid 1903795938 --secret URPNLJHFDBA987654444444456789ABD
-```
-
-```javascript
-export http_proxy="http://172.31.0.1:51888"
-export https_proxy="http://172.31.0.1:51888"
-export all_proxy="socks5://172.31.0.1:51888"
-
-curl -I https://www.google.com
-```
-
