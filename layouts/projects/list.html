@@ -22,6 +22,7 @@
     {{- with .items }}
     <div class="projects-hub">
       {{- range . }}
+      {{- $project := . }}
       <article class="project-card">
         <span class="project-card__status">{{ .status }}</span>
         <h2 class="project-card__title">{{ .title }}</h2>
@@ -38,7 +39,10 @@
           <a class="project-card__btn project-card__btn--demo" href="{{ . | relURL }}" target="_blank" rel="noopener noreferrer">Demo</a>
           {{- end }}
           {{- with .docsUrl }}
-          <a class="project-card__btn project-card__btn--docs" href="{{ . | relURL }}" target="_blank" rel="noopener noreferrer">Docs</a>
+          <a class="project-card__btn project-card__btn--docs" href="{{ . | relURL }}" target="_blank" rel="noopener noreferrer">{{ default "Docs" $project.docsLabel }}</a>
+          {{- end }}
+          {{- with .repoUrl }}
+          <a class="project-card__btn project-card__btn--repo" href="{{ . }}" target="_blank" rel="noopener noreferrer">GitHub</a>
           {{- end }}
         </div>
       </article>

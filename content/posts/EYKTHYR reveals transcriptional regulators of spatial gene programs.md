@@ -43,7 +43,7 @@ draft: false
 
 ## 3. 方法主线
 
-![Figure 1 EYKTHYR 方法总览](./images/EYKTHYR reveals transcriptional regulators of spatial gene programs/figure1_overview.png)
+![Figure 1 EYKTHYR 方法总览](<./images/EYKTHYR reveals transcriptional regulators of spatial gene programs/figure1_overview.png>)
 
 Figure 1 基本把全文的方法逻辑画完了。左边输入是 paired spatial multiome：同一位置或同一细胞上的 RNA expression 与 chromatin accessibility。中间有两个关键转换：表达矩阵通过 `POPARI` 变成 metagenes；ATAC peaks 通过 motif annotation 变成 TF activity。右边的核心动作是对某个 TF 做虚拟敲除，也就是把该 TF activity 设为 0，再观察 metagene、cell identity 和下游基因会怎样变化。
 
@@ -72,7 +72,7 @@ Figure 1 基本把全文的方法逻辑画完了。左边输入是 paired spatia
 
 ### 4.2 Msx1 案例：低表达 TF 也能被 ATAC 信号救回来
 
-![Figure 3 Msx1 案例](./images/EYKTHYR reveals transcriptional regulators of spatial gene programs/figure3_msx1.png)
+![Figure 3 Msx1 案例](<./images/EYKTHYR reveals transcriptional regulators of spatial gene programs/figure3_msx1.png>)
 
 `Msx1` 是这篇文章最有说服力的案例之一。它在该组织中的 RNA 表达很低，如果只看 TF transcript expression，很容易把它当作“不重要”。但 `EYKTHYR` 根据染色质可及性推断出 `Msx1` 在 pallium 和 diencephalon 中有较强 activity，并预测它调控 DPallv 相关 metagene `m11`。
 
@@ -84,7 +84,7 @@ Figure 1 基本把全文的方法逻辑画完了。左边输入是 paired spatia
 
 ### 4.3 小鼠 hindbrain：沿 radial glia 分化轨迹识别 Hes1
 
-![Figure 5 Hes1 案例](./images/EYKTHYR reveals transcriptional regulators of spatial gene programs/figure5_hes1.png)
+![Figure 5 Hes1 案例](<./images/EYKTHYR reveals transcriptional regulators of spatial gene programs/figure5_hes1.png>)
 
 第二个应用换成了小鼠胚胎 hindbrain 的 spatial ATAC/RNA-seq 数据，研究 radial glia 向 postmitotic premature neurons 分化。这里的问题不再是离散细胞簇是否分开，而是连续发育轨迹会怎样被 TF perturbation 改变。
 
@@ -98,7 +98,7 @@ Figure 1 基本把全文的方法逻辑画完了。左边输入是 paired spatia
 
 ### 4.4 人黑色素瘤：T cell 状态受肿瘤微环境约束
 
-![Figure 6 melanoma T cell 案例](./images/EYKTHYR reveals transcriptional regulators of spatial gene programs/figure6_melanoma.png)
+![Figure 6 melanoma T cell 案例](<./images/EYKTHYR reveals transcriptional regulators of spatial gene programs/figure6_melanoma.png>)
 
 第三个应用是 human metastatic melanoma 的 Slide-tags single-cell multiome 数据。原研究按 tumor transcriptomic signature 定义了两个 tumor compartments，并分析 T cell infiltration；`EYKTHYR` 的 metagene 分析进一步区分出 proliferating T cells。
 
