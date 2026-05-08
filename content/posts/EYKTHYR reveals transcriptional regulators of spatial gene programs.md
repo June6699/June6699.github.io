@@ -41,7 +41,35 @@ draft: false
 
 `EYKTHYR` 的切入点很聪明：先把表达矩阵压缩成少数可解释的空间 `metagene`，再把 ATAC 数据转成 `TF activity`，然后在每个局部空间邻域里拟合 TF 到 metagene 的影响。这样既降低噪声，又保留了“某个 TF 影响哪个空间基因程序”的解释性。
 
-## 3. 方法主线
+## 3. 先理解两个概念：metagene 和 dropout
+
+### 3.1 Metagene 不是一个真实基因，而是一组空间基因程序
+
+`Metagene` 可以先按“宏基因”来理解，但它不是基因组里真实存在的一段 DNA，而是从表达矩阵中学出来的一个抽象变量。更直白地说，它代表一组在空间上协同表达、共同反映某种组织功能或细胞状态的基因。
+
+如果单个基因像一个乐手，`metagene` 更像一个乐队；如果单个基因像一个员工，`metagene` 更像一个部门。真正有生物学意义的往往不是某一个基因孤零零地升高，而是一组基因一起形成一个空间表达程序，例如神经分化、细胞周期、axon guidance 或特定组织区域的 identity。
+
+在数学上，可以把每个 `metagene` 看成一组基因的加权组合。某个基因权重越高，说明它越能代表这个空间程序；某个细胞或 spot 的 metagene score 越高，说明这个空间程序在该位置越活跃。因此，metagene 同时有两层含义：一层是“哪些基因组成这个程序”，另一层是“这个程序在哪里强、在哪里弱”。
+
+### 3.2 Dropout 让单个基因层面的判断很不稳
+
+空间转录组和单细胞数据里有大量 0。这里要先区分两种 0：一种是真 0，也就是基因确实没有表达；另一种是假 0，也就是基因本来有 RNA，但因为捕获、反转录、PCR 扩增或测序深度等技术原因没有被检测到，这就是常说的 `dropout`。
+
+低表达基因尤其容易遇到这个问题。一个细胞里某个转录本可能本来就只有几个到几十个拷贝，组织处理、RNA 捕获、扩增和测序每一步都会损失一部分信号。空间数据还会受到组织切片质量、局部 RNA 扩散、spot 分辨率和测序深度的影响。所以，如果直接拿单个 gene-level 表达去推断调控关系，很多结果可能只是技术稀疏性造成的假象。
+
+这也是为什么 `EYKTHYR` 不急着在每个基因上直接建一个巨大的 GRN。单个基因可能被 dropout 打成 0，但一组功能相关、空间上共表达的基因不太可能同时全部丢失。把它们压缩成 metagene，相当于用群体信号降低单个基因缺失和随机噪声的影响。
+
+### 3.3 为什么线性设计重要
+
+`EYKTHYR` 的核心不是“用复杂模型硬猜缺失值”，而是用两层相对透明的线性关系把问题拆开。
+
+第一层是 gene 到 metagene。表达矩阵被压缩成少数 metagene 后，模型不再追着几万个稀疏基因跑，而是分析几十个更稳定的空间基因程序。这一步能减少参数量，也能把随机噪声平均掉。
+
+第二层是 TF activity 到 metagene。`EYKTHYR` 从 ATAC peak 和 motif 信息推断 TF activity，再在每个局部空间邻域里用 Ridge regression 学习“哪些 TF activity 能解释哪些 metagene 的变化”。这样得到的不是一个全局平均调控网络，而是带空间位置的 TF-metagene 权重。
+
+线性关系的好处是解释路径很清楚：敲掉某个 TF 后，模型可以先预测哪些 metagene 会变，再根据 metagene 的基因权重把变化投回 gene-level。这里不需要把它理解成严格的矩阵求逆或万能补全；更准确地说，它提供了一条可追踪的解释链：`TF activity -> metagene shift -> affected genes/pathways`。
+
+## 4. 方法主线
 
 ![Figure 1 EYKTHYR 方法总览](<./images/EYKTHYR reveals transcriptional regulators of spatial gene programs/figure1_overview.png>)
 
@@ -58,9 +86,9 @@ Figure 1 基本把全文的方法逻辑画完了。左边输入是 paired spatia
 
 这个设计最重要的地方，是它没有把空间多组学整合做成一个黑箱分数。TF activity 到 metagene、metagene 到 gene expression 都保持线性映射，所以结果可以一路解释到“哪个 TF、哪个 metagene、哪些基因、哪个空间 compartment”。
 
-## 4. 核心结果
+## 5. 核心结果
 
-### 4.1 小鼠脑发育：找到 pallium differentiation 的空间调控因子
+### 5.1 小鼠脑发育：找到 pallium differentiation 的空间调控因子
 
 作者首先在 MISAR-seq 小鼠胚胎脑发育数据上测试 `EYKTHYR`，关注 progenitors 向 dorsal pallium ventricular region、dorsal pallium mantle region 和 subpallium 的分化。
 
@@ -70,7 +98,7 @@ Figure 1 基本把全文的方法逻辑画完了。左边输入是 paired spatia
 
 这部分结果给全文立住了第一个可信点：`EYKTHYR` 不是把非空间 GRN 方法硬套到空间数据上，而是确实利用了局部空间邻域和 ATAC motif activity。
 
-### 4.2 Msx1 案例：低表达 TF 也能被 ATAC 信号救回来
+### 5.2 Msx1 案例：低表达 TF 也能被 ATAC 信号救回来
 
 ![Figure 3 Msx1 案例](<./images/EYKTHYR reveals transcriptional regulators of spatial gene programs/figure3_msx1.png>)
 
@@ -82,7 +110,7 @@ Figure 1 基本把全文的方法逻辑画完了。左边输入是 paired spatia
 
 这张图最值得看的地方，是它展示了为什么不能只盯着 TF 的 RNA 表达。`Msx1` 的 transcript 很稀疏，但 chromatin accessibility 推出来的 activity 更连续，也更有空间结构。对空间多组学来说，这种“RNA 不显眼、ATAC 很显眼”的 TF 可能正是最容易被传统分析漏掉的一类。
 
-### 4.3 小鼠 hindbrain：沿 radial glia 分化轨迹识别 Hes1
+### 5.3 小鼠 hindbrain：沿 radial glia 分化轨迹识别 Hes1
 
 ![Figure 5 Hes1 案例](<./images/EYKTHYR reveals transcriptional regulators of spatial gene programs/figure5_hes1.png>)
 
@@ -96,7 +124,7 @@ Figure 1 基本把全文的方法逻辑画完了。左边输入是 paired spatia
 
 这部分还有一个细节很重要：同一个 TF 的作用不是全组织一致的。文章显示 `Hes1` 在 ventricle-proximal 区域和 CNS 区域影响的 metagene 不同，说明 TF regulation 需要放回具体空间 compartment 里理解。
 
-### 4.4 人黑色素瘤：T cell 状态受肿瘤微环境约束
+### 5.4 人黑色素瘤：T cell 状态受肿瘤微环境约束
 
 ![Figure 6 melanoma T cell 案例](<./images/EYKTHYR reveals transcriptional regulators of spatial gene programs/figure6_melanoma.png>)
 
@@ -108,7 +136,7 @@ Figure 1 基本把全文的方法逻辑画完了。左边输入是 paired spatia
 
 也就是说，同一个 TF 并不是在整张组织切片上执行同一套程序。局部肿瘤微环境会改变它影响 T cell 状态的方式。
 
-## 5. 这篇文章的创新点
+## 6. 这篇文章的创新点
 
 1. 明确面向 spatial multiome 的 TF regulator inference，而不是把非空间 scRNA/scATAC GRN 方法直接套上去。
 2. 用 metagene 作为中间层，降低稀疏数据中的噪声和参数量，同时保留 gene-level 可解释性。
@@ -118,7 +146,7 @@ Figure 1 基本把全文的方法逻辑画完了。左边输入是 paired spatia
 
 我觉得最值得借鉴的是第二点和第四点。很多空间组学文章会把空间结构当成可视化结果，但 `EYKTHYR` 是把空间邻域放进了调控模型本身。它的输出天然带着“在哪里起作用”的信息，而不是事后再把结果投回空间图上。
 
-## 6. 需要谨慎看待的地方
+## 7. 需要谨慎看待的地方
 
 这篇文章的方法思路很清晰，但也有几个地方不能看得太满。
 
@@ -132,7 +160,7 @@ Figure 1 基本把全文的方法逻辑画完了。左边输入是 paired spatia
 
 第五，`in silico knockout` 更适合用来做方向判断和候选排序，不应理解成真实扰动实验的定量替代。真正要坐实某个 TF 的空间调控作用，还是需要 Perturb-FISH、spatial CRISPR 或类似实验验证。
 
-## 7. 对后续工作的启发
+## 8. 对后续工作的启发
 
 如果我们的研究问题涉及空间组织结构中的 cell state transition、发育轨迹或 tumor microenvironment，`EYKTHYR` 值得重点关注。它给我的启发不是“又多了一个 GRN 软件”，而是提供了一种问题重构方式：
 
@@ -144,7 +172,7 @@ Figure 1 基本把全文的方法逻辑画完了。左边输入是 paired spatia
 
 另一个值得注意的点是 metagene。空间数据通常很吵，直接在 gene-level 上做模型容易不稳定。把空间共表达模式先压缩为 metagene，既能减少参数量，也更符合“组织区域通常由一组 gene program 定义”的直觉。这个思想不一定只能用于 `EYKTHYR`，也可以迁移到其他空间多组学整合任务里。
 
-## 8. 阅读顺序建议
+## 9. 阅读顺序建议
 
 如果只是快速读这篇文章，我建议按这个顺序：
 
