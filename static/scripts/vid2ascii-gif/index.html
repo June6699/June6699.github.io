@@ -486,7 +486,11 @@ modeColorBtn.addEventListener('click', () => {
         ffmpeg.on('progress', ({ progress }) => {
             if (!isNaN(progress)) setStatus(`FFmpeg 引擎: ${Math.round(progress*100)}%`);
         });
-        await ffmpeg.load({ coreURL: './ffmpeg-core.js', wasmURL: './ffmpeg-core.wasm' });
+        const ffmpegCoreBase = 'https://unpkg.com/@ffmpeg/core@0.12.10/dist/umd';
+        await ffmpeg.load({
+            coreURL: `${ffmpegCoreBase}/ffmpeg-core.js`,
+            wasmURL: `${ffmpegCoreBase}/ffmpeg-core.wasm`
+        });
         sysReady = true;
         videoInput.disabled = false;
         setStatus('✅ 引擎初始化就绪！\n您可以选择【方案 A】解析新视频 ➜ 或选择【方案 B】直接播放已有存档\n📌 快捷键提示: F=全屏  Space=暂停  ←→=快进/后退 5 秒');

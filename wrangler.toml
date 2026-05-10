@@ -1,0 +1,10 @@
+name = "blog"
+compatibility_date = "2026-05-10"
+keep_vars = true
+
+[build]
+command = "npm run build"
+
+[assets]
+directory = "./public"
+not_found_handling = "404-page"

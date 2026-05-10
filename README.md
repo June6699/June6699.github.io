@@ -23,6 +23,26 @@ hugo
 
 输出在 `public/`，可部署到 GitHub Pages（仓库名 `June6699.github.io` 时，发布 `public` 到 `main` 分支或使用 GitHub Actions）。
 
+## Cloudflare Workers 部署
+
+本仓库已带 `wrangler.toml`，Worker 名称为 `blog`，静态资源目录为 `public/`。
+
+在 Cloudflare Workers & Pages 里连接此仓库时，建议使用：
+
+- Build command: 留空即可，`wrangler.toml` 的 `[build]` 会执行 `npm run build`
+- Deploy command: `npx wrangler deploy` 或 `npm run deploy`
+- Root directory: `/`
+
+环境变量建议：
+
+- `HUGO_VERSION=0.157.0`
+- `PYTHON_VERSION=3.11.9`（仓库也有 `.python-version`）
+- 如需动态页口令/恢复邮箱：继续在 Cloudflare 里配置 `HUGO_MOMENTS_PASSWORD_HASH`、`HUGO_MOMENTS_RECOVERY_EMAIL`
+
+`npm run build` 会同步图片和图标，并用 `https://june6699.top/` 作为 Hugo `baseURL` 构建。视频转 ASCII 页面只在进入该工具页时从 `unpkg` 下载 ffmpeg wasm，不会在进入博客其它页面时加载，也不再提交本地 `ffmpeg-core.wasm`。
+
+域名 `june6699.top` 可以用。关键是先把域名加到 Cloudflare 的 Websites/Zone 里并把注册商 NS 改成 Cloudflare 提供的 nameservers；在 Cloudflare 里显示 Active 之前，Worker Custom Domain 会报 `Only domains active on your Cloudflare account can be added`。等阿里云实名与 NS 生效后，再给 Worker 添加 `june6699.top` 和 `www.june6699.top`。
+
 ### Gitalk 评论（环境变量）
 
 `clientID` / `clientSecret` **不要**写入 `hugo.toml` 或提交到仓库。构建前请设置：
