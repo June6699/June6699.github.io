@@ -1,7 +1,7 @@
 ---
 cover:
   image: /images/header_img/snow-4936687.jpg
-title: FitHiC2 猪 Hi-C 数据分析流程文档
+title: FitHiC2 猪 Hi-C 数据处理记录：validPairs 到显著互作
 date: 2026-05-16
 author: June
 tags:
@@ -12,15 +12,15 @@ tags:
 
 ## 一、这条流程在解决什么问题
 
-这篇文档记录的是一套把猪 Hi-C `validPairs` 数据整理成 FitHiC2 输入，并用 FitHiC2 识别显著染色质互作的流程。这里的分辨率设为 `10 kb`，样本名沿用当前数据中的 `6month`、`70day`、`9year`。
+这次要处理的是三批猪 Hi-C 数据：`6month`、`70day`、`9year`。手头已经有去重后的 `validPairs`，目标是把它们整理成 FitHiC2 能吃的 `10 kb` 输入，再跑出显著互作。
 
-流程的核心目标不是简单把文件格式转一下，而是保证 FitHiC2 的三个关键输入都尽量可信：
+中间最容易踩坑的地方不是 FitHiC2 命令本身，而是输入文件。FitHiC2 至少要看三类东西：
 
 - `contactCounts`：每一对 bin 之间观测到多少次接触。
 - `fragments`：每个 bin 的坐标、边际接触数、是否可比对。
 - `bias`：每个 bin 的归一化偏差权重，用于校正测序深度、可比对性、GC、片段可捕获性等系统误差。
 
-原始 `createFitHiCFragments-fixedsize.py` 会把 fragments 文件第 4 列和第 5 列都写成 `1`。这在能跑通命令上没问题，但在统计建模上不够理想：第 4 列应尽量反映真实的 `marginalized contact count`，第 5 列应尽量反映 bin 的 `mappability`。所以这里把 fragments 生成步骤改成了“真实边际接触数 + mappability 阈值”的版本。
+我主要改了两个地方。第一，原始 `createFitHiCFragments-fixedsize.py` 会把 fragments 第 4 列和第 5 列都写成 `1`，能跑，但太粗糙：第 4 列应该尽量是真实的 `marginalized contact count`，第 5 列应该反映 bin 的 `mappability`。第二，官方 `validPairs2FitHiC-fixedSize.sh` 里有一处低距离过滤的括号写错了，下面会单独拎出来说。这里给的是修过后的版本。
 
 ## 二、FitHiC2 原理
 
@@ -32,7 +32,7 @@ Hi-C 数据最明显的规律是：同一条染色体上，两个位点之间的
 
 ### 2.2 FitHiC2 的统计建模思路
 
-FitHiC2 的简化逻辑可以理解为四步：
+只看和这次流程有关的部分，FitHiC2 大致是在做这几件事：
 
 1. 把基因组切成固定大小的 bin，例如 `10 kb`。
 2. 对每个 bin pair 计算观测接触数，同时记录这对 bin 的基因组距离。
@@ -89,6 +89,12 @@ MAP_THRES=0.2
 SAMPLES=(6month 9year 70day)
 
 mkdir -p "${OUT_DIR}"
+```
+
+后面的 awk 里会用到绝对距离。为了避免再写出 `sqrt(($3-$7)^2 > t)` 这种括号事故，本文都用一个明确的 awk 函数：
+
+```awk
+function abs(x) { return x < 0 ? -x : x }
 ```
 
 这份配置假设：
@@ -235,11 +241,11 @@ chr  start  mid  marginalizedContactCount  mappable
 
 FitHiC2 的 fragments 第 4 列需要每个 bin 的总接触量。这里不直接从 contactCounts 反推，而是从 validPairs 出发，把每对 reads 拆成两个单端 BED 记录，再用 `bedtools intersect -c` 统计每个 `10 kb` bin 中落入多少 read 端点。
 
-这一步做了三个过滤：
+这一步先做三个过滤：
 
 - 只保留常规染色体命名长度较短的记录，避免未组装 contig 造成干扰。
 - 去掉线粒体 `MT`。
-- 去掉同染色体距离小于 `2 × resolution` 的极短距离 pairs，减少 self-ligation 和近距离技术噪音。
+- 去掉同染色体距离不超过 `2 × resolution` 的极短距离 pairs，减少 self-ligation 和近距离技术噪音。
 
 ### 6.2 代码
 
@@ -263,9 +269,11 @@ do
     countsBed="${OUT_DIR}/${sample}_bins_with_counts.bed"
 
     zcat -f "${validPairs}" |
-    awk -v minDist="${MIN_CIS_DIST}" 'BEGIN{OFS="\t"}
+    awk -v minDist="${MIN_CIS_DIST}" '
+        BEGIN{OFS="\t"}
+        function abs(x) { return x < 0 ? -x : x }
         length($2) <= 5 && length($6) <= 5 && $2 != "MT" && $6 != "MT" {
-            if ($2 != $6 || sqrt(($3 - $7)^2) > minDist) {
+            if ($2 != $6 || abs($3 - $7) > minDist) {
                 print $2, $3 - 1, $3
                 print $6, $7 - 1, $7
             }
@@ -320,15 +328,34 @@ chr  start  end    count
 
 ### 7.1 原理
 
-这一步把 validPairs 的两个端点分别换算成 `10 kb` bin 起点，再转成 bin 中点，最后对相同 bin pair 计数。FitHiC2 要求每个互作只出现一次，所以脚本会把 bin pair 统一成固定顺序：染色体编号较小的端点在前；同染色体时，中点坐标较小的端点在前。
+这一步把 validPairs 的两个端点分别换算成 `10 kb` bin 起点，再转成 bin 中点，最后对相同 bin pair 计数。FitHiC2 要求每个互作只出现一次，所以脚本会把 bin pair 统一成固定顺序：染色体编号较小的端点在前；同染色体时，起点坐标较小的端点在前。
 
-原始脚本里需要特别注意一个距离过滤写法：
+官方 `validPairs2FitHiC-fixedSize.sh` 里这一行要改：
 
 ```bash
-sqrt(($3 - $7)^2) > minDist
+awk -v t=$lowDistThres '{if($2!=$5||($2==$5 && (sqrt(($3-$6)^2>t)))) {print $0}}'
 ```
 
-不要写成 `sqrt(($3 - $7)^2 > minDist)`。后者会先做逻辑判断再开方，含义完全变了。
+这里的 `$2/$3` 和 `$5/$6` 是官方脚本默认的 validPairs 列号。本文前面那份 shortFormat 文件用的是 `$2/$3` 和 `$6/$7`，所以后面的完整脚本会按本地列号写；括号问题和修法是同一个问题。
+
+问题出在括号位置。awk 会先算 `($3-$6)^2 > t`，这个表达式的结果只有 `0` 或 `1`，再丢给 `sqrt()`。也就是说它算的不是两个端点之间的距离，而是在对一个真假值开方：真就是 `sqrt(1)=1`，假就是 `sqrt(0)=0`。
+
+这会把低距离过滤改坏。原本应当保留“同染色体且距离大于阈值”的 pair；错误写法实际只是在判断 `($3-$6)^2 > t` 是否为真。因为左边是平方、右边还是原始距离阈值，等价阈值变成了 `sqrt(t)`。如果 `t=20000`，最后实际只过滤掉约 `141 bp` 以内的 pair，而不是过滤掉 `20 kb` 以内的 pair。
+
+最直接的修法是先取绝对距离，再和阈值比较：
+
+```bash
+awk -v t=$lowDistThres 'function abs(x){return x < 0 ? -x : x}
+    {if($2!=$5 || ($2==$5 && abs($3-$6)>t)) {print $0}}'
+```
+
+如果继续用平方也可以，但要把阈值一起平方：
+
+```bash
+($3 - $6)^2 > t^2
+```
+
+我更倾向于 `abs()`，一眼就能看出来是在做距离过滤，不容易再被括号坑。
 
 ### 7.2 validPairs2FitHiC-fixedSize.sh
 
@@ -345,9 +372,11 @@ lowDistThres=$((w * 2))
 mkdir -p "${outdir}"
 
 zcat -f "${validPairsFile}" |
-awk -v r="${w}" -v minDist="${lowDistThres}" 'BEGIN{OFS="\t"}
+awk -v r="${w}" -v minDist="${lowDistThres}" '
+    BEGIN{OFS="\t"}
+    function abs(x) { return x < 0 ? -x : x }
     length($2) <= 5 && length($6) <= 5 && $2 != "MT" && $6 != "MT" {
-        if ($2 != $6 || sqrt(($3 - $7)^2) > minDist) {
+        if ($2 != $6 || abs($3 - $7) > minDist) {
             chr1 = $2
             start1 = int($3 / r) * r
             chr2 = $6
