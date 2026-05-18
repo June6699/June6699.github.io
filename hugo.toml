@@ -48,7 +48,7 @@ ignoreLogs = ["warning-goldmark-raw-html"]
   homeHeroSubtitle = "Who Changes? Who Benefits!"
   sidebarAboutTitle = "关于我"
   sidebarAboutText = "徐子昂 · 研究生 · 生信/前端/杂记"
-  sidebarAvatar = "/images/底特律·变包.png"
+  sidebarAvatar = "/images/kara.png"
   sidebarEmail = "3439394104@qq.com"
   # 统计页「已运行天数」起始日（可改为建站/博客上线日）
   siteBirthDate = "2026-01-01"

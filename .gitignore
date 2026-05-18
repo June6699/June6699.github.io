@@ -4,7 +4,9 @@
 /public_check/
 
 # 由 scripts/sync_images.py 生成（唯一源：content/posts/images、content/moments 内图片）
-/static/images/
+/static/images/**
+!/static/images/底特律·变包.png
+!/static/images/kara.png
 
 # OS
 .DS_Store
