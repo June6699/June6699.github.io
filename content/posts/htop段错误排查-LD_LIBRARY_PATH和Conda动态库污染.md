@@ -282,3 +282,5 @@ env -u LD_LIBRARY_PATH htop
 ```
 
 永久处理是删掉全局配置里的那行 `LD_LIBRARY_PATH`，让 Conda 环境只在 `conda activate` 后影响自己该影响的程序。
+
+但是你用htop不多也不需要。
