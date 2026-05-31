@@ -13,13 +13,13 @@ tags:
 
 这次发 Simple Live `v1.12.4`，表面上看是补了一堆功能：弹幕过滤、抖音 Cookie、WebDAV、Windows 全屏、Android 横竖屏、小窗、TV 包。
 
-但真正花时间的，不是“加一个开关”这种事，而是几个很难一眼看出根因的问题。
+真正花时间的地方，基本都藏在几个很难一眼看出根因的问题里。
 
 比如 Windows 最大化后进全屏，边缘会错位。  
 比如 WebDAV 明明能上传，恢复时却拉不下来。  
 比如弹幕过滤如果写得太直，直播间弹幕一多就开始拖后腿。  
 
-这些问题都有一个共同点：它们不是改一行 UI 就能过去的。要拆状态，要看时序，要知道是哪一层出了问题。
+这些问题看起来零散，处理起来都绕不开同一件事：要拆状态，要看时序，要知道是哪一层出了问题。
 
 最后主要动了三块：
 
@@ -31,7 +31,7 @@ WebDAV 恢复：远端 zip 下载、解压、导入
 
 下面按这三块写一下。
 
-## 二、Windows 全屏不是一个布尔值
+## 二、Windows 全屏牵着一串窗口状态
 
 最开始以为 Windows 全屏就是：
 
@@ -49,7 +49,7 @@ await windowManager.setFullScreen(true);
 simple_live_app/lib/modules/live_room/player/player_controller.dart:436
 ```
 
-核心处理是：如果进入全屏前已经最大化，先不要直接全屏。
+现在的处理是：如果进入全屏前已经最大化，先把窗口从最大化态退出来。
 
 ```dart
 _windowMaximizedBeforeFullScreen = await windowManager.isMaximized();
@@ -108,7 +108,7 @@ unawaited(
 );
 ```
 
-这个是为了解决“一秒后窗口框又出来”的问题。Windows / Flutter 桌面窗口状态切换不是完全同步的。有些状态在 `setFullScreen(true)` 返回后还会被系统再刷一遍，所以只做一次无边框处理不够。延迟补一次，才算把后面的回弹压住。
+这个是为了解决“一秒后窗口框又出来”的问题。Windows / Flutter 桌面窗口状态切换有延迟。有些状态在 `setFullScreen(true)` 返回后还会被系统再刷一遍，所以只做一次无边框处理不够。延迟补一次，才算把后面的回弹压住。
 
 退出全屏时也不能只 `setFullScreen(false)`。如果进入前是最大化，退出后还要恢复最大化；如果边界缓存没刷新，还要轻推一下尺寸：
 
@@ -133,9 +133,9 @@ await windowManager.setSize(nudgedSize);
 await windowManager.setSize(size);
 ```
 
-这种代码看起来不优雅，但桌面窗口问题有时候就是这样。你不是在和 Flutter 的 widget 树打交道，而是在和系统窗口管理器的状态缓存打交道。
+这种代码看起来不优雅，但桌面窗口问题有时候就是这样。这里面对的是系统窗口管理器的状态缓存，不能只按 Flutter widget 树的思路看。
 
-顺手还修了 Android 的一个横竖屏问题。退出全屏时原来是释放所有方向：
+这次也一起修了 Android 的一个横竖屏问题。退出全屏时原来是释放所有方向：
 
 ```dart
 await SystemChrome.setPreferredOrientations(DeviceOrientation.values);
@@ -149,13 +149,13 @@ await SystemChrome.setPreferredOrientations([
 ]);
 ```
 
-这段在 `player_controller.dart:735`。不是所有“恢复默认”都适合用 `DeviceOrientation.values`，尤其是从横屏全屏退回普通页面的时候。
+这段在 `player_controller.dart:735`。从横屏全屏退回普通页面时，`DeviceOrientation.values` 这种“恢复默认”反而容易把横屏状态留下。
 
 ## 三、弹幕过滤不能只写 contains
 
 弹幕过滤最早可以很简单：用户设置几个关键词，来了弹幕以后 `contains` 一下。
 
-但直播间里弹幕不是普通列表。它频率高、来源杂、还有表情、富文本、图片字段。过滤逻辑如果写得太随意，会有两个问题：
+但直播间里的弹幕频率高、来源杂，还有表情、富文本、图片字段。过滤逻辑如果写得太随意，会有两个问题：
 
 1. 误杀太多，正常弹幕被吞。
 2. 开销太大，高弹幕量房间拖播放器。
@@ -246,7 +246,7 @@ bool shouldShieldUser(String userName, {String? siteId}) {
 simple_live_app/lib/modules/live_room/live_room_controller.dart:227
 ```
 
-核心是一个队列加一个计数表：
+这里用的是一个队列加一个计数表：
 
 ```dart
 final duplicate = _recentDanmuCounts.containsKey(fingerprint);
@@ -284,9 +284,9 @@ void setDanmuDedupeStep(int e) {
 }
 ```
 
-窗口默认 10，步长默认 2。也就是说，不是每一条都裁剪窗口，而是按步长批量清理。这样能少一点高频操作。
+窗口默认 10，步长默认 2。实际运行时按步长批量清理，避免每一条弹幕都触发裁剪窗口。这样能少一点高频操作。
 
-清理时也不是只从队列里删，还要同步扣计数：
+清理时除了从队列里删，还要同步扣计数：
 
 ```dart
 while (shouldPrune && _recentDanmuFingerprints.length > windowSize) {
@@ -351,7 +351,7 @@ return value.trim().replaceAll(RegExp(r"\s+"), " ");
 
 WebDAV 的问题更典型：用户反馈“能上传，但恢复不下来”。
 
-这类问题很烦，因为“上传成功”很容易让人误以为 WebDAV 配置没问题。实际上上传和下载不是一条链路。服务端对 `PUT`、`GET`、流式读取、Content-Length 的处理都可能不一样。
+这类问题很烦，因为“上传成功”很容易让人误以为 WebDAV 配置没问题。实际上上传和下载走的是两段链路。服务端对 `PUT`、`GET`、流式读取、Content-Length 的处理都可能不一样。
 
 恢复代码在：
 
@@ -411,7 +411,7 @@ Archive _decodeWebDavBackupArchive(List<int> data) {
 object is unsendable
 ```
 
-最后这里没有继续硬上 isolate，而是让恢复流程在当前 isolate 里顺序执行。因为这个备份 zip 通常不大，相比“理论上更异步”，先把恢复链路做稳定更重要。
+最后这里没有继续硬上 isolate，恢复流程改成在当前 isolate 里顺序执行。这个备份 zip 通常不大，相比“理论上更异步”，先把恢复链路做稳定更重要。
 
 新备份里如果有完整配置包，就走：
 
@@ -455,7 +455,7 @@ finally {
 
 这也是后来我越来越在意的一点：同步类功能失败时，不能只在日志里失败。用户至少要看到 loading 结束，看到一个能理解的错误。
 
-## 五、这三个问题其实是一类问题
+## 五、修到最后，看的都是状态边界
 
 这三块看起来不相关：
 
@@ -467,7 +467,7 @@ finally {
 
 第一，别相信“一个 API 调用就是一个完整状态”。
 
-`setFullScreen(true)` 不是完整全屏。它只是告诉系统我要全屏，后面还有窗口框、阴影、标题栏、最大化状态缓存。
+`setFullScreen(true)` 只能算发起全屏请求。后面还有窗口框、阴影、标题栏、最大化状态缓存。
 
 第二，别让高频路径做线性蠢活。
 
@@ -485,10 +485,10 @@ WebDAV 服务五花八门。直接读流看起来省事，但出了问题很难�
 
 这次修完以后，我对这种问题的判断更保守了一点。
 
-如果一个 bug 只在“最大化后再全屏”出现，那就不是全屏按钮坏了，是状态切换路径里有旧状态没清干净。  
+如果一个 bug 只在“最大化后再全屏”出现，问题多半在状态切换路径，里面还有旧状态没清干净。  
 如果一个功能“能上传但不能恢复”，那就不能只看登录和上传，要把下载、文件、解压、导入拆开。  
-如果一个过滤逻辑要跑在直播间弹幕流里，那它就不是普通列表操作，而是高频路径。  
+如果一个过滤逻辑要跑在直播间弹幕流里，就要按高频路径来写。  
 
-很多修复最后都不是大招，而是把状态拆细，把路径走完整，把失败点暴露出来。
+很多修复最后没有什么大招，就是把状态拆细，把路径走完整，把失败点暴露出来。
 
 这听起来不酷，但对一个每天要被人打开的工具来说，够用了。

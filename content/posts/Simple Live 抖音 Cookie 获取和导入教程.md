@@ -11,11 +11,11 @@ tags:
 
 ## 一、先说结论
 
-Simple Live 里抖音直播“播放”和“搜索”不是一回事。
+Simple Live 里抖音直播的“播放”和“搜索”走的接口不一样。
 
 如果只是打开某个抖音直播间，默认内置的 `ttwid` 很多时候就够了。但如果要在 Simple Live 里搜索主播、搜索房间名，抖音接口经常会要求登录态。这时候只填一个 `ttwid` 不够，需要浏览器登录后的完整 Cookie。
 
-简单说：
+可以先按这个理解：
 
 ```text
 只看直播：默认 ttwid 多数情况下可以兜底
@@ -36,9 +36,9 @@ cookie: key1=value1; key2=value2; key3=value3
 
 这一整行就是我们要复制的东西。
 
-它不是密码，但它很接近登录凭据。拿到你的完整 Cookie 的人，有可能在一段时间内用你的登录态请求抖音接口。所以不要发给别人，不要贴到公开 issue，也不要截图发群里。
+它不等同于密码，但很接近登录凭据。拿到你的完整 Cookie 的人，有可能在一段时间内用你的登录态请求抖音接口。所以不要发给别人，不要贴到公开 issue，也不要截图发群里。
 
-Simple Live 需要它，是因为抖音搜索接口并不是完全公开的匿名接口。浏览器能搜，是因为浏览器带着你的登录态。Simple Live 想在 App 里调用同一个搜索能力，也要带上这个登录态。
+Simple Live 需要它，是因为抖音搜索接口对匿名请求不太友好。浏览器能搜，是因为浏览器带着你的登录态。Simple Live 想在 App 里调用同一个搜索能力，也要带上这个登录态。
 
 ## 三、不要只复制 ttwid
 
@@ -48,7 +48,7 @@ Simple Live 需要它，是因为抖音搜索接口并不是完全公开的匿�
 
 `ttwid` 更像一个设备 / 访客标识，它对播放有帮助，但它不一定代表“你已经登录”。搜索主播、房间名时，接口更关心完整的登录 Cookie，里面可能还会有 `sid_guard`、`sessionid`、`passport_csrf_token`、`msToken` 等一批字段。
 
-所以这篇教程里说的 Cookie，默认都是“完整 Cookie”，不是单个字段。
+所以这篇教程里说的 Cookie，默认都指“完整 Cookie”，也就是一整串字段。
 
 你要复制的是这种：
 
@@ -56,7 +56,7 @@ Simple Live 需要它，是因为抖音搜索接口并不是完全公开的匿�
 ttwid=...; sid_guard=...; sessionid=...; passport_csrf_token=...; msToken=...
 ```
 
-而不是这种：
+不要只复制这种：
 
 ```text
 ttwid=...
@@ -137,7 +137,7 @@ cookie: ...
 
 注意，是 `Request Headers` 里的 `cookie`。
 
-不要复制 `Response Headers` 里的 `set-cookie`。那是服务器返回给浏览器的单个设置项，不是浏览器下一次请求会带上的完整 Cookie。
+不要复制 `Response Headers` 里的 `set-cookie`。那是服务器返回给浏览器的单个设置项，浏览器下一次请求真正带出去的是 `Request Headers` 里的 `cookie`。
 
 你可以复制整行：
 
@@ -182,7 +182,7 @@ user-agent: Mozilla/5.0 ...
 simple_live_app/lib/modules/mine/account/account_controller.dart
 ```
 
-核心就是先尝试从整段文本里找 `cookie:`，找不到再把输入当作纯 Cookie：
+处理时会先尝试从整段文本里找 `cookie:`，找不到再把输入当作纯 Cookie：
 
 ```dart
 String _normalizeDouyinCookieInput(String input) {
@@ -209,7 +209,7 @@ String _normalizeDouyinCookieInput(String input) {
 
 把刚才复制的内容粘贴进去，点确定。
 
-保存后，账号管理页会显示一个摘要。如果 Cookie 里有 `sid_guard`，应用会尝试解析一个预计有效期。这个时间不是绝对的，因为退出登录、改密码、账号风控都可能让 Cookie 提前失效。
+保存后，账号管理页会显示一个摘要。如果 Cookie 里有 `sid_guard`，应用会尝试解析一个预计有效期。这个时间只能作参考，因为退出登录、改密码、账号风控都可能让 Cookie 提前失效。
 
 如果显示“有效期无法判断”，也不一定代表不能用，只是 Cookie 里没有能被当前逻辑解析的标准过期字段。
 
@@ -263,11 +263,11 @@ TV 端不内置浏览器登录抖音。
 
 ## 九、为什么任意请求都可以
 
-很多人会问：是不是一定要找到 `aweme/v1/web/live/search/` 这个搜索请求？
+很多人会问：一定要找到 `aweme/v1/web/live/search/` 这个搜索请求吗？
 
 不一定。
 
-Cookie 不是某一个请求独有的东西。它是浏览器对这个域名发请求时携带的一组凭据。只要你已经登录，浏览器访问 `www.douyin.com` 或 `live.douyin.com` 时，很多请求都会带上同一批 Cookie。
+Cookie 属于浏览器对这个域名发请求时携带的一组凭据，不绑定某一个具体请求。只要你已经登录，浏览器访问 `www.douyin.com` 或 `live.douyin.com` 时，很多请求都会带上同一批 Cookie。
 
 Simple Live 搜索时会把你保存的 Cookie 放到请求头里：
 
@@ -275,7 +275,7 @@ Simple Live 搜索时会把你保存的 Cookie 放到请求头里：
 cookie: 你保存的完整 Cookie
 ```
 
-所以获取 Cookie 的关键不是“点中哪个接口”，而是“复制到的 Cookie 是否完整，是否来自登录后的浏览器请求”。
+所以获取 Cookie 时，重点看两件事：复制到的 Cookie 是否完整，是否来自登录后的浏览器请求。
 
 当然，如果你刚好能在 Network 里点到搜索接口，那也可以。但没必要为了找它折腾半天。
 
@@ -289,7 +289,7 @@ cookie: 你保存的完整 Cookie
 
 原因是搜索前会先对抖音域名发一个 HEAD 请求，尝试补一些网页 Cookie。Android 网络环境、系统 TLS、服务端策略都有可能让这个 HEAD 请求失败。
 
-后来 Simple Live 改了兜底逻辑：如果你本地已经保存了完整 Cookie，HEAD 失败时不再直接中断，而是继续用已保存 Cookie 请求搜索。
+后来 Simple Live 改了兜底逻辑：如果你本地已经保存了完整 Cookie，HEAD 失败时会继续用已保存 Cookie 请求搜索。
 
 对应代码在：
 
@@ -313,13 +313,13 @@ try {
 }
 ```
 
-所以如果你还遇到类似问题，先确认自己导入的是完整 Cookie，而不是只有 `ttwid`。
+所以如果你还遇到类似问题，先确认自己导入的是完整 Cookie，不要只导入 `ttwid`。
 
 ## 十一、Cookie 会失效吗
 
 会。
 
-Cookie 不是永久通行证。常见失效原因有：
+Cookie 会过期。常见失效原因有：
 
 - 你在浏览器里退出了抖音登录。
 - 修改密码或账号安全状态变化。
@@ -401,7 +401,7 @@ Network 里看到的还是登录前请求，Cookie 不完整
 
 Cookie 接近登录凭据。别人拿到后，至少在一段时间内可能可以用你的登录态请求接口。遇到问题可以描述现象，不要把完整 Cookie 发出来。
 
-## 十三、最后总结
+## 十三、最后记几句
 
 获取抖音 Cookie 这件事，最关键的就三句话：
 
