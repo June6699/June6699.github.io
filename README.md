@@ -69,3 +69,4 @@ GitHub Actions 已在工作流中读取仓库 **Secrets**：`GITALK_CLIENT_ID`�
 ## 迁移脚本
 
 文章与图片由 `migrate_to_hugo.py`（在 Jekyll 项目根目录）生成，如需重新迁移可再运行该脚本。
+
