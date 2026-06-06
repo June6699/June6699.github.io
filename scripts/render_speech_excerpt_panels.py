@@ -59,7 +59,7 @@ def render_sources(sources: list[dict[str, Any]]) -> str:
         meta = source_meta(source)
         links.append(
             "    <li class=\"speech-excerpt__source-item\">"
-            f"<a class=\"speech-excerpt__source-link\" href=\"{esc(url)}\">{esc(source.get('label') or title)}</a>"
+            f"<a class=\"speech-excerpt__source-link\" href=\"{esc(url)}\" target=\"_blank\" rel=\"noopener noreferrer\">{esc(source.get('label') or title)}</a>"
             f"<span class=\"speech-excerpt__source-meta\">{esc(meta)}</span>"
             f"<span class=\"speech-excerpt__source-title\">{esc(title)}</span>"
             "</li>"
