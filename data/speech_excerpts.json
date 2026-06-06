@@ -1,0 +1,320 @@
+{
+  "generated_at": "2026-06-06T07:05:06+00:00",
+  "max_excerpt_words": 25,
+  "items": [
+    {
+      "id": "lisa-su",
+      "person": "Lisa Su",
+      "occasion": "MIT Commencement 2026",
+      "excerpt_en": "Technology itself does not decide what the future looks like.",
+      "excerpt_zh": "技术本身不会决定未来的样子。",
+      "excerpt_source_label": "MIT News",
+      "excerpt_word_count": 10,
+      "sources": [
+        {
+          "label": "MIT News",
+          "url": "https://news.mit.edu/2026/commencement-address-lisa-su-0528",
+          "status": "ok",
+          "title": "Commencement address by Lisa Su ’90, SM ’91, PhD ’94",
+          "site": "MIT News | Massachusetts Institute of Technology",
+          "published": "",
+          "canonical": "https://news.mit.edu/2026/commencement-address-lisa-su-0528",
+          "excerpt_en": "Technology itself does not decide what the future looks like.",
+          "excerpt_zh": "技术本身不会决定未来的样子。",
+          "excerpt_word_count": 10,
+          "status_code": 200,
+          "final_url": "https://news.mit.edu/2026/commencement-address-lisa-su-0528"
+        }
+      ]
+    },
+    {
+      "id": "jensen-huang",
+      "person": "Jensen Huang",
+      "occasion": "Carnegie Mellon Commencement 2026",
+      "excerpt_en": "Shape what comes next.",
+      "excerpt_zh": "塑造接下来会发生的事。",
+      "excerpt_source_label": "CMU News",
+      "excerpt_word_count": 4,
+      "sources": [
+        {
+          "label": "CMU News",
+          "url": "https://www.cmu.edu/news/stories/archives/2026/may/nvidia-founder-ceo-jensen-huang-to-carnegie-mellon-university-graduates-shape-what-comes-next",
+          "status": "ok",
+          "title": "NVIDIA Founder, CEO Jensen Huang to Carnegie Mellon University Graduates: ‘Shape What Comes Next’",
+          "site": "News",
+          "published": "2026-05-10T15:00:00-0400",
+          "canonical": "https://www.cmu.edu/news/stories/archives/2026/may/nvidia-founder-ceo-jensen-huang-to-carnegie-mellon-university-graduates-shape-what-comes-next",
+          "excerpt_en": "Shape what comes next.",
+          "excerpt_zh": "塑造接下来会发生的事。",
+          "excerpt_word_count": 4,
+          "status_code": 200,
+          "final_url": "https://www.cmu.edu/news/stories/archives/2026/may/nvidia-founder-ceo-jensen-huang-to-carnegie-mellon-university-graduates-shape-what-comes-next"
+        },
+        {
+          "label": "NVIDIA Blog",
+          "url": "https://blogs.nvidia.com/blog/nvidia-ceo-carnegie-mellon-commencement-address/",
+          "status": "ok",
+          "title": "‘Your Career Starts at the Beginning of the AI Revolution,’ NVIDIA CEO Tells Graduates",
+          "site": "NVIDIA Blog",
+          "published": "2026-05-10T22:00:50+00:00",
+          "canonical": "https://blogs.nvidia.com/blog/nvidia-ceo-carnegie-mellon-commencement-address/",
+          "excerpt_en": "The answer is not to fear the future.",
+          "excerpt_zh": "答案不是害怕未来。",
+          "excerpt_word_count": 8,
+          "status_code": 200,
+          "final_url": "https://blogs.nvidia.com/blog/nvidia-ceo-carnegie-mellon-commencement-address/"
+        }
+      ]
+    },
+    {
+      "id": "elon-musk",
+      "person": "Elon Musk",
+      "occasion": "Caltech Commencement 2012",
+      "excerpt_en": "",
+      "excerpt_zh": "",
+      "excerpt_source_label": "",
+      "excerpt_word_count": 0,
+      "sources": [
+        {
+          "label": "C-SPAN",
+          "url": "https://www.c-span.org/video/?306109-1/california-institute-technology-commencement-address",
+          "status": "ok",
+          "title": "California Institute of Technology Commencement Address",
+          "site": "C-SPAN.org",
+          "published": "",
+          "canonical": "https://www.c-span.org/program/public-affairs-event/california-institute-of-technology-commencement-address/277397",
+          "excerpt_en": "",
+          "excerpt_zh": "",
+          "excerpt_word_count": 0,
+          "status_code": 200,
+          "final_url": "https://www.c-span.org/program/public-affairs-event/california-institute-of-technology-commencement-address/277397"
+        }
+      ]
+    },
+    {
+      "id": "mark-zuckerberg",
+      "person": "Mark Zuckerberg",
+      "occasion": "Harvard Commencement 2017",
+      "excerpt_en": "Ideas don't come out fully formed.",
+      "excerpt_zh": "想法不会一开始就完整成形。",
+      "excerpt_source_label": "Harvard Gazette",
+      "excerpt_word_count": 6,
+      "sources": [
+        {
+          "label": "Harvard Gazette",
+          "url": "https://news.harvard.edu/gazette/story/2017/05/mark-zuckerbergs-speech-as-written-for-harvards-class-of-2017/",
+          "status": "ok",
+          "title": "Mark Zuckerberg's speech as written for Harvard's Class of 2017",
+          "site": "Harvard Gazette",
+          "published": "2017-05-25T21:12:02+00:00",
+          "canonical": "https://news.harvard.edu/gazette/story/2017/05/mark-zuckerbergs-speech-as-written-for-harvards-class-of-2017/",
+          "excerpt_en": "Ideas don't come out fully formed.",
+          "excerpt_zh": "想法不会一开始就完整成形。",
+          "excerpt_word_count": 6,
+          "status_code": 200,
+          "final_url": "https://news.harvard.edu/gazette/story/2017/05/mark-zuckerbergs-speech-as-written-for-harvards-class-of-2017/"
+        }
+      ]
+    },
+    {
+      "id": "park-bo-young",
+      "person": "Park Bo-young",
+      "occasion": "Baeksang Arts Awards 2026",
+      "excerpt_en": "",
+      "excerpt_zh": "",
+      "excerpt_source_label": "",
+      "excerpt_word_count": 0,
+      "sources": [
+        {
+          "label": "MK English",
+          "url": "https://www.mk.co.kr/en/entertain/12044203",
+          "status": "ok",
+          "title": "Actor Park Bo-young drew smiles from fans with her lovely daily life.Park Bo-young released several .. - MK",
+          "site": "매일경제",
+          "published": "2026-05-12T07:16:23+09:00",
+          "canonical": "https://www.mk.co.kr/en/entertain/12044203",
+          "excerpt_en": "",
+          "excerpt_zh": "",
+          "excerpt_word_count": 0,
+          "status_code": 200,
+          "final_url": "https://www.mk.co.kr/en/entertain/12044203"
+        }
+      ]
+    },
+    {
+      "id": "steve-jobs",
+      "person": "Steve Jobs",
+      "occasion": "Stanford Commencement 2005",
+      "excerpt_en": "",
+      "excerpt_zh": "",
+      "excerpt_source_label": "",
+      "excerpt_word_count": 0,
+      "sources": [
+        {
+          "label": "Stanford Report",
+          "url": "https://news.stanford.edu/stories/2005/06/youve-got-find-love-jobs-says",
+          "status": "http_error",
+          "title": "",
+          "site": "",
+          "published": "",
+          "canonical": "https://news.stanford.edu/stories/2005/06/youve-got-find-love-jobs-says",
+          "excerpt_en": "",
+          "excerpt_zh": "",
+          "excerpt_word_count": 0,
+          "status_code": 403,
+          "final_url": "https://news.stanford.edu/stories/2005/06/youve-got-find-love-jobs-says"
+        }
+      ]
+    },
+    {
+      "id": "jeff-bezos",
+      "person": "Jeff Bezos",
+      "occasion": "Princeton Baccalaureate 2010",
+      "excerpt_en": "",
+      "excerpt_zh": "",
+      "excerpt_source_label": "",
+      "excerpt_word_count": 0,
+      "sources": [
+        {
+          "label": "Princeton",
+          "url": "https://www.princeton.edu/news/2010/05/30/2010-baccalaureate-remarks",
+          "status": "http_error",
+          "title": "",
+          "site": "",
+          "published": "",
+          "canonical": "https://www.princeton.edu/news/2010/05/30/2010-baccalaureate-remarks",
+          "excerpt_en": "",
+          "excerpt_zh": "",
+          "excerpt_word_count": 0,
+          "status_code": 403,
+          "final_url": "https://www.princeton.edu/news/2010/05/30/2010-baccalaureate-remarks"
+        }
+      ]
+    },
+    {
+      "id": "bill-gates",
+      "person": "Bill Gates",
+      "occasion": "NAU Commencement 2023",
+      "excerpt_en": "",
+      "excerpt_zh": "",
+      "excerpt_source_label": "",
+      "excerpt_word_count": 0,
+      "sources": [
+        {
+          "label": "GatesNotes",
+          "url": "https://www.gatesnotes.com/NAU-Commencement-Speech",
+          "status": "http_error",
+          "title": "",
+          "site": "",
+          "published": "",
+          "canonical": "https://www.gatesnotes.com/NAU-Commencement-Speech",
+          "excerpt_en": "",
+          "excerpt_zh": "",
+          "excerpt_word_count": 0,
+          "status_code": 403,
+          "final_url": "https://www.gatesnotes.com/NAU-Commencement-Speech"
+        }
+      ]
+    },
+    {
+      "id": "tim-cook",
+      "person": "Tim Cook",
+      "occasion": "Stanford Commencement 2019",
+      "excerpt_en": "",
+      "excerpt_zh": "",
+      "excerpt_source_label": "",
+      "excerpt_word_count": 0,
+      "sources": [
+        {
+          "label": "Stanford Report",
+          "url": "https://news.stanford.edu/2019/06/16/remarks-tim-cook-2019-stanford-commencement/",
+          "status": "http_error",
+          "title": "",
+          "site": "",
+          "published": "",
+          "canonical": "https://news.stanford.edu/2019/06/16/remarks-tim-cook-2019-stanford-commencement/",
+          "excerpt_en": "",
+          "excerpt_zh": "",
+          "excerpt_word_count": 0,
+          "status_code": 403,
+          "final_url": "https://news.stanford.edu/2019/06/16/remarks-tim-cook-2019-stanford-commencement/"
+        }
+      ]
+    },
+    {
+      "id": "sheryl-sandberg",
+      "person": "Sheryl Sandberg",
+      "occasion": "UC Berkeley Commencement 2016",
+      "excerpt_en": "I learned about the depths of sadness and the brutality of loss.",
+      "excerpt_zh": "我理解了悲伤的深度，也理解了失去的残酷。",
+      "excerpt_source_label": "Los Angeles Times",
+      "excerpt_word_count": 12,
+      "sources": [
+        {
+          "label": "Los Angeles Times",
+          "url": "https://www.latimes.com/local/california/la-sheryl-sandberg-commencement-address-transcript-20160514-story.html",
+          "status": "ok",
+          "title": "Transcript: Sheryl Sandberg's 2016 Commencement Address at University of California, Berkeley",
+          "site": "Los Angeles Times",
+          "published": "2016-05-14T18:24:42",
+          "canonical": "https://www.latimes.com/local/california/la-sheryl-sandberg-commencement-address-transcript-20160514-story.html",
+          "excerpt_en": "I learned about the depths of sadness and the brutality of loss.",
+          "excerpt_zh": "我理解了悲伤的深度，也理解了失去的残酷。",
+          "excerpt_word_count": 12,
+          "status_code": 200,
+          "final_url": "https://www.latimes.com/local/california/la-sheryl-sandberg-commencement-address-transcript-20160514-story.html"
+        }
+      ]
+    },
+    {
+      "id": "sundar-pichai",
+      "person": "Sundar Pichai",
+      "occasion": "Dear Class of 2020",
+      "excerpt_en": "Be impatient. It will create the progress the world needs.",
+      "excerpt_zh": "保持不耐烦，它会创造世界需要的进步。",
+      "excerpt_source_label": "Google Blog",
+      "excerpt_word_count": 10,
+      "sources": [
+        {
+          "label": "Google Blog",
+          "url": "https://blog.google/products/youtube/sundar-pichai-message-class-2020/",
+          "status": "ok",
+          "title": "You Will Prevail - A message to the Class of 2020",
+          "site": "Google",
+          "published": "2020-06-07",
+          "canonical": "https://blog.google/products-and-platforms/products/youtube/sundar-pichai-message-class-2020/",
+          "excerpt_en": "Be impatient. It will create the progress the world needs.",
+          "excerpt_zh": "保持不耐烦，它会创造世界需要的进步。",
+          "excerpt_word_count": 10,
+          "status_code": 200,
+          "final_url": "https://blog.google/products-and-platforms/products/youtube/sundar-pichai-message-class-2020/"
+        }
+      ]
+    },
+    {
+      "id": "jk-rowling",
+      "person": "J.K. Rowling",
+      "occasion": "Harvard Commencement 2008",
+      "excerpt_en": "Failure meant a stripping away of the inessential.",
+      "excerpt_zh": "失败意味着剥离掉那些不必要的东西。",
+      "excerpt_source_label": "Harvard Gazette",
+      "excerpt_word_count": 8,
+      "sources": [
+        {
+          "label": "Harvard Gazette",
+          "url": "https://news.harvard.edu/gazette/story/2008/06/text-of-j-k-rowling-speech/",
+          "status": "ok",
+          "title": "Text of J.K. Rowling's speech — Harvard Gazette",
+          "site": "Harvard Gazette",
+          "published": "2008-06-05T19:24:53+00:00",
+          "canonical": "https://news.harvard.edu/gazette/story/2008/06/text-of-j-k-rowling-speech/",
+          "excerpt_en": "Failure meant a stripping away of the inessential.",
+          "excerpt_zh": "失败意味着剥离掉那些不必要的东西。",
+          "excerpt_word_count": 8,
+          "status_code": 200,
+          "final_url": "https://news.harvard.edu/gazette/story/2008/06/text-of-j-k-rowling-speech/"
+        }
+      ]
+    }
+  ]
+}

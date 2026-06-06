@@ -3409,3 +3409,195 @@ a.sidebar-tag-nav__flat:hover {
 .moments-vtimeline__mode.is-active {
     background: #0891b2;
 }
+
+/* ===== speech excerpt accordion ===== */
+.speech-excerpt {
+    margin: 1rem 0 1.35rem;
+    border: 1px solid color-mix(in srgb, var(--border) 88%, transparent 12%);
+    border-radius: 8px;
+    background: color-mix(in srgb, var(--entry) 94%, var(--theme) 6%);
+    overflow: hidden;
+}
+
+.speech-excerpt__toggle {
+    appearance: none;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 0.8rem;
+    align-items: center;
+    width: 100%;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    cursor: pointer;
+    padding: 0.82rem 0.95rem;
+    text-align: left;
+}
+
+.speech-excerpt__toggle:hover,
+.speech-excerpt__toggle:focus-visible {
+    background: color-mix(in srgb, var(--accent) 7%, transparent 93%);
+    outline: none;
+}
+
+.speech-excerpt__toggle:focus-visible {
+    box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--accent) 50%, transparent 50%);
+}
+
+.speech-excerpt__toggle-copy {
+    display: grid;
+    gap: 0.18rem;
+    min-width: 0;
+}
+
+.speech-excerpt__eyebrow {
+    color: var(--accent);
+    font-size: 0.76rem;
+    font-weight: 800;
+    line-height: 1.2;
+}
+
+.speech-excerpt__title {
+    color: var(--primary);
+    font-size: 1rem;
+    line-height: 1.35;
+}
+
+.speech-excerpt__meta {
+    color: var(--secondary);
+    font-size: 0.84rem;
+    line-height: 1.35;
+}
+
+.speech-excerpt__toggle-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 3.1rem;
+    height: 2rem;
+    border: 1px solid color-mix(in srgb, var(--border) 80%, transparent 20%);
+    border-radius: 8px;
+    color: var(--secondary);
+    font-size: 0.82rem;
+    font-weight: 800;
+}
+
+.speech-excerpt.is-open .speech-excerpt__toggle-icon {
+    color: #fff;
+    border-color: transparent;
+    background: var(--accent);
+}
+
+.speech-excerpt__body {
+    border-top: 1px solid color-mix(in srgb, var(--border) 88%, transparent 12%);
+    padding: 0.95rem;
+}
+
+.speech-excerpt__toolbar {
+    display: inline-flex;
+    gap: 0.2rem;
+    padding: 0.2rem;
+    border: 1px solid color-mix(in srgb, var(--border) 82%, transparent 18%);
+    border-radius: 8px;
+    background: color-mix(in srgb, var(--theme) 74%, transparent 26%);
+}
+
+.speech-excerpt__lang {
+    appearance: none;
+    border: 0;
+    border-radius: 6px;
+    background: transparent;
+    color: var(--secondary);
+    cursor: pointer;
+    font-size: 0.86rem;
+    font-weight: 800;
+    padding: 0.38rem 0.68rem;
+}
+
+.speech-excerpt__lang:hover,
+.speech-excerpt__lang:focus-visible,
+.speech-excerpt__lang.is-active {
+    color: #fff;
+    background: var(--accent);
+    outline: none;
+}
+
+.speech-excerpt__content {
+    margin-top: 0.85rem;
+    max-height: min(56vh, 520px);
+    overflow: auto;
+    padding-right: 0.25rem;
+}
+
+.speech-excerpt__label {
+    margin: 0 0 0.35rem;
+    color: var(--secondary);
+    font-size: 0.82rem;
+    font-weight: 800;
+}
+
+.post-content .speech-excerpt__quote {
+    margin: 0;
+    padding: 0.72rem 0.85rem;
+    border-left: 3px solid var(--accent);
+    border-radius: 0 8px 8px 0;
+    background: color-mix(in srgb, var(--accent) 7%, transparent 93%);
+    color: var(--primary);
+    line-height: 1.72;
+}
+
+.speech-excerpt__note {
+    margin: 0.65rem 0 0;
+    color: var(--secondary);
+    font-size: 0.88rem;
+    line-height: 1.65;
+}
+
+.speech-excerpt__sources {
+    display: grid;
+    gap: 0.55rem;
+    list-style: none;
+    margin: 0.95rem 0 0;
+    padding: 0;
+}
+
+.speech-excerpt__source-item {
+    display: grid;
+    gap: 0.18rem;
+    min-width: 0;
+    padding: 0.68rem 0.75rem;
+    border: 1px solid color-mix(in srgb, var(--border) 84%, transparent 16%);
+    border-radius: 8px;
+    background: color-mix(in srgb, var(--theme) 66%, transparent 34%);
+}
+
+.speech-excerpt__source-link {
+    color: var(--accent);
+    font-weight: 800;
+    overflow-wrap: anywhere;
+}
+
+.speech-excerpt__source-meta,
+.speech-excerpt__source-title {
+    color: var(--secondary);
+    font-size: 0.82rem;
+    line-height: 1.42;
+    overflow-wrap: anywhere;
+}
+
+@media (max-width: 640px) {
+    .speech-excerpt__toggle {
+        grid-template-columns: 1fr;
+    }
+
+    .speech-excerpt__toggle-icon {
+        width: 100%;
+    }
+
+    .speech-excerpt__toolbar {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        width: 100%;
+        box-sizing: border-box;
+    }
+}
