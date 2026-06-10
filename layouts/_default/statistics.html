@@ -8,13 +8,18 @@
 
 <div class="statistics-page">
   {{- $posts := where site.RegularPages "Section" "posts" }}
+  {{- $moments := where site.RegularPages "Section" "moments" }}
   {{- $excludeTerms := slice "日常" "博客" }}
+  {{- $palette := slice "#2563eb" "#f97316" "#14b8a6" "#8b5cf6" "#eab308" "#ef4444" "#0f766e" "#7c3aed" "#ec4899" "#84cc16" "#06b6d4" "#f59e0b" }}
+  {{- $currentYear := now.Year }}
+
   {{- $publicTags := partial "public_leaf_tags.html" . }}
   {{- $topTagChars := newScratch }}
   {{- $topTagPostCount := newScratch }}
   {{- $total := len $posts }}
-  {{- $.Scratch.Set "totalChars" 0 }}
-  {{- range $posts }}{{ $.Scratch.Add "totalChars" (countrunes (plainify .Content)) }}{{ end }}
+  {{- $postScratch := newScratch }}
+  {{- $postScratch.Set "totalChars" 0 }}
+  {{- range $posts }}{{ $postScratch.Add "totalChars" (countrunes (plainify .Content)) }}{{ end }}
   {{- $topLevelTags := slice }}
   {{- range $posts }}
     {{- $chars := countrunes (plainify .Content) -}}
@@ -36,7 +41,7 @@
       {{- end }}
     {{- end }}
   {{- end }}
-  {{- $totalChars := $.Scratch.Get "totalChars" }}
+  {{- $totalChars := $postScratch.Get "totalChars" }}
   {{- $topTagRaw := slice }}
   {{- range $topLevelTags }}
     {{- $chars := $topTagChars.Get (printf "chars_%s" .) | default 0 -}}
@@ -51,7 +56,6 @@
   {{- $topTagRaw = sort $topTagRaw "chars" "desc" }}
   {{- $topTaggedCharsTotal := 0 }}
   {{- range $topTagRaw }}{{- $topTaggedCharsTotal = add $topTaggedCharsTotal .chars -}}{{- end }}
-  {{- $palette := slice "#2563eb" "#f97316" "#14b8a6" "#8b5cf6" "#eab308" "#ef4444" "#0f766e" "#7c3aed" "#ec4899" "#84cc16" "#06b6d4" "#f59e0b" }}
   {{- $topTagStats := slice }}
   {{- $chartStops := slice }}
   {{- $cursor := 0.0 }}
@@ -77,145 +81,335 @@
     {{- $chartStops = $chartStops | append (printf "%s %.2f%% %.2f%%" $color $startNum $endNum) -}}
   {{- end }}
   {{- $chartGradient := delimit $chartStops ", " }}
-  {{- $currentYear := now.Year }}
   {{- $postsThisYear := where $posts "Date.Year" $currentYear }}
   {{- $oldest := $posts.ByDate | first 1 }}
   {{- $newest := $posts.ByDate.Reverse | first 1 }}
 
-  <section class="stat-cards">
-    <div class="stat-card">
-      <span class="stat-number">{{ $total }}</span>
-      <span class="stat-label">文章总数</span>
-    </div>
-    <div class="stat-card">
-      <span class="stat-number">{{ len $publicTags }}</span>
-      <span class="stat-label">标签数</span>
-    </div>
-    {{- with site.Params.siteBirthDate }}
-    {{- $birth := time . }}
-    {{- $days := div (int (now.Sub $birth).Seconds) 86400 }}
-    <div class="stat-card stat-card--highlight">
-      <span class="stat-number">{{ $days }}</span>
-      <span class="stat-label">已运行天数</span>
-    </div>
+  {{- $momentTagCount := newScratch }}
+  {{- $momentTopTagChars := newScratch }}
+  {{- $momentTopTagPostCount := newScratch }}
+  {{- $momentScratch := newScratch }}
+  {{- $momentScratch.Set "totalChars" 0 }}
+  {{- $momentTotal := len $moments }}
+  {{- $momentTopLevelTags := slice }}
+  {{- range $moments }}
+    {{- $chars := countrunes (plainify .Content) -}}
+    {{- $momentScratch.Add "totalChars" $chars -}}
+    {{- $seenMomentTopTags := slice -}}
+    {{- with .Params.tags }}
+      {{- range . }}
+        {{- $t := . | string -}}
+        {{- if in $excludeTerms $t -}}{{- continue -}}{{- end -}}
+        {{- $momentTagCount.Set (printf "mc_%s" $t) (add ($momentTagCount.Get (printf "mc_%s" $t) | default 0) 1) -}}
+        {{- $top := index (split $t "/") 0 -}}
+        {{- if in $excludeTerms $top -}}{{- continue -}}{{- end -}}
+        {{- if not (in $seenMomentTopTags $top) -}}
+          {{- $seenMomentTopTags = $seenMomentTopTags | append $top -}}
+          {{- if not (in $momentTopLevelTags $top) -}}
+            {{- $momentTopLevelTags = $momentTopLevelTags | append $top -}}
+          {{- end -}}
+          {{- $momentTopTagChars.Set (printf "chars_%s" $top) (add ($momentTopTagChars.Get (printf "chars_%s" $top) | default 0) $chars) -}}
+          {{- $momentTopTagPostCount.Set (printf "posts_%s" $top) (add ($momentTopTagPostCount.Get (printf "posts_%s" $top) | default 0) 1) -}}
+        {{- end -}}
+      {{- end }}
     {{- end }}
-    <div class="stat-card">
-      <span class="stat-number">{{ $totalChars }}</span>
-      <span class="stat-label">总字数（字符）</span>
-    </div>
-    <div class="stat-card">
-      <span class="stat-number">{{ len $postsThisYear }}</span>
-      <span class="stat-label">{{ $currentYear }} 年新文</span>
-    </div>
-  </section>
-
-  <section class="stat-section">
-    <h2>时间线</h2>
-    <ul class="stat-timeline">
-      {{- with index $oldest 0 }}<li>最早文章：<a href="{{ .RelPermalink }}">{{ .Title }}</a>（{{ .Date.Format "2006-01-02" }}）</li>{{- end }}
-      {{- with index $newest 0 }}<li>最新文章：<a href="{{ .RelPermalink }}">{{ .Title }}</a>（{{ .Date.Format "2006-01-02" }}）</li>{{- end }}
-    </ul>
-  </section>
-
-  {{- if gt (len $topTagStats) 0 }}
-  <section class="stat-section">
-    <h2>一级标签字数分布</h2>
-    <div class="stat-pie-grid">
-      <div class="stat-pie-card">
-        <div class="stat-pie-shell">
-          <div
-            class="stat-pie-chart"
-            data-chart-segments='{{ $topTagStats | jsonify }}'
-            {{ if $chartGradient }}style="background: conic-gradient({{ $chartGradient }});"{{ end }}>
-            <div class="stat-pie-hole">
-              <span class="stat-pie-total">{{ $topTaggedCharsTotal }}</span>
-              <span class="stat-pie-caption">标签字符数</span>
-            </div>
-          </div>
-          <div class="stat-pie-tooltip" hidden></div>
-        </div>
-        <p class="stat-pie-note">按文章一级标签汇总字符数，子标签如 `诗/人物/柳宗元` 会归入 `诗`。</p>
-      </div>
-      <div class="stat-pie-legend">
-        <ol class="stat-tag-breakdown">
-          {{- range $topTagStats }}
-          <li>
-            <button type="button" class="stat-tag-item" data-stat-index="{{ .index }}" aria-pressed="false">
-              <span class="stat-tag-swatch" style="background-color: {{ .color }};"></span>
-              <div class="stat-tag-main">
-                <div class="stat-tag-head">
-                  <span class="stat-tag-name">{{ .name }}</span>
-                  <span class="stat-tag-percent">{{ printf "%.1f%%" .percent }}</span>
-                </div>
-                <div class="stat-tag-meta">
-                  <span>{{ .chars }} 字符</span>
-                  <span>{{ .posts }} 篇文章</span>
-                </div>
-              </div>
-            </button>
-          </li>
-          {{- end }}
-        </ol>
-      </div>
-    </div>
-  </section>
   {{- end }}
+  {{- $momentTotalChars := $momentScratch.Get "totalChars" }}
+  {{- $momentTerms := slice }}
+  {{- $momentSeenTerms := newScratch }}
+  {{- range $_, $taxonomy := site.Taxonomies.tags }}
+    {{- $t := $taxonomy.Page.Title -}}
+    {{- $rel := $taxonomy.Page.RelPermalink -}}
+    {{- if in $excludeTerms $t -}}{{- continue -}}{{- end -}}
+    {{- $c := $momentTagCount.Get (printf "mc_%s" $t) | default 0 -}}
+    {{- if and (gt $c 0) (not ($momentSeenTerms.Get (printf "rel_%s" $rel))) -}}
+      {{- $momentSeenTerms.Set (printf "rel_%s" $rel) true -}}
+      {{- $momentTerms = $momentTerms | append (dict "name" $taxonomy.Page.LinkTitle "raw" $t "rel" $rel "count" $c) -}}
+    {{- end -}}
+  {{- end }}
+  {{- $momentPublicTags := slice }}
+  {{- range $_, $term := $momentTerms }}
+    {{- $state := newScratch -}}
+    {{- $state.Set "isLeaf" true -}}
+    {{- $prefix := printf "%s/" $term.raw -}}
+    {{- range $_, $other := $momentTerms }}
+      {{- if and (ne $other.raw $term.raw) (hasPrefix $other.raw $prefix) -}}
+        {{- $state.Set "isLeaf" false -}}
+      {{- end -}}
+    {{- end }}
+    {{- if $state.Get "isLeaf" -}}
+      {{- $momentPublicTags = $momentPublicTags | append $term -}}
+    {{- end -}}
+  {{- end }}
+  {{- $momentTopTagRaw := slice }}
+  {{- range $momentTopLevelTags }}
+    {{- $chars := $momentTopTagChars.Get (printf "chars_%s" .) | default 0 -}}
+    {{- if gt $chars 0 -}}
+      {{- $momentTopTagRaw = $momentTopTagRaw | append (dict
+        "name" .
+        "chars" $chars
+        "posts" ($momentTopTagPostCount.Get (printf "posts_%s" .) | default 0)
+      ) -}}
+    {{- end -}}
+  {{- end }}
+  {{- $momentTopTagRaw = sort $momentTopTagRaw "chars" "desc" }}
+  {{- $momentTopTaggedCharsTotal := 0 }}
+  {{- range $momentTopTagRaw }}{{- $momentTopTaggedCharsTotal = add $momentTopTaggedCharsTotal .chars -}}{{- end }}
+  {{- $momentTopTagStats := slice }}
+  {{- $momentChartStops := slice }}
+  {{- $momentCursor := 0.0 }}
+  {{- range $i, $item := $momentTopTagRaw }}
+    {{- $percent := 0.0 -}}
+    {{- if gt $momentTopTaggedCharsTotal 0 -}}
+      {{- $percent = mul (div (float $item.chars) (float $momentTopTaggedCharsTotal)) 100 -}}
+    {{- end -}}
+    {{- $startNum := (float $momentCursor) -}}
+    {{- $momentCursor = add (float $momentCursor) (float $percent) -}}
+    {{- $endNum := (float $momentCursor) -}}
+    {{- $color := index $palette (mod $i (len $palette)) -}}
+    {{- $momentTopTagStats = $momentTopTagStats | append (dict
+      "index" $i
+      "name" $item.name
+      "chars" $item.chars
+      "posts" $item.posts
+      "percent" $percent
+      "start" $startNum
+      "end" $endNum
+      "color" $color
+    ) -}}
+    {{- $momentChartStops = $momentChartStops | append (printf "%s %.2f%% %.2f%%" $color $startNum $endNum) -}}
+  {{- end }}
+  {{- $momentChartGradient := delimit $momentChartStops ", " }}
+  {{- $momentsThisYear := where $moments "Date.Year" $currentYear }}
+  {{- $oldestMoment := $moments.ByDate | first 1 }}
+  {{- $newestMoment := $moments.ByDate.Reverse | first 1 }}
 
-  <section class="stat-section">
-    <h2>热门标签</h2>
-    <ul class="terms-tags tag-cloud">
-      {{- range first 20 (sort $publicTags "count" "desc") }}
-        <li><a href="{{ .rel }}">{{ .name }} <sup>{{ .count }}</sup></a></li>
+  <section class="stat-category">
+    <header class="stat-category__header">
+      <p class="stat-category__eyebrow">Posts</p>
+      <h2>文章统计</h2>
+    </header>
+
+    <section class="stat-cards">
+      <div class="stat-card">
+        <span class="stat-number">{{ $total }}</span>
+        <span class="stat-label">文章总数</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-number">{{ len $publicTags }}</span>
+        <span class="stat-label">标签数</span>
+      </div>
+      {{- with site.Params.siteBirthDate }}
+      {{- $birth := time . }}
+      {{- $days := div (int (now.Sub $birth).Seconds) 86400 }}
+      <div class="stat-card stat-card--highlight">
+        <span class="stat-number">{{ $days }}</span>
+        <span class="stat-label">已运行天数</span>
+      </div>
       {{- end }}
-    </ul>
+      <div class="stat-card">
+        <span class="stat-number">{{ $totalChars }}</span>
+        <span class="stat-label">总字数（字符）</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-number">{{ len $postsThisYear }}</span>
+        <span class="stat-label">{{ $currentYear }} 年新文</span>
+      </div>
+    </section>
+
+    <section class="stat-section">
+      <h3>时间线</h3>
+      <ul class="stat-timeline">
+        {{- with index $oldest 0 }}<li>最早文章：<a href="{{ .RelPermalink }}">{{ .Title }}</a>（{{ .Date.Format "2006-01-02" }}）</li>{{- end }}
+        {{- with index $newest 0 }}<li>最新文章：<a href="{{ .RelPermalink }}">{{ .Title }}</a>（{{ .Date.Format "2006-01-02" }}）</li>{{- end }}
+      </ul>
+    </section>
+
+    {{- if gt (len $topTagStats) 0 }}
+    <section class="stat-section">
+      <h3>一级标签字数分布</h3>
+      <div class="stat-pie-grid">
+        <div class="stat-pie-card">
+          <div class="stat-pie-shell">
+            <div
+              class="stat-pie-chart"
+              data-chart-segments='{{ $topTagStats | jsonify }}'
+              data-stat-entry-label="篇文章"
+              {{ if $chartGradient }}style="background: conic-gradient({{ $chartGradient }});"{{ end }}>
+              <div class="stat-pie-hole">
+                <span class="stat-pie-total">{{ $topTaggedCharsTotal }}</span>
+                <span class="stat-pie-caption">标签字符数</span>
+              </div>
+            </div>
+            <div class="stat-pie-tooltip" hidden></div>
+          </div>
+          <p class="stat-pie-note">按文章一级标签汇总字符数，子标签如 `诗/人物/柳宗元` 会归入 `诗`。</p>
+        </div>
+        <div class="stat-pie-legend">
+          <ol class="stat-tag-breakdown">
+            {{- range $topTagStats }}
+            <li>
+              <button type="button" class="stat-tag-item" data-stat-index="{{ .index }}" aria-pressed="false">
+                <span class="stat-tag-swatch" style="background-color: {{ .color }};"></span>
+                <div class="stat-tag-main">
+                  <div class="stat-tag-head">
+                    <span class="stat-tag-name">{{ .name }}</span>
+                    <span class="stat-tag-percent">{{ printf "%.1f%%" .percent }}</span>
+                  </div>
+                  <div class="stat-tag-meta">
+                    <span>{{ .chars }} 字符</span>
+                    <span>{{ .posts }} 篇文章</span>
+                  </div>
+                </div>
+              </button>
+            </li>
+            {{- end }}
+          </ol>
+        </div>
+      </div>
+    </section>
+    {{- end }}
+
+    <section class="stat-section">
+      <h3>热门标签</h3>
+      <ul class="terms-tags tag-cloud">
+        {{- range first 20 (sort $publicTags "count" "desc") }}
+          <li><a href="{{ .rel }}">{{ .name }} <sup>{{ .count }}</sup></a></li>
+        {{- end }}
+      </ul>
+    </section>
+
+    <section class="stat-section">
+      <h3>最新文章</h3>
+      <ul class="stat-posts-list">
+        {{- range first 10 $posts.ByDate.Reverse }}
+        <li><a href="{{ .RelPermalink }}">{{ .Title }}</a> <span class="stat-date">{{ .Date.Format "2006-01-02" }}</span></li>
+        {{- end }}
+      </ul>
+    </section>
+
+    <section class="stat-section">
+      <h3>按年归档</h3>
+      <ul class="stat-archives">
+        {{- range $posts.GroupByDate "2006" }}
+        <li><a href="{{ "posts/" | relLangURL }}#{{ .Key }}">{{ .Key }}</a> <sup>{{ len .Pages }}</sup></li>
+        {{- end }}
+      </ul>
+    </section>
   </section>
 
-  <section class="stat-section">
-    <h2>最新文章</h2>
-    <ul class="stat-posts-list">
-      {{- range first 10 $posts.ByDate.Reverse }}
-      <li><a href="{{ .RelPermalink }}">{{ .Title }}</a> <span class="stat-date">{{ .Date.Format "2006-01-02" }}</span></li>
-      {{- end }}
-    </ul>
-  </section>
+  <section class="stat-category stat-category--moments">
+    <header class="stat-category__header">
+      <p class="stat-category__eyebrow">Moments</p>
+      <h2>动态统计</h2>
+    </header>
 
-  <section class="stat-section">
-    <h2>按年归档</h2>
-    <ul class="stat-archives">
-      {{- range $posts.GroupByDate "2006" }}
-      <li><a href="{{ "posts/" | relLangURL }}#{{ .Key }}">{{ .Key }}</a> <sup>{{ len .Pages }}</sup></li>
-      {{- end }}
-    </ul>
+    <section class="stat-cards">
+      <div class="stat-card">
+        <span class="stat-number">{{ $momentTotal }}</span>
+        <span class="stat-label">动态总数</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-number">{{ len $momentPublicTags }}</span>
+        <span class="stat-label">标签数</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-number">{{ $momentTotalChars }}</span>
+        <span class="stat-label">总字数（字符）</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-number">{{ len $momentsThisYear }}</span>
+        <span class="stat-label">{{ $currentYear }} 年新动态</span>
+      </div>
+    </section>
+
+    <section class="stat-section">
+      <h3>时间线</h3>
+      <ul class="stat-timeline">
+        {{- with index $oldestMoment 0 }}<li>最早动态：<a href="{{ .RelPermalink }}">{{ .Title }}</a>（{{ .Date.Format "2006-01-02" }}）</li>{{- end }}
+        {{- with index $newestMoment 0 }}<li>最新动态：<a href="{{ .RelPermalink }}">{{ .Title }}</a>（{{ .Date.Format "2006-01-02" }}）</li>{{- end }}
+      </ul>
+    </section>
+
+    {{- if gt (len $momentTopTagStats) 0 }}
+    <section class="stat-section">
+      <h3>一级标签字数分布</h3>
+      <div class="stat-pie-grid">
+        <div class="stat-pie-card">
+          <div class="stat-pie-shell">
+            <div
+              class="stat-pie-chart"
+              data-chart-segments='{{ $momentTopTagStats | jsonify }}'
+              data-stat-entry-label="条动态"
+              {{ if $momentChartGradient }}style="background: conic-gradient({{ $momentChartGradient }});"{{ end }}>
+              <div class="stat-pie-hole">
+                <span class="stat-pie-total">{{ $momentTopTaggedCharsTotal }}</span>
+                <span class="stat-pie-caption">动态标签字符数</span>
+              </div>
+            </div>
+            <div class="stat-pie-tooltip" hidden></div>
+          </div>
+          <p class="stat-pie-note">按动态一级标签汇总字符数，子标签会归入对应的顶层标签。</p>
+        </div>
+        <div class="stat-pie-legend">
+          <ol class="stat-tag-breakdown">
+            {{- range $momentTopTagStats }}
+            <li>
+              <button type="button" class="stat-tag-item" data-stat-index="{{ .index }}" aria-pressed="false">
+                <span class="stat-tag-swatch" style="background-color: {{ .color }};"></span>
+                <div class="stat-tag-main">
+                  <div class="stat-tag-head">
+                    <span class="stat-tag-name">{{ .name }}</span>
+                    <span class="stat-tag-percent">{{ printf "%.1f%%" .percent }}</span>
+                  </div>
+                  <div class="stat-tag-meta">
+                    <span>{{ .chars }} 字符</span>
+                    <span>{{ .posts }} 条动态</span>
+                  </div>
+                </div>
+              </button>
+            </li>
+            {{- end }}
+          </ol>
+        </div>
+      </div>
+    </section>
+    {{- end }}
+
+    <section class="stat-section">
+      <h3>热门标签</h3>
+      <ul class="terms-tags tag-cloud">
+        {{- range first 20 (sort $momentPublicTags "count" "desc") }}
+          <li><a href="{{ .rel }}">{{ .name }} <sup>{{ .count }}</sup></a></li>
+        {{- end }}
+      </ul>
+    </section>
+
+    <section class="stat-section">
+      <h3>最新动态</h3>
+      <ul class="stat-posts-list">
+        {{- range first 10 $moments.ByDate.Reverse }}
+        <li><a href="{{ .RelPermalink }}">{{ .Title }}</a> <span class="stat-date">{{ .Date.Format "2006-01-02" }}</span></li>
+        {{- end }}
+      </ul>
+    </section>
+
+    <section class="stat-section">
+      <h3>按年归档</h3>
+      <ul class="stat-archives">
+        {{- range $moments.GroupByDate "2006" }}
+        <li><a href="{{ "moments/" | relLangURL }}">{{ .Key }}</a> <sup>{{ len .Pages }}</sup></li>
+        {{- end }}
+      </ul>
+    </section>
   </section>
 </div>
 
-{{- if gt (len $topTagStats) 0 }}
+{{- if or (gt (len $topTagStats) 0) (gt (len $momentTopTagStats) 0) }}
 <script>
 (function () {
-  const chart = document.querySelector('.stat-pie-chart');
-  if (!chart) return;
-
-  const shell = chart.closest('.stat-pie-shell');
-  const card = chart.closest('.stat-pie-card');
-  const tooltip = shell ? shell.querySelector('.stat-pie-tooltip') : null;
-  const totalEl = chart.querySelector('.stat-pie-total');
-  const captionEl = chart.querySelector('.stat-pie-caption');
-  const legendButtons = Array.from(document.querySelectorAll('.stat-tag-item[data-stat-index]'));
-  const defaultTotal = totalEl ? totalEl.textContent : '';
-  const defaultCaption = captionEl ? captionEl.textContent : '';
-  let segments = [];
-
-  try {
-    segments = JSON.parse(chart.dataset.chartSegments || '[]');
-  } catch (err) {
-    console.error('Failed to parse statistics chart data.', err);
-    return;
-  }
-  if (!segments.length) return;
-
-  const holeRatio = 0.56;
-  let lockedIndex = -1;
-  let hoverIndex = -1;
+  const charts = Array.from(document.querySelectorAll('.stat-pie-chart[data-chart-segments]'));
+  if (!charts.length) return;
 
   function hexToRgba(hex, alpha) {
     const value = hex.replace('#', '');
@@ -229,123 +423,149 @@
     return `rgba(${r}, ${g}, ${b}, ${alpha})`;
   }
 
-  function effectiveIndex() {
-    return hoverIndex >= 0 ? hoverIndex : lockedIndex;
-  }
+  charts.forEach((chart) => {
+    const section = chart.closest('.stat-section') || document;
+    const shell = chart.closest('.stat-pie-shell');
+    const card = chart.closest('.stat-pie-card');
+    const tooltip = shell ? shell.querySelector('.stat-pie-tooltip') : null;
+    const totalEl = chart.querySelector('.stat-pie-total');
+    const captionEl = chart.querySelector('.stat-pie-caption');
+    const legendButtons = Array.from(section.querySelectorAll('.stat-tag-item[data-stat-index]'));
+    const defaultTotal = totalEl ? totalEl.textContent : '';
+    const defaultCaption = captionEl ? captionEl.textContent : '';
+    const entryLabel = chart.dataset.statEntryLabel || '篇文章';
+    let segments = [];
 
-  function updateCenter(index) {
-    if (!totalEl || !captionEl) return;
-    if (index < 0 || !segments[index]) {
-      totalEl.textContent = defaultTotal;
-      captionEl.textContent = defaultCaption;
+    try {
+      segments = JSON.parse(chart.dataset.chartSegments || '[]');
+    } catch (err) {
+      console.error('Failed to parse statistics chart data.', err);
       return;
     }
-    const item = segments[index];
-    totalEl.textContent = item.chars;
-    captionEl.textContent = `${item.name} · ${item.posts} 篇`;
-  }
+    if (!segments.length) return;
 
-  function applyLegendState(activeIndex) {
-    legendButtons.forEach((button) => {
-      const idx = Number(button.dataset.statIndex);
-      const isActive = idx === activeIndex;
-      button.classList.toggle('is-active', isActive);
-      button.setAttribute('aria-pressed', lockedIndex === idx ? 'true' : 'false');
-    });
-  }
+    const holeRatio = 0.56;
+    let lockedIndex = -1;
+    let hoverIndex = -1;
 
-  function renderChart(activeIndex) {
-    const gradient = segments.map((item, index) => {
-      const color = activeIndex < 0 || index === activeIndex
-        ? item.color
-        : hexToRgba(item.color, 0.18);
-      return `${color} ${item.start.toFixed(2)}% ${item.end.toFixed(2)}%`;
-    }).join(', ');
-    chart.style.background = `conic-gradient(${gradient})`;
-    applyLegendState(activeIndex);
-    updateCenter(activeIndex);
-  }
-
-  function showTooltip(item, event) {
-    if (!tooltip || !card) return;
-    tooltip.hidden = false;
-    tooltip.innerHTML = `
-      <strong>${item.name}</strong>
-      <span>${item.chars} 字符</span>
-      <span>${item.posts} 篇文章 · ${item.percent.toFixed(1)}%</span>
-    `;
-    const rect = card.getBoundingClientRect();
-    tooltip.style.left = `${event.clientX - rect.left}px`;
-    tooltip.style.top = `${event.clientY - rect.top}px`;
-  }
-
-  function hideTooltip() {
-    if (!tooltip) return;
-    tooltip.hidden = true;
-  }
-
-  function findSegmentIndex(event) {
-    const rect = chart.getBoundingClientRect();
-    const cx = rect.left + rect.width / 2;
-    const cy = rect.top + rect.height / 2;
-    const dx = event.clientX - cx;
-    const dy = event.clientY - cy;
-    const outerRadius = rect.width / 2;
-    const distance = Math.sqrt(dx * dx + dy * dy);
-    if (distance > outerRadius || distance < outerRadius * holeRatio) return -1;
-
-    let angle = Math.atan2(dy, dx) * 180 / Math.PI + 90;
-    if (angle < 0) angle += 360;
-    const percent = angle / 360 * 100;
-
-    for (let i = 0; i < segments.length; i += 1) {
-      const item = segments[i];
-      if (percent >= item.start && (percent < item.end || (i === segments.length - 1 && percent <= item.end + 0.0001))) {
-        return i;
-      }
+    function effectiveIndex() {
+      return hoverIndex >= 0 ? hoverIndex : lockedIndex;
     }
-    return -1;
-  }
 
-  chart.addEventListener('mousemove', (event) => {
-    const index = findSegmentIndex(event);
-    hoverIndex = index;
-    renderChart(effectiveIndex());
-    if (index >= 0) showTooltip(segments[index], event);
-    else hideTooltip();
-  });
+    function updateCenter(index) {
+      if (!totalEl || !captionEl) return;
+      if (index < 0 || !segments[index]) {
+        totalEl.textContent = defaultTotal;
+        captionEl.textContent = defaultCaption;
+        return;
+      }
+      const item = segments[index];
+      totalEl.textContent = item.chars;
+      captionEl.textContent = `${item.name} · ${item.posts} ${entryLabel}`;
+    }
 
-  chart.addEventListener('mouseleave', () => {
-    hoverIndex = -1;
-    hideTooltip();
-    renderChart(effectiveIndex());
-  });
+    function applyLegendState(activeIndex) {
+      legendButtons.forEach((button) => {
+        const idx = Number(button.dataset.statIndex);
+        const isActive = idx === activeIndex;
+        button.classList.toggle('is-active', isActive);
+        button.setAttribute('aria-pressed', lockedIndex === idx ? 'true' : 'false');
+      });
+    }
 
-  legendButtons.forEach((button) => {
-    const index = Number(button.dataset.statIndex);
-    button.addEventListener('click', () => {
-      lockedIndex = lockedIndex === index ? -1 : index;
-      renderChart(effectiveIndex());
-    });
-    button.addEventListener('mouseenter', () => {
+    function renderChart(activeIndex) {
+      const gradient = segments.map((item, index) => {
+        const color = activeIndex < 0 || index === activeIndex
+          ? item.color
+          : hexToRgba(item.color, 0.18);
+        return `${color} ${item.start.toFixed(2)}% ${item.end.toFixed(2)}%`;
+      }).join(', ');
+      chart.style.background = `conic-gradient(${gradient})`;
+      applyLegendState(activeIndex);
+      updateCenter(activeIndex);
+    }
+
+    function showTooltip(item, event) {
+      if (!tooltip || !card) return;
+      tooltip.hidden = false;
+      tooltip.innerHTML = `
+        <strong>${item.name}</strong>
+        <span>${item.chars} 字符</span>
+        <span>${item.posts} ${entryLabel} · ${item.percent.toFixed(1)}%</span>
+      `;
+      const rect = card.getBoundingClientRect();
+      tooltip.style.left = `${event.clientX - rect.left}px`;
+      tooltip.style.top = `${event.clientY - rect.top}px`;
+    }
+
+    function hideTooltip() {
+      if (!tooltip) return;
+      tooltip.hidden = true;
+    }
+
+    function findSegmentIndex(event) {
+      const rect = chart.getBoundingClientRect();
+      const cx = rect.left + rect.width / 2;
+      const cy = rect.top + rect.height / 2;
+      const dx = event.clientX - cx;
+      const dy = event.clientY - cy;
+      const outerRadius = rect.width / 2;
+      const distance = Math.sqrt(dx * dx + dy * dy);
+      if (distance > outerRadius || distance < outerRadius * holeRatio) return -1;
+
+      let angle = Math.atan2(dy, dx) * 180 / Math.PI + 90;
+      if (angle < 0) angle += 360;
+      const percent = angle / 360 * 100;
+
+      for (let i = 0; i < segments.length; i += 1) {
+        const item = segments[i];
+        if (percent >= item.start && (percent < item.end || (i === segments.length - 1 && percent <= item.end + 0.0001))) {
+          return i;
+        }
+      }
+      return -1;
+    }
+
+    chart.addEventListener('mousemove', (event) => {
+      const index = findSegmentIndex(event);
       hoverIndex = index;
       renderChart(effectiveIndex());
+      if (index >= 0) showTooltip(segments[index], event);
+      else hideTooltip();
     });
-    button.addEventListener('mouseleave', () => {
-      hoverIndex = -1;
-      renderChart(effectiveIndex());
-    });
-    button.addEventListener('focus', () => {
-      hoverIndex = index;
-      renderChart(effectiveIndex());
-    });
-    button.addEventListener('blur', () => {
-      hoverIndex = -1;
-      renderChart(effectiveIndex());
-    });
-  });
 
-  renderChart(-1);
+    chart.addEventListener('mouseleave', () => {
+      hoverIndex = -1;
+      hideTooltip();
+      renderChart(effectiveIndex());
+    });
+
+    legendButtons.forEach((button) => {
+      const index = Number(button.dataset.statIndex);
+      button.addEventListener('click', () => {
+        lockedIndex = lockedIndex === index ? -1 : index;
+        renderChart(effectiveIndex());
+      });
+      button.addEventListener('mouseenter', () => {
+        hoverIndex = index;
+        renderChart(effectiveIndex());
+      });
+      button.addEventListener('mouseleave', () => {
+        hoverIndex = -1;
+        renderChart(effectiveIndex());
+      });
+      button.addEventListener('focus', () => {
+        hoverIndex = index;
+        renderChart(effectiveIndex());
+      });
+      button.addEventListener('blur', () => {
+        hoverIndex = -1;
+        renderChart(effectiveIndex());
+      });
+    });
+
+    renderChart(-1);
+  });
 })();
 </script>
 {{- end }}

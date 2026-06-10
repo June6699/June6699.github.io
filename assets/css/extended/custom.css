@@ -1188,6 +1188,34 @@ a.sidebar-tag-nav__flat:hover {
     margin: 0 auto;
 }
 
+.stat-category {
+    margin: 2.75rem 0 4rem;
+}
+
+.stat-category + .stat-category {
+    padding-top: 2.5rem;
+    border-top: 1px solid var(--border);
+}
+
+.stat-category__header {
+    margin-bottom: 1.4rem;
+}
+
+.stat-category__eyebrow {
+    margin: 0 0 0.25rem;
+    color: var(--accent);
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0;
+    text-transform: uppercase;
+}
+
+.stat-category__header h2 {
+    margin: 0;
+    color: var(--primary);
+    font-size: 1.35rem;
+}
+
 .stat-cards {
     display: flex;
     gap: 1.25rem;
@@ -1212,7 +1240,8 @@ a.sidebar-tag-nav__flat:hover {
 .stat-number { display: block; font-size: 2rem; font-weight: 700; color: var(--primary); }
 .stat-label { font-size: 0.95rem; color: var(--secondary); }
 .stat-section { margin: 2.5rem 0; }
-.stat-section h2 { font-size: 1.15rem; margin-bottom: 1rem; color: var(--primary); padding-bottom: 0.35rem; border-bottom: 2px solid var(--accent); }
+.stat-section h2,
+.stat-section h3 { font-size: 1.15rem; margin-bottom: 1rem; color: var(--primary); padding-bottom: 0.35rem; border-bottom: 2px solid var(--accent); }
 .statistics-page .terms-tags { list-style: none; padding: 0; display: flex; flex-wrap: wrap; gap: 0.6rem; }
 .statistics-page .terms-tags a { padding: 0.4rem 0.9rem; background: var(--entry); border-radius: var(--radius-sm); border: 1px solid var(--border); color: var(--secondary); }
 .statistics-page .terms-tags a:hover { background: var(--tertiary); color: var(--theme); border-color: var(--accent); }
