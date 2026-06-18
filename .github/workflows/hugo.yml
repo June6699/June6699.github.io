@@ -88,12 +88,15 @@ jobs:
 
           mkdir -p ~/.ssh
           chmod 700 ~/.ssh
-          if printf '%s' "$SERVER_SSH_PRIVATE_KEY" | grep -q 'BEGIN OPENSSH PRIVATE KEY'; then
-            printf '%s' "$SERVER_SSH_PRIVATE_KEY" | tr -d '\r' > ~/.ssh/id_ed25519
-          else
-            printf '%s' "$SERVER_SSH_PRIVATE_KEY" | tr -d '\r\n' | base64 -d > ~/.ssh/id_ed25519
+          key_file=~/.ssh/id_ed25519
+          raw_key=$(printf '%s' "$SERVER_SSH_PRIVATE_KEY" | tr -d '\r')
+          printf '%s' "$raw_key" > "$key_file"
+          chmod 600 "$key_file"
+          if ! ssh-keygen -y -f "$key_file" >/dev/null 2>&1; then
+            printf '%s' "$SERVER_SSH_PRIVATE_KEY" | tr -d '\r\n' | base64 -d > "$key_file"
+            chmod 600 "$key_file"
+            ssh-keygen -y -f "$key_file" >/dev/null 2>&1
           fi
-          chmod 600 ~/.ssh/id_ed25519
 
           if [ -n "$SERVER_SSH_KNOWN_HOSTS" ]; then
             printf '%s' "$SERVER_SSH_KNOWN_HOSTS" | tr -d '\r' > ~/.ssh/known_hosts
