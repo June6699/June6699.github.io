@@ -90,12 +90,20 @@ jobs:
           chmod 700 ~/.ssh
           key_file=~/.ssh/id_ed25519
           raw_key=$(printf '%s' "$SERVER_SSH_PRIVATE_KEY" | tr -d '\r')
-          printf '%s' "$raw_key" > "$key_file"
-          chmod 600 "$key_file"
-          if ! ssh-keygen -y -f "$key_file" >/dev/null 2>&1; then
-            printf '%s' "$SERVER_SSH_PRIVATE_KEY" | tr -d '\r\n' | base64 -d > "$key_file"
-            chmod 600 "$key_file"
+
+          try_key() {
+            printf '%s' "$1" > "$key_file" &&
+            chmod 600 "$key_file" &&
             ssh-keygen -y -f "$key_file" >/dev/null 2>&1
+          }
+
+          if ! try_key "$raw_key"; then
+            escaped_key=${raw_key//\\n/$'\n'}
+            if ! try_key "$escaped_key"; then
+              printf '%s' "$raw_key" | tr -d '\r\n' | base64 -d > "$key_file" &&
+              chmod 600 "$key_file" &&
+              ssh-keygen -y -f "$key_file" >/dev/null 2>&1
+            fi
           fi
 
           if [ -n "$SERVER_SSH_KNOWN_HOSTS" ]; then
