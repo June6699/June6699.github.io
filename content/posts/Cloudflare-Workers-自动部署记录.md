@@ -111,9 +111,11 @@ push GitHub -> Cloudflare 自动构建 -> wrangler deploy -> workers.dev 更新
 - 监听 `master` 分支 push；
 - 安装依赖；
 - 跑 `npm run typecheck`；
-- 再跑 `npm run deploy`。
+- 最后只输出提示，不再重复部署。
 
 这样一来，就算 Cloudflare 那边的 Git 集成某次没触发，我也还有一条明确的自动部署路径。
+
+后来我又把这条 GitHub Actions 收窄了一下，只保留检查，不再直接执行 `wrangler deploy`。原因很简单：真正发布已经由 Cloudflare 的 Git 集成接管了，GitHub 这边再发一次反而容易让人看不清到底是谁在负责上线。
 
 ## 6、最后怎么验证真的生效了
 
