@@ -89,22 +89,9 @@ jobs:
           mkdir -p ~/.ssh
           chmod 700 ~/.ssh
           key_file=~/.ssh/id_ed25519
-          raw_key=$(printf '%s' "$SERVER_SSH_PRIVATE_KEY" | tr -d '\r')
-
-          try_key() {
-            printf '%s' "$1" > "$key_file" &&
-            chmod 600 "$key_file" &&
-            ssh-keygen -y -f "$key_file" >/dev/null 2>&1
-          }
-
-          if ! try_key "$raw_key"; then
-            escaped_key=${raw_key//\\n/$'\n'}
-            if ! try_key "$escaped_key"; then
-              printf '%s' "$raw_key" | tr -d '\r\n' | base64 -d > "$key_file" &&
-              chmod 600 "$key_file" &&
-              ssh-keygen -y -f "$key_file" >/dev/null 2>&1
-            fi
-          fi
+          printf '%s' "$SERVER_SSH_PRIVATE_KEY" | tr -d '\r\n' | base64 -d > "$key_file"
+          chmod 600 "$key_file"
+          ssh-keygen -y -f "$key_file" >/dev/null 2>&1
 
           if [ -n "$SERVER_SSH_KNOWN_HOSTS" ]; then
             printf '%s' "$SERVER_SSH_KNOWN_HOSTS" | tr -d '\r' > ~/.ssh/known_hosts
