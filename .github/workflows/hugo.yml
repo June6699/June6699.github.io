@@ -88,11 +88,11 @@ jobs:
 
           mkdir -p ~/.ssh
           chmod 700 ~/.ssh
-          printf '%s\n' "$SERVER_SSH_PRIVATE_KEY" > ~/.ssh/id_ed25519
+          printf '%s' "$SERVER_SSH_PRIVATE_KEY" | tr -d '\r' > ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519
 
           if [ -n "$SERVER_SSH_KNOWN_HOSTS" ]; then
-            printf '%s\n' "$SERVER_SSH_KNOWN_HOSTS" > ~/.ssh/known_hosts
+            printf '%s' "$SERVER_SSH_KNOWN_HOSTS" | tr -d '\r' > ~/.ssh/known_hosts
           else
             ssh-keyscan -p "${SERVER_SSH_PORT:-22}" -H "$SERVER_SSH_HOST" >> ~/.ssh/known_hosts
           fi

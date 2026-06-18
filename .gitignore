@@ -16,6 +16,8 @@ codex_run_server_test.log
 
 # 本地密钥（勿提交）
 .env
+local-secrets.md
+.env.local
 
 # moments
 # content/moments/

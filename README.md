@@ -46,6 +46,15 @@ GitHub Actions 里需要配置的 Secrets：
 
 注意：`ssh june-server` 只是你 Windows 本机的别名，GitHub Actions 里不会认识它，必须填真实主机名或 IP。
 
+本地建议用 `.env` 或 `local-secrets.md` 记一份对照，不要提交真实值。对应关系一般是：
+
+- `SERVER_SSH_HOST=47.109.206.0`
+- `SERVER_SSH_PORT=22`
+- `SERVER_SSH_USER=root`
+- `SERVER_DEPLOY_PATH=/projects/June6699.github.io/public`
+- `SERVER_SSH_PRIVATE_KEY` 放 `C:\Users\June\.ssh\june_server_ed25519` 的私钥内容
+- `SERVER_SSH_KNOWN_HOSTS` 放 `ssh-keygen -F 47.109.206.0 -f C:\Users\June\.ssh\known_hosts` 的输出
+
 `npm run build` 会同步图片和图标，并用 `https://june6699.top/` 作为 Hugo `baseURL` 构建。视频转 ASCII 页面只在进入该工具页时从 `unpkg` 下载 ffmpeg wasm，不会在进入博客其它页面时加载，也不再提交本地 `ffmpeg-core.wasm`。
 
 ### Gitalk 评论（环境变量）
