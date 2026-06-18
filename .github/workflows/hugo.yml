@@ -10,7 +10,7 @@ permissions:
   id-token: write
 
 concurrency:
-  group: "pages"
+  group: "site"
   cancel-in-progress: false
 
 jobs:
@@ -29,23 +29,28 @@ jobs:
           hugo-version: "latest"
           extended: true
 
-      - name: Sync images to static/images
-        run: python scripts/sync_images.py
-
-      - name: Build with Hugo
+      - name: Build site
         env:
           GITALK_CLIENT_ID: ${{ secrets.GITALK_CLIENT_ID }}
           GITALK_CLIENT_SECRET: ${{ secrets.GITALK_CLIENT_SECRET }}
           HUGO_MOMENTS_PASSWORD_HASH: ${{ secrets.HUGO_MOMENTS_PASSWORD_HASH }}
           HUGO_MOMENTS_RECOVERY_EMAIL: ${{ secrets.HUGO_MOMENTS_RECOVERY_EMAIL }}
-        run: hugo --minify --buildFuture
+        run: npm run build
 
-      - name: Upload artifact
+      - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
           path: ./public
 
-  deploy:
+      - name: Upload site artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: site-public
+          path: ./public
+          if-no-files-found: error
+          retention-days: 1
+
+  deploy-pages:
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
@@ -55,3 +60,43 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+
+  deploy-server:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Download site artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: site-public
+          path: ./site-public
+
+      - name: Deploy to june-server
+        env:
+          SERVER_SSH_HOST: ${{ secrets.SERVER_SSH_HOST }}
+          SERVER_SSH_PORT: ${{ secrets.SERVER_SSH_PORT }}
+          SERVER_SSH_USER: ${{ secrets.SERVER_SSH_USER }}
+          SERVER_DEPLOY_PATH: ${{ secrets.SERVER_DEPLOY_PATH }}
+          SERVER_SSH_PRIVATE_KEY: ${{ secrets.SERVER_SSH_PRIVATE_KEY }}
+          SERVER_SSH_KNOWN_HOSTS: ${{ secrets.SERVER_SSH_KNOWN_HOSTS }}
+        run: |
+          set -e
+          if [ -z "$SERVER_SSH_HOST" ] || [ -z "$SERVER_SSH_USER" ] || [ -z "$SERVER_DEPLOY_PATH" ] || [ -z "$SERVER_SSH_PRIVATE_KEY" ]; then
+            echo "Server deploy secrets are not configured; skipping."
+            exit 0
+          fi
+
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+          printf '%s\n' "$SERVER_SSH_PRIVATE_KEY" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+
+          if [ -n "$SERVER_SSH_KNOWN_HOSTS" ]; then
+            printf '%s\n' "$SERVER_SSH_KNOWN_HOSTS" > ~/.ssh/known_hosts
+          else
+            ssh-keyscan -p "${SERVER_SSH_PORT:-22}" -H "$SERVER_SSH_HOST" >> ~/.ssh/known_hosts
+          fi
+          chmod 600 ~/.ssh/known_hosts
+
+          ssh -p "${SERVER_SSH_PORT:-22}" "$SERVER_SSH_USER@$SERVER_SSH_HOST" "mkdir -p '$SERVER_DEPLOY_PATH'"
+          rsync -az --delete -e "ssh -p ${SERVER_SSH_PORT:-22}" ./site-public/ "$SERVER_SSH_USER@$SERVER_SSH_HOST:$SERVER_DEPLOY_PATH/"

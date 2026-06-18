@@ -1,5 +1,7 @@
 # 服务器部署步骤
 
+> 说明：现在推荐走 GitHub Actions 双发布，这份文档保留给手工应急或初次搭建服务器时参考。
+
 本文记录将 `June6699.github.io` 部署到 Alibaba Cloud Linux 服务器的完整流程。
 
 ## 当前已确认
@@ -275,4 +277,3 @@ sudo dnf --disableexcludes=all install -y nginx
 2. 阿里云安全组是否放行 80/443
 3. Nginx 是否在运行
 4. `sudo nginx -t` 是否通过
-

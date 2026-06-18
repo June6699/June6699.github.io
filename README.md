@@ -4,7 +4,7 @@
 
 ## 本地运行
 
-仓库根目录的 `hugo.toml` 里 `baseURL` 指向 **线上 GitHub Pages**，用于正式构建；若直接用 `hugo server` 且未覆盖 baseURL，部分主题会用绝对链接跳到公网。
+仓库根目录的 `hugo.toml` 里 `baseURL` 指向 **线上 top 域名**，用于正式构建；若直接用 `hugo server` 且未覆盖 baseURL，部分主题会用绝对链接跳到公网。
 
 推荐任选其一：
 
@@ -23,25 +23,30 @@ hugo
 
 输出在 `public/`，可部署到 GitHub Pages（仓库名 `June6699.github.io` 时，发布 `public` 到 `main` 分支或使用 GitHub Actions）。
 
-## Cloudflare Workers 部署
+## GitHub Actions 双发布
 
-本仓库已带 `wrangler.toml`，Worker 名称为 `blog`，静态资源目录为 `public/`。
+当前工作流会在 `main` 推送后：
 
-在 Cloudflare Workers & Pages 里连接此仓库时，建议使用：
+- 用同一份源码构建一次
+- 发布到 GitHub Pages（`june6699.github.io`）
+- 再把同一份 `public/` 通过 SSH 同步到 `june-server`，供 `www.june6699.top` 使用
 
-- Build command: 留空即可，`wrangler.toml` 的 `[build]` 会执行 `npm run build`
-- Deploy command: `npx wrangler deploy` 或 `npm run deploy`
-- Root directory: `/`
+GitHub Actions 里需要配置的 Secrets：
 
-环境变量建议：
+- `GITALK_CLIENT_ID`
+- `GITALK_CLIENT_SECRET`
+- `HUGO_MOMENTS_PASSWORD_HASH`
+- `HUGO_MOMENTS_RECOVERY_EMAIL`
+- `SERVER_SSH_HOST`
+- `SERVER_SSH_PORT`（可选，默认 `22`）
+- `SERVER_SSH_USER`
+- `SERVER_DEPLOY_PATH`（例如 `/projects/June6699.github.io/public`）
+- `SERVER_SSH_PRIVATE_KEY`
+- `SERVER_SSH_KNOWN_HOSTS`（可选，建议填）
 
-- `HUGO_VERSION=0.157.0`
-- `PYTHON_VERSION=3.11.9`（仓库也有 `.python-version`）
-- 如需动态页口令/恢复邮箱：继续在 Cloudflare 里配置 `HUGO_MOMENTS_PASSWORD_HASH`、`HUGO_MOMENTS_RECOVERY_EMAIL`
+注意：`ssh june-server` 只是你 Windows 本机的别名，GitHub Actions 里不会认识它，必须填真实主机名或 IP。
 
 `npm run build` 会同步图片和图标，并用 `https://june6699.top/` 作为 Hugo `baseURL` 构建。视频转 ASCII 页面只在进入该工具页时从 `unpkg` 下载 ffmpeg wasm，不会在进入博客其它页面时加载，也不再提交本地 `ffmpeg-core.wasm`。
-
-域名 `june6699.top` 可以用。关键是先把域名加到 Cloudflare 的 Websites/Zone 里并把注册商 NS 改成 Cloudflare 提供的 nameservers；在 Cloudflare 里显示 Active 之前，Worker Custom Domain 会报 `Only domains active on your Cloudflare account can be added`。等阿里云实名与 NS 生效后，再给 Worker 添加 `june6699.top` 和 `www.june6699.top`。
 
 ### Gitalk 评论（环境变量）
 

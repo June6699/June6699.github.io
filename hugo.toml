@@ -1,7 +1,7 @@
 # 主题放在 themes/PaperMod，不用 Hugo Module
 # 生产构建（hugo / CI）用此 URL；本地预览请用 run_server.bat 或：hugo server --baseURL http://localhost:1313/
 # 亦可设环境变量 HUGO_BASEURL（优先级更高）。
-baseURL = "https://June6699.github.io/"
+baseURL = "https://june6699.top/"
 languageCode = "zh-cn"
 defaultContentLanguage = "zh"
 defaultContentLanguageInSubdir = false
