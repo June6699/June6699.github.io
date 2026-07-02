@@ -3,20 +3,31 @@ chcp 65001 >nul
 cd /d "%~dp0"
 
 REM Keep this file ASCII-only: cmd.exe parses .bat as system ANSI; UTF-8 Chinese breaks lines.
+set "PYTHON_EXE=python"
 where python >nul 2>&1
 if errorlevel 1 (
-  echo [ERROR] python.exe not found in PATH.
-  echo Install Python with "Add to PATH", or add its folder to User PATH.
-  echo If it works in IDE terminal but not when double-clicking this file, PATH differs; run from terminal.
-  pause
-  exit /b 1
+  if exist "C:\softwares\python311\python.exe" (
+    set "PYTHON_EXE=C:\softwares\python311\python.exe"
+  ) else (
+    echo [ERROR] python.exe not found in PATH or C:\softwares\python311.
+    echo Install Python, or add its folder to User PATH, then run this script again.
+    pause
+    exit /b 1
+  )
 )
+set "HUGO_EXE=hugo"
 where hugo >nul 2>&1
 if errorlevel 1 (
-  echo [ERROR] hugo.exe not found in PATH.
-  echo Add Hugo to User PATH ^(e.g. WinGet Links folder^), then run this script from cmd/PowerShell.
-  pause
-  exit /b 1
+  if exist "%LOCALAPPDATA%\Microsoft\WinGet\Links\hugo.exe" (
+    set "HUGO_EXE=%LOCALAPPDATA%\Microsoft\WinGet\Links\hugo.exe"
+  ) else if exist "C:\softwares\hugo\hugo.exe" (
+    set "HUGO_EXE=C:\softwares\hugo\hugo.exe"
+  ) else (
+    echo [ERROR] hugo.exe not found in PATH or known fallback locations.
+    echo Install Hugo, or add its folder to User PATH, then run this script again.
+    pause
+    exit /b 1
+  )
 )
 
 REM Only apply .env lines with a non-empty value; empty "KEY=" would otherwise clear User/system env (e.g. HUGO_MOMENTS_PASSWORD_HASH).
@@ -36,7 +47,7 @@ if not "%~1"=="" (
 )
 
 echo Syncing images: content/posts/images + content/moments -^> static/images ...
-python scripts\sync_images.py
+"%PYTHON_EXE%" scripts\sync_images.py
 if errorlevel 1 (
   echo [ERROR] sync_images.py failed. Check Python and paths above.
   pause
@@ -44,7 +55,7 @@ if errorlevel 1 (
 )
 
 echo Syncing my_icons -^> static (favicons^) ...
-python scripts\sync_icons.py
+"%PYTHON_EXE%" scripts\sync_icons.py
 if errorlevel 1 (
   echo [ERROR] sync_icons.py failed.
   pause
@@ -83,7 +94,7 @@ echo   Hugo server starting on:
 echo   %HUGO_BASEURL%
 echo.
 echo Press Ctrl+C to stop the server.
-hugo server -D --buildFuture --baseURL "%HUGO_BASEURL%" --appendPort=false --disableFastRender --port %HUGO_SERVER_PORT%
+"%HUGO_EXE%" server -D --buildFuture --baseURL "%HUGO_BASEURL%" --appendPort=false --disableFastRender --port %HUGO_SERVER_PORT%
 if errorlevel 1 (
   echo [ERROR] Hugo failed to start. See messages above.
   pause
