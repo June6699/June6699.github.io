@@ -21,7 +21,7 @@ permissions:
 
 concurrency:
   group: "site"
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   build:
@@ -70,9 +70,7 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
-        with:
-          timeout: 1800000
-          reporting_interval: 15000
+
 
   deploy-server:
     runs-on: ubuntu-latest
