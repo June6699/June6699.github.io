@@ -1,5 +1,5 @@
 ---
-title:      Simple Live 抖音 Cookie 获取和导入教程
+title:      Simple Live 抖音/快手 Cookie 获取和导入教程
 subtitle:   为什么不能只填 ttwid，以及怎么把完整 Cookie 从电脑带到手机和 TV
 date:       2026-06-01
 author:     June
@@ -11,24 +11,27 @@ tags:
 
 ## 一、先说结论
 
-Simple Live 里抖音直播的“播放”和“搜索”走的接口不一样。
-
-如果只是打开某个抖音直播间，默认内置的 `ttwid` 很多时候就够了。但如果要在 Simple Live 里搜索主播、搜索房间名，抖音接口经常会要求登录态。这时候只填一个 `ttwid` 不够，需要浏览器登录后的完整 Cookie。
-
-可以先按这个理解：
+Simple Live 里抖音和快手都可以配置 Cookie，但两家的用途和表现不完全一样。
 
 ```text
-只看直播：默认 ttwid 多数情况下可以兜底
-搜索主播 / 房间：建议使用完整 www.douyin.com Cookie
+抖音：只看直播时默认 ttwid 多数情况下可以兜底；搜索主播 / 房间建议导入完整 Cookie。
+快手：非登录网页也可能看到弹幕，但验证码、代理、风控会影响稳定性；如果要让弹幕更稳定，建议导入 live.kuaishou.com 的完整 Cookie。
 ```
 
-这篇写给不熟悉浏览器开发者工具的人。只要按步骤做，不需要懂前端。
+简单记：
+
+- 抖音不要只填 `ttwid`，搜索更建议用完整 `www.douyin.com` Cookie。
+- 快手不要只复制某一个字段，弹幕更建议用完整 `live.kuaishou.com` Cookie。
+- 手机端不建议手动粘贴超长 Cookie，推荐保存成 txt 文件后用“从文件导入 Cookie”。
+- TV 端不适合直接抓 Cookie，建议先在主 App 配好，再通过同步功能同步到 TV。
+
+这篇教程写给不熟悉浏览器开发者工具的人。只要按步骤做，不需要懂前端。
 
 ## 二、Cookie 是什么
 
 Cookie 可以粗略理解成“浏览器帮你保存的一串登录凭据”。
 
-你在电脑浏览器里登录抖音后，浏览器每次请求 `www.douyin.com` 或 `live.douyin.com`，都会在请求头里带上一段类似这样的东西：
+你在电脑浏览器里登录抖音或快手后，浏览器每次请求对应网站时，都会在请求头里带上一段类似这样的东西：
 
 ```text
 cookie: key1=value1; key2=value2; key3=value3
@@ -36,11 +39,11 @@ cookie: key1=value1; key2=value2; key3=value3
 
 这一整行就是我们要复制的东西。
 
-它不等同于密码，但很接近登录凭据。拿到你的完整 Cookie 的人，有可能在一段时间内用你的登录态请求抖音接口。所以不要发给别人，不要贴到公开 issue，也不要截图发群里。
+它不等同于密码，但很接近登录凭据。拿到你的完整 Cookie 的人，有可能在一段时间内用你的登录态请求平台接口。所以不要发给别人，不要贴到公开 issue，也不要截图发群里。
 
-Simple Live 需要它，是因为抖音搜索接口对匿名请求不太友好。浏览器能搜，是因为浏览器带着你的登录态。Simple Live 想在 App 里调用同一个搜索能力，也要带上这个登录态。
+## 三、抖音 Cookie 获取和导入
 
-## 三、不要只复制 ttwid
+### 3.1 不要只复制 ttwid
 
 很多人第一次会去浏览器 Cookie 列表里找 `ttwid`，然后只复制这一项。
 
@@ -48,7 +51,7 @@ Simple Live 需要它，是因为抖音搜索接口对匿名请求不太友好�
 
 `ttwid` 更像一个设备 / 访客标识，它对播放有帮助，但它不一定代表“你已经登录”。搜索主播、房间名时，接口更关心完整的登录 Cookie，里面可能还会有 `sid_guard`、`sessionid`、`passport_csrf_token`、`msToken` 等一批字段。
 
-所以这篇教程里说的 Cookie，默认都指“完整 Cookie”，也就是一整串字段。
+所以这篇教程里说的抖音 Cookie，默认都指“完整 Cookie”，也就是一整串字段。
 
 你要复制的是这种：
 
@@ -62,82 +65,33 @@ ttwid=...; sid_guard=...; sessionid=...; passport_csrf_token=...; msToken=...
 ttwid=...
 ```
 
-## 四、电脑端获取 Cookie
+### 3.2 电脑端获取抖音 Cookie
 
 建议用电脑端 Chrome 或 Edge。下面以 Edge / Chrome 这一类 Chromium 浏览器为例。
 
-### 1. 打开抖音网页并登录
+1. 打开抖音网页并登录：
 
-先打开：
+   ```text
+   https://www.douyin.com/
+   ```
 
-```text
-https://www.douyin.com/
-```
+   或者：
 
-或者：
+   ```text
+   https://live.douyin.com/
+   ```
 
-```text
-https://live.douyin.com/
-```
+2. 按 `F12` 打开开发者工具。如果没反应，可以试 `Ctrl + Shift + I`。
 
-登录自己的账号。扫码、验证码都可以。确认页面右上角能看到登录后的状态。
+3. 点上方的 `Network`，中文浏览器里一般叫“网络”。
 
-### 2. 打开开发者工具
+4. 在 Network 面板打开的情况下，按 `Ctrl + R` 刷新页面。
 
-按 `F12`。
+5. 在请求列表里点一个域名是 `www.douyin.com` 或 `live.douyin.com` 的请求。
 
-如果 `F12` 没反应，可以试：
+6. 进入 `Headers`，找到 `Request Headers` 里的 `cookie: ...`。
 
-```text
-Ctrl + Shift + I
-```
-
-打开后，点上方的 `Network`，中文浏览器里一般叫“网络”。
-
-### 3. 刷新页面
-
-在 Network 面板打开的情况下，按一下：
-
-```text
-Ctrl + R
-```
-
-或者直接点浏览器刷新。
-
-这样 Network 里会出现很多请求。不要被列表吓到，我们只需要其中任意一个带 Cookie 的抖音请求。
-
-### 4. 找一个 www.douyin.com 或 live.douyin.com 请求
-
-在 Network 请求列表里，随便点一个域名是下面这些的请求：
-
-```text
-www.douyin.com
-live.douyin.com
-```
-
-不一定非要点中搜索接口。
-
-只要这个请求的 Request Headers 里有完整 Cookie，一般就可以用。你可以点页面、进个人页、进直播页、刷新首页，都会产生请求。
-
-### 5. 复制 Request Headers 里的 Cookie
-
-点开某个请求后，右侧或下方会看到 `Headers`。
-
-往下找：
-
-```text
-Request Headers
-```
-
-再找：
-
-```text
-cookie: ...
-```
-
-注意，是 `Request Headers` 里的 `cookie`。
-
-不要复制 `Response Headers` 里的 `set-cookie`。那是服务器返回给浏览器的单个设置项，浏览器下一次请求真正带出去的是 `Request Headers` 里的 `cookie`。
+注意，是 `Request Headers` 里的 `cookie`。不要复制 `Response Headers` 里的 `set-cookie`。
 
 你可以复制整行：
 
@@ -153,53 +107,7 @@ ttwid=...; sid_guard=...; sessionid=...
 
 Simple Live 都能识别。
 
-## 五、如果浏览器显示成两行
-
-有些复制方式会变成这样：
-
-```text
-cookie
-ttwid=...; sid_guard=...; sessionid=...
-```
-
-也没关系。Simple Live 做了兼容，会识别 `cookie` 下一行的内容。
-
-也支持你把整段请求头都复制进去，例如：
-
-```text
-accept: application/json
-accept-language: zh-CN,zh;q=0.9
-cookie: ttwid=...; sid_guard=...; sessionid=...
-referer: https://www.douyin.com/
-user-agent: Mozilla/5.0 ...
-```
-
-应用会从里面提取 `cookie` 那一行。
-
-这部分逻辑在主 App 里是这样处理的：
-
-```text
-simple_live_app/lib/modules/mine/account/account_controller.dart
-```
-
-处理时会先尝试从整段文本里找 `cookie:`，找不到再把输入当作纯 Cookie：
-
-```dart
-String _normalizeDouyinCookieInput(String input) {
-  var cookie = _extractDouyinCookieFromHeaderText(input) ?? input.trim();
-  if (cookie.toLowerCase().startsWith("cookie:")) {
-    cookie = cookie.substring(cookie.indexOf(":") + 1).trim();
-  }
-  if (!cookie.contains("=")) {
-    cookie = 'ttwid=$cookie';
-  }
-  return cookie;
-}
-```
-
-所以不用太纠结复制格式。只要里面有完整 Cookie，应用会尽量帮你提取。
-
-## 六、粘贴到 Simple Live
+### 3.3 抖音粘贴到 Simple Live
 
 在 Simple Live 里打开：
 
@@ -213,18 +121,110 @@ String _normalizeDouyinCookieInput(String input) {
 
 如果显示“有效期无法判断”，也不一定代表不能用，只是 Cookie 里没有能被当前逻辑解析的标准过期字段。
 
-## 七、手机端怎么导入
+## 四、快手 Cookie 获取和导入
+
+### 4.1 快手一定要登录才有弹幕吗
+
+不一定。
+
+网页端打开快手直播时，未登录状态也可能看到弹幕。但这件事不稳定，常见影响因素有：
+
+- 页面弹出验证码，需要先完成验证。
+- 当前网络或代理环境触发风控。
+- 匿名 Cookie、设备标识或临时凭证失效。
+- 某些直播间或某些时间段要求更完整的登录态。
+
+所以结论是：
+
+```text
+能不能匿名看到弹幕：看当时网页和风控状态。
+想让 Simple Live 里快手弹幕更稳定：建议导入完整 Cookie。
+```
+
+### 4.2 快手 Cookie 要复制哪一个
+
+快手建议复制 `live.kuaishou.com` 的完整 Cookie。
+
+你可能会看到很多字段，例如：
+
+```text
+did=...; didv=...; userId=...; kuaishou.live.bfb1s=...; kwfv1=...
+```
+
+字段名可能会变，不需要逐个理解。重点是复制完整 Cookie，而不是只复制某一个字段。
+
+快手弹幕还会用到一类弹幕签名 / 凭证。当前 Simple Live 会优先使用 Cookie 里的 `kwfv1` 自动生成弹幕签名；如果缺少 `kwfv1`，应用也会保存 Cookie，但可能提示：
+
+```text
+Cookie 已保存，但缺少 kwfv1，弹幕可能需要重新网页登录
+```
+
+这不是说 Cookie 一定没用，而是提醒弹幕链路可能不完整。遇到这种情况，建议重新登录快手网页并重新复制完整 Cookie。
+
+### 4.3 电脑端获取快手 Cookie
+
+建议用电脑端 Chrome 或 Edge。
+
+1. 打开快手直播网页：
+
+   ```text
+   https://live.kuaishou.com/
+   ```
+
+2. 登录快手账号。如果页面弹验证码，先完成验证。
+
+3. 按 `F12` 打开开发者工具。如果没反应，可以试 `Ctrl + Shift + I`。
+
+4. 点上方的 `Network`，中文浏览器里一般叫“网络”。
+
+5. 在 Network 面板打开的情况下，按 `Ctrl + R` 刷新页面。
+
+6. 在请求列表里点一个域名是 `live.kuaishou.com` 的请求。
+
+7. 进入 `Headers`，找到 `Request Headers` 里的 `cookie: ...`。
+
+你可以复制整行：
+
+```text
+cookie: did=...; didv=...; userId=...; kwfv1=...
+```
+
+也可以只复制冒号后面的值：
+
+```text
+did=...; didv=...; userId=...; kwfv1=...
+```
+
+Simple Live 会尽量从你粘贴的内容里提取 Cookie。
+
+### 4.4 桌面端导入快手 Cookie
+
+在 Simple Live 桌面端里打开：
+
+```text
+设置 -> 账号管理 -> 快手直播 -> 浏览器登录后粘贴 Cookie
+```
+
+应用会尝试打开系统浏览器，你登录快手后，回到 Simple Live 粘贴完整 Cookie 即可。
+
+也可以直接打开：
+
+```text
+设置 -> 账号管理 -> 快手直播 -> Cookie 登录
+```
+
+然后手动粘贴 `live.kuaishou.com` 的完整 Cookie。
+
+### 4.5 手机端导入快手 Cookie
 
 手机上直接粘贴超长 Cookie 很容易失败：输入框长度、剪贴板、聊天软件转发，都可能把内容截断。
-
-所以现在 Android / iOS 里加了“从文件导入 Cookie”。
 
 推荐流程是：
 
 1. 在电脑上新建一个文本文件，例如：
 
    ```text
-   douyin-cookie.txt
+   kuaishou-cookie.txt
    ```
 
 2. 把完整 Cookie 粘进去。
@@ -236,20 +236,78 @@ String _normalizeDouyinCookieInput(String input) {
 5. 手机打开 Simple Live：
 
    ```text
-   设置 -> 账号管理 -> 抖音直播 -> 从文件导入 Cookie
+   设置 -> 账号管理 -> 快手直播 -> 从文件导入 Cookie
    ```
 
 6. 选择这个 txt 文件。
 
-导入时会自动 `trim()`，也就是去掉文件开头和结尾的空格、空行。文件里可以是纯 Cookie，也可以是 `Cookie: xxx`，也可以是整段 Request Headers。
+文件里可以是纯 Cookie，也可以是 `Cookie: xxx`，也可以是整段 Request Headers。应用会从里面提取 Cookie，并尝试读取快手弹幕需要的凭证。
 
-这也是为什么推荐用文件。电脑复制方便，手机负责导入，不要在手机上和一大段 Cookie 较劲。
+### 4.6 手机端 Web 登录
 
-## 八、TV 怎么办
+移动端 Simple Live 里也提供快手 `Web登录`：
 
-TV 端不内置浏览器登录抖音。
+```text
+设置 -> 账号管理 -> 快手直播 -> Web登录
+```
 
-原因很简单：TV 上打开网页登录体验很差，很多情况下也没法正常完成扫码、验证码、复制 Cookie 这些动作。
+这个入口会在 App 内打开快手网页，登录后自动读取 Cookie，并尝试读取本地的 `kwfv1` 凭证。
+
+如果 Web 登录能正常完成，优先用这个方式；如果验证码、网页兼容性或网络环境导致登录不顺，再改用电脑抓 Cookie + 手机文件导入。
+
+### 4.7 快手 Cookie 有效期为什么无法判断
+
+快手 Cookie 的有效期不一定能像抖音那样稳定解析。
+
+原因是：
+
+- 手动从 `Request Headers` 复制出来的 Cookie 通常只有 `key=value`，不包含浏览器内部保存的过期时间。
+- `expires` / `max-age` 这类信息通常出现在 `Set-Cookie` 或浏览器 Cookie 存储里，不一定会出现在请求头 Cookie 里。
+- 快手不同字段的有效期不完全一致，风控、验证码、退出登录也可能让 Cookie 提前失效。
+
+所以“有效期无法判断”的意思只是：
+
+```text
+应用没有拿到可可靠解析的过期时间。
+```
+
+它不等于 Cookie 不能用。只要弹幕、搜索或需要登录态的功能能正常工作，就可以继续用。等某天失效后，再重新登录并导入即可。
+
+## 五、如果浏览器显示成两行
+
+有些复制方式会变成这样：
+
+```text
+cookie
+ttwid=...; sid_guard=...; sessionid=...
+```
+
+或者：
+
+```text
+cookie
+did=...; didv=...; kwfv1=...
+```
+
+也没关系。Simple Live 做了兼容，会识别 `cookie` 下一行的内容。
+
+也支持你把整段请求头都复制进去，例如：
+
+```text
+accept: application/json
+accept-language: zh-CN,zh;q=0.9
+cookie: key1=value1; key2=value2; key3=value3
+referer: https://live.kuaishou.com/
+user-agent: Mozilla/5.0 ...
+```
+
+应用会从里面提取 `cookie` 那一行。
+
+## 六、TV 怎么办
+
+TV 端不适合直接在设备上抓 Cookie。
+
+原因很简单：TV 上网页登录体验很差，很多情况下也没法正常完成扫码、验证码、复制 Cookie 这些动作。
 
 推荐做法是：
 
@@ -259,29 +317,33 @@ TV 端不内置浏览器登录抖音。
 -> 通过同步功能同步到 TV
 ```
 
-不要在 TV 上尝试只填 `ttwid`。如果你要用抖音搜索，还是完整 Cookie 更靠谱。
+如果你要用抖音搜索，建议同步完整抖音 Cookie。  
+如果你要让快手弹幕更稳定，建议同步完整快手 Cookie。
 
-## 九、为什么任意请求都可以
+## 七、为什么任意请求都可以
 
-很多人会问：一定要找到 `aweme/v1/web/live/search/` 这个搜索请求吗？
+很多人会问：一定要找到某个具体接口请求吗？
 
 不一定。
 
-Cookie 属于浏览器对这个域名发请求时携带的一组凭据，不绑定某一个具体请求。只要你已经登录，浏览器访问 `www.douyin.com` 或 `live.douyin.com` 时，很多请求都会带上同一批 Cookie。
+Cookie 属于浏览器对这个域名发请求时携带的一组凭据，不绑定某一个具体请求。只要你已经登录，浏览器访问 `www.douyin.com`、`live.douyin.com` 或 `live.kuaishou.com` 时，很多请求都会带上同一批 Cookie。
 
-Simple Live 搜索时会把你保存的 Cookie 放到请求头里：
+Simple Live 调用接口时会把你保存的 Cookie 放到请求头里：
 
 ```text
 cookie: 你保存的完整 Cookie
 ```
 
-所以获取 Cookie 时，重点看两件事：复制到的 Cookie 是否完整，是否来自登录后的浏览器请求。
+所以获取 Cookie 时，重点看两件事：
 
-当然，如果你刚好能在 Network 里点到搜索接口，那也可以。但没必要为了找它折腾半天。
+- 复制到的 Cookie 是否完整。
+- 是否来自登录后的浏览器请求。
 
-## 十、为什么 Android 会报 HEAD 请求失败
+当然，如果你刚好能在 Network 里点到搜索、直播间详情或弹幕相关接口，那也可以。但没必要为了找它折腾半天。
 
-之前 Android 上有一个容易误导的问题：同一个 Cookie，Windows 能用，Android 搜索时报：
+## 八、为什么 Android 会报 HEAD 请求失败
+
+之前 Android 上有一个容易误导的问题：同一个抖音 Cookie，Windows 能用，Android 搜索时报：
 
 ```text
 发送HEAD请求失败
@@ -291,60 +353,37 @@ cookie: 你保存的完整 Cookie
 
 后来 Simple Live 改了兜底逻辑：如果你本地已经保存了完整 Cookie，HEAD 失败时会继续用已保存 Cookie 请求搜索。
 
-对应代码在：
-
-```text
-simple_live_core/lib/src/douyin_site.dart
-```
-
-大概逻辑是：
-
-```dart
-try {
-  headResp = await HttpClient.instance.head(
-    'https://live.douyin.com',
-    header: requestHeaders,
-  );
-} catch (e) {
-  if (dyCookie.isEmpty) {
-    rethrow;
-  }
-  _logDebug("抖音搜索预取 Cookie 的 HEAD 请求失败，使用已保存 Cookie 继续：$e");
-}
-```
-
 所以如果你还遇到类似问题，先确认自己导入的是完整 Cookie，不要只导入 `ttwid`。
 
-## 十一、Cookie 会失效吗
+## 九、Cookie 会失效吗
 
 会。
 
 Cookie 会过期。常见失效原因有：
 
-- 你在浏览器里退出了抖音登录。
+- 你在浏览器里退出了账号登录。
 - 修改密码或账号安全状态变化。
-- 抖音服务端主动让登录态过期。
+- 平台服务端主动让登录态过期。
 - Cookie 本身过期。
 - 账号触发风控，需要重新验证。
+- 网络代理、验证码、人机校验导致当前 Cookie 暂时不可用。
 
-Simple Live 会尝试从 `sid_guard` 解析一个预计有效期，但这只是参考。
-
-如果某天搜索突然不能用了，最直接的处理方式是：
+如果某天搜索、弹幕或登录态相关功能突然不能用了，最直接的处理方式是：
 
 ```text
-重新在电脑浏览器登录抖音
+重新在电脑浏览器登录对应平台
 -> 重新复制完整 Cookie
 -> 重新粘贴或从文件导入
 ```
 
-## 十二、几个常见错误
+## 十、几个常见错误
 
-### 只填 ttwid
+### 10.1 只填 ttwid
 
 表现：
 
 ```text
-播放可能还能用，搜索不稳定或提示需要登录
+抖音播放可能还能用，搜索不稳定或提示需要登录
 ```
 
 处理：
@@ -353,12 +392,26 @@ Simple Live 会尝试从 `sid_guard` 解析一个预计有效期，但这只是�
 重新复制完整 Request Headers Cookie
 ```
 
-### 复制了 set-cookie
+### 10.2 快手缺少 kwfv1
 
 表现：
 
 ```text
-看起来有 Cookie，但字段很少，搜索还是失败
+Cookie 能保存，但快手弹幕仍然不稳定，或者提示缺少 kwfv1
+```
+
+处理：
+
+```text
+重新登录 live.kuaishou.com，完成验证码后重新复制完整 Cookie，或使用移动端 Web 登录
+```
+
+### 10.3 复制了 set-cookie
+
+表现：
+
+```text
+看起来有 Cookie，但字段很少，搜索或弹幕还是失败
 ```
 
 处理：
@@ -367,7 +420,7 @@ Simple Live 会尝试从 `sid_guard` 解析一个预计有效期，但这只是�
 去 Request Headers 里复制 cookie，不要复制 Response Headers 里的 set-cookie
 ```
 
-### 复制内容被截断
+### 10.4 复制内容被截断
 
 表现：
 
@@ -381,7 +434,7 @@ Simple Live 会尝试从 `sid_guard` 解析一个预计有效期，但这只是�
 把 Cookie 保存成 txt 文件，传到手机后用“从文件导入 Cookie”
 ```
 
-### 登录后没有刷新 Network
+### 10.5 登录后没有刷新 Network
 
 表现：
 
@@ -395,22 +448,25 @@ Network 里看到的还是登录前请求，Cookie 不完整
 登录成功后保持开发者工具打开，再刷新一次页面
 ```
 
-### 把 Cookie 发给别人测试
+### 10.6 把 Cookie 发给别人测试
 
 这个不要做。
 
 Cookie 接近登录凭据。别人拿到后，至少在一段时间内可能可以用你的登录态请求接口。遇到问题可以描述现象，不要把完整 Cookie 发出来。
 
-## 十三、最后记几句
+## 十一、最后记几句
 
-获取抖音 Cookie 这件事，最关键的就三句话：
+获取 Cookie 这件事，最关键的是：
 
 ```text
 要登录后的完整 Cookie
 要复制 Request Headers 里的 cookie
-不要只复制 ttwid
+不要只复制某一个字段
 ```
+
+抖音：不要只复制 `ttwid`。  
+快手：优先完整 `live.kuaishou.com` Cookie，弹幕相关尽量保证有 `kwfv1`。
 
 电脑端复制最方便，手机端建议用文件导入，TV 端建议从主 App 同步。
 
-如果以后抖音网页改版，开发者工具的位置可能会变，但原理不会变：浏览器能搜索，是因为请求里带着登录态；Simple Live 要搜索，也要带着同一份登录态。
+如果以后平台网页改版，开发者工具的位置可能会变，但原理不会变：浏览器能正常访问，是因为请求里带着登录态；Simple Live 要调用同类能力，也需要带着同一份登录态。
