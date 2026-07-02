@@ -3,30 +3,33 @@ chcp 65001 >nul
 cd /d "%~dp0"
 
 REM Keep this file ASCII-only: cmd.exe parses .bat as system ANSI; UTF-8 Chinese breaks lines.
-set "PYTHON_EXE=python"
-where python >nul 2>&1
-if errorlevel 1 (
-  if exist "C:\softwares\python311\python.exe" (
-    set "PYTHON_EXE=C:\softwares\python311\python.exe"
-  ) else (
+set "PYTHON_EXE=C:\softwares\python311\python.exe"
+if not exist "%PYTHON_EXE%" (
+  where python >nul 2>&1
+  if errorlevel 1 (
     echo [ERROR] python.exe not found in PATH or C:\softwares\python311.
     echo Install Python, or add its folder to User PATH, then run this script again.
     pause
     exit /b 1
+  ) else (
+    set "PYTHON_EXE=python"
   )
 )
-set "HUGO_EXE=hugo"
-where hugo >nul 2>&1
-if errorlevel 1 (
-  if exist "%LOCALAPPDATA%\Microsoft\WinGet\Links\hugo.exe" (
-    set "HUGO_EXE=%LOCALAPPDATA%\Microsoft\WinGet\Links\hugo.exe"
-  ) else if exist "C:\softwares\hugo\hugo.exe" (
+
+set "HUGO_EXE=%LOCALAPPDATA%\Microsoft\WinGet\Links\hugo.exe"
+if not exist "%HUGO_EXE%" (
+  if exist "C:\softwares\hugo\hugo.exe" (
     set "HUGO_EXE=C:\softwares\hugo\hugo.exe"
   ) else (
-    echo [ERROR] hugo.exe not found in PATH or known fallback locations.
-    echo Install Hugo, or add its folder to User PATH, then run this script again.
-    pause
-    exit /b 1
+    where hugo >nul 2>&1
+    if errorlevel 1 (
+      echo [ERROR] hugo.exe not found in PATH or known fallback locations.
+      echo Install Hugo, or add its folder to User PATH, then run this script again.
+      pause
+      exit /b 1
+    ) else (
+      set "HUGO_EXE=hugo"
+    )
   )
 )
 
@@ -94,6 +97,7 @@ echo   Hugo server starting on:
 echo   %HUGO_BASEURL%
 echo.
 echo Press Ctrl+C to stop the server.
+start "" cmd /c "timeout /t 2 /nobreak >nul && start "" "%HUGO_BASEURL%""
 "%HUGO_EXE%" server -D --buildFuture --baseURL "%HUGO_BASEURL%" --appendPort=false --disableFastRender --port %HUGO_SERVER_PORT%
 if errorlevel 1 (
   echo [ERROR] Hugo failed to start. See messages above.
