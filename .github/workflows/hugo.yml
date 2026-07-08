@@ -24,8 +24,35 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  server-deploy-config:
+    runs-on: ubuntu-latest
+    outputs:
+      deploy_server: ${{ steps.read-config.outputs.deploy_server }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Read server deploy config
+        id: read-config
+        run: |
+          set -e
+          deploy_server=false
+          if [ -f .github/server-deploy.env ]; then
+            . .github/server-deploy.env
+            deploy_server="${DEPLOY_SERVER:-false}"
+          fi
+          case "$deploy_server" in
+            true|false) ;;
+            *)
+              echo "DEPLOY_SERVER must be true or false, got: $deploy_server" >&2
+              exit 1
+              ;;
+          esac
+          echo "deploy_server=$deploy_server" >> "$GITHUB_OUTPUT"
+
   build:
     runs-on: ubuntu-latest
+    needs: server-deploy-config
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -73,8 +100,9 @@ jobs:
 
 
   deploy-server:
+    if: needs.server-deploy-config.outputs.deploy_server == 'true'
     runs-on: ubuntu-latest
-    needs: build
+    needs: [build, server-deploy-config]
     steps:
       - name: Download site artifact
         uses: actions/download-artifact@v4

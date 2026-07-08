@@ -23,13 +23,25 @@ hugo
 
 输出在 `public/`，可部署到 GitHub Pages（仓库名 `June6699.github.io` 时，发布 `public` 到 `main` 分支或使用 GitHub Actions）。
 
-## GitHub Actions 双发布
+## GitHub Actions 发布开关
 
 当前工作流会在 `main` 推送后：
 
 - 用同一份源码构建一次
 - 发布到 GitHub Pages（`june6699.github.io`）
-- 再把同一份 `public/` 通过 SSH 同步到 `june-server`，供 `www.june6699.top` 使用
+- 是否再把同一份 `public/` 通过 SSH 同步到 `june-server`，由 `.github/server-deploy.env` 控制
+
+当前配置：
+
+```bash
+DEPLOY_SERVER=false
+```
+
+这表示现在只发布 GitHub Pages，不连接服务器，也不执行 `rsync`。需要恢复服务器同步时，把 `.github/server-deploy.env` 改为：
+
+```bash
+DEPLOY_SERVER=true
+```
 
 GitHub Actions 里需要配置的 Secrets：
 

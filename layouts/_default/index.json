@@ -1,0 +1,15 @@
+{{- $.Scratch.Add "index" slice -}}
+{{- range site.RegularPages -}}
+    {{- if and (eq .Type "posts") (not .Params.searchHidden) -}}
+        {{- $tags := slice -}}
+        {{- with .Params.tags -}}
+            {{- range . -}}
+                {{- if not (in $tags .) -}}
+                    {{- $tags = $tags | append . -}}
+                {{- end -}}
+            {{- end -}}
+        {{- end -}}
+        {{- $.Scratch.Add "index" (dict "title" .Title "content" .Plain "permalink" .Permalink "summary" .Summary "tags" $tags) -}}
+    {{- end -}}
+{{- end -}}
+{{- $.Scratch.Get "index" | jsonify -}}

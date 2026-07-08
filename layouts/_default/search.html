@@ -1,0 +1,31 @@
+{{- define "main" }}
+
+<header class="page-header search-page-header">
+    <h1>{{- (printf "%s&nbsp;" .Title ) | htmlUnescape -}}
+        <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+            aria-hidden="true">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+    </h1>
+    {{- if .Description }}
+    <div class="post-description">
+        {{ .Description }}
+    </div>
+    {{- end }}
+</header>
+
+<section id="searchbox" class="site-search" aria-label="站内搜索">
+    <div class="search-mode" role="radiogroup" aria-label="搜索范围">
+        <button class="search-mode__button is-active" type="button" role="radio" aria-checked="true" data-search-mode="title">标题</button>
+        <button class="search-mode__button" type="button" role="radio" aria-checked="false" data-search-mode="content">正文</button>
+        <button class="search-mode__button" type="button" role="radio" aria-checked="false" data-search-mode="tags">标签</button>
+    </div>
+    <input id="searchInput" autofocus placeholder="{{ .Params.placeholder | default (printf "%s ↵" .Title) }}"
+        aria-label="搜索关键词" type="search" autocomplete="off" maxlength="64">
+    <p id="searchStatus" class="search-status" aria-live="polite">输入关键词开始搜索文章。</p>
+    <ul id="searchResults" class="search-results" aria-label="搜索结果"></ul>
+</section>
+
+{{- end }}{{/* end main */}}

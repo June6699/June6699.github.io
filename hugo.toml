@@ -10,6 +10,9 @@ title = "June's Blog"
 theme = "PaperMod"
 googleAnalytics = "G-S7DXV0QV58"
 
+[outputs]
+  home = ["HTML", "RSS", "JSON"]
+
 [languages]
   [languages.zh]
     languageName = "中文"
@@ -115,3 +118,7 @@ ignoreLogs = ["warning-goldmark-raw-html"]
   name = "我的项目"
   url = "/projects/"
   weight = 6
+[[menu.main]]
+  name = "搜索"
+  url = "/search/"
+  weight = 7
