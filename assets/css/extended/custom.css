@@ -1176,6 +1176,11 @@ a.sidebar-tag-nav__flat:hover {
     scroll-margin-top: calc(var(--header-height, 60px) + 1rem);
 }
 
+/* 宽高属性预留图片空间；窄屏仍按原始比例缩放 */
+.post-content img {
+    height: auto;
+}
+
 /* ========== 拼音/注音 <rt> ========== */
 .post-content rt {
     font-size: 0.75em;

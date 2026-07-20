@@ -1,9 +1,23 @@
-{{- $src := .Destination -}}
+{{- $destination := .Destination -}}
+{{- $parsedDestination := urls.Parse $destination -}}
+{{- $src := $destination -}}
+{{- $sourcePath := "" -}}
+{{- $imageWidth := 0 -}}
+{{- $imageHeight := 0 -}}
 {{- /* 动态优先：./xxx → /images/moments/xxx（源在 content/moments） */ -}}
 {{- if and (eq .Page.Section "moments") (hasPrefix $src "./") -}}
+  {{- $relativePath := strings.TrimPrefix "./" $parsedDestination.Path -}}
+  {{- $sourcePath = path.Join "content" "moments" $relativePath -}}
   {{- $src = printf "/images/moments/%s" (strings.TrimPrefix "./" $src) -}}
 {{- /* 文章：./images/... → /images/...（源在 content/posts/images） */ -}}
 {{- else if hasPrefix $src "./images/" -}}
+  {{- $relativePath := strings.TrimPrefix "./images/" $parsedDestination.Path -}}
+  {{- $sourcePath = path.Join "content" "posts" "images" $relativePath -}}
   {{- $src = replace $src "./images/" "/images/" -}}
 {{- end -}}
-<img src="{{ $src }}"{{ with .PlainText }} alt="{{ . }}"{{ end }}{{ with .Title }} title="{{ . }}"{{ end }} loading="lazy" />
+{{- if and $sourcePath (os.FileExists $sourcePath) -}}
+  {{- $imageConfig := images.Config $sourcePath -}}
+  {{- $imageWidth = $imageConfig.Width -}}
+  {{- $imageHeight = $imageConfig.Height -}}
+{{- end -}}
+<img src="{{ $src }}"{{ with .PlainText }} alt="{{ . }}"{{ end }}{{ with .Title }} title="{{ . }}"{{ end }}{{ if and (gt $imageWidth 0) (gt $imageHeight 0) }} width="{{ $imageWidth }}" height="{{ $imageHeight }}"{{ end }} loading="lazy" />
