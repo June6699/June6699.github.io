@@ -13,6 +13,8 @@ tags:
 
 GNU 通用公共许可证第3版（GPLv3）是一份由自由软件基金会（FSF）发布的、具有**强版权保护（Copyleft）**性质的开源许可证。它的核心理念并非“免费”，而是“自由”，并利用著作权法律来保障这种自由不可被私人占有。
 
+本篇文章供 [种田作者大战百万年薪大厂程序员事件记录 | June's Blog](https://june6699.github.io/posts/种田作者大战百万年薪大厂程序员事件记录/) 使用。
+
 我的 [SimpleLive GPL 3.0协议](https://github.com/June6699/dart_simple_live/blob/master/LICENSE) 继承自 [上游 xiaoyaocz 仓库](https://github.com/xiaoyaocz/dart_simple_live/blob/master/LICENSE) 。
 
 ![image-20260720152501916](./images/GPL3.0协议的内容/image-20260720152501916.png)
@@ -93,3 +95,7 @@ GPLv3 的基本精神是确保软件的最终用户始终拥有以下四项基�
 ### 五、 总结
 
 GPLv3 是一份精密设计的法律文本，它通过 **Copyleft 强制传播、反硬件锁、专利防御和宽容的恢复条款**，构建了一个强大的自由软件共同体保护体系。同时，它对**商业活动极其友好**，明确区分了“软件的许可限制”和“个人的劳务与捐赠”。因此，只要你遵循上述分发义务，在你的 fork 中放置赞助码并为用户提供付费技术协助，是完全合规且正当的自由软件商业模式。
+
+
+
+本篇文章供 [种田作者大战百万年薪大厂程序员事件记录 | June's Blog](https://june6699.github.io/posts/种田作者大战百万年薪大厂程序员事件记录/) 使用。
