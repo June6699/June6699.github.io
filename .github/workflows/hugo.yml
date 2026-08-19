@@ -66,6 +66,9 @@ jobs:
           hugo-version: "latest"
           extended: true
 
+      - name: Test content tooling
+        run: npm test
+
       - name: Build site
         env:
           GITALK_CLIENT_ID: ${{ secrets.GITALK_CLIENT_ID }}

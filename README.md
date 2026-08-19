@@ -4,7 +4,7 @@
 
 ## 本地运行
 
-仓库根目录的 `hugo.toml` 里 `baseURL` 指向 **线上 top 域名**，用于正式构建；若直接用 `hugo server` 且未覆盖 baseURL，部分主题会用绝对链接跳到公网。
+仓库根目录的 `hugo.toml` 里 `baseURL` 指向 **GitHub Pages**，用于正式构建；若直接用 `hugo server` 且未覆盖 baseURL，部分主题会用绝对链接跳到公网。
 
 推荐任选其一：
 
@@ -67,7 +67,7 @@ GitHub Actions 里需要配置的 Secrets：
 - `SERVER_SSH_PRIVATE_KEY` 放 `C:\Users\June\.ssh\june_server_ed25519` 的私钥内容
 - `SERVER_SSH_KNOWN_HOSTS` 放 `ssh-keygen -F 47.109.206.0 -f C:\Users\June\.ssh\known_hosts` 的输出
 
-`npm run build` 会同步图片和图标，并用 `https://june6699.top/` 作为 Hugo `baseURL` 构建。视频转 ASCII 页面只在进入该工具页时从 `unpkg` 下载 ffmpeg wasm，不会在进入博客其它页面时加载，也不再提交本地 `ffmpeg-core.wasm`。
+`npm run build` 会先自动修正包含空格的 Markdown 图片目标，再同步图片和图标、清理旧构建产物，并用 `https://june6699.github.io/` 作为 Hugo `baseURL` 构建。任务启动器在 Windows 使用 `py -3.11`，在 GitHub Actions 使用 `python3`。视频转 ASCII 页面只在进入该工具页时从 `unpkg` 下载 ffmpeg wasm，不会在进入博客其它页面时加载，也不再提交本地 `ffmpeg-core.wasm`。
 
 ### Gitalk 评论（环境变量）
 
@@ -86,6 +86,7 @@ GitHub Actions 已在工作流中读取仓库 **Secrets**：`GITALK_CLIENT_ID`�
 
 - 文章：`content/posts/卜算子·自嘲.md`（保留可见文件名，不用 index.md）
 - **正文里图片路径**：`./images/卜算子·自嘲/xxx.png`（相对路径，和文件名一致）
+- 图片目录或文件名可以包含中文和空格；构建脚本会把 `![说明](./images/中文 目录/图片.png)` 自动规范化为 CommonMark 可解析的写法。
 - **图片只提交在 `content` 里**（`static/images/` 由脚本生成，已 `.gitignore`，避免仓库双份）：
   - 文章：`content/posts/images/<与 md 对应的子目录>/` → 本地打开 `content/posts/某文.md` 时写 `./images/子目录/xxx.png` **能看图**
   - 动态：`content/moments/` 下放图，`photos` 写 `图名.png` 或 `./图名.png`

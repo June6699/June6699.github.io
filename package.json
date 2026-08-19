@@ -2,7 +2,8 @@
   "name": "june6699-blog",
   "private": true,
   "scripts": {
-    "build": "python scripts/sync_images.py && python scripts/sync_icons.py && hugo --minify --buildFuture --baseURL https://june6699.top/ && python scripts/prepare_cloudflare_assets.py",
+    "test": "node scripts/site_tasks.mjs test",
+    "build": "node scripts/site_tasks.mjs build",
     "deploy": "wrangler deploy"
   },
   "devDependencies": {

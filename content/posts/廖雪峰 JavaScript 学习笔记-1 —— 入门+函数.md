@@ -605,7 +605,7 @@ MapReduce: 1
 
 Google 那篇论文，就是把这个简单思路，**放大到几千台机器的大数据场景**。
 
-![image-20260406214608194](./images/廖雪峰 JavaScript 学习笔记 —— 初级注意事项/image-20260406214608194.png)
+![image-20260406214608194](<./images/廖雪峰 JavaScript 学习笔记 —— 初级注意事项/image-20260406214608194.png>)
 
 ```javascript
 let arr = [1, 3, 5, 7, 9];

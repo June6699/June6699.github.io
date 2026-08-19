@@ -8,7 +8,13 @@
 
 <div class="statistics-page">
   {{- $posts := where site.RegularPages "Section" "posts" }}
+  {{- $posts = where $posts "Draft" false }}
+  {{- $posts = where $posts "Title" "ne" "" }}
+  {{- $posts = where $posts "Date.Year" "gt" 1 }}
   {{- $moments := where site.RegularPages "Section" "moments" }}
+  {{- $moments = where $moments "Draft" false }}
+  {{- $moments = where $moments "Title" "ne" "" }}
+  {{- $moments = where $moments "Date.Year" "gt" 1 }}
   {{- $excludeTerms := slice "日常" "博客" }}
   {{- $palette := slice "#2563eb" "#f97316" "#14b8a6" "#8b5cf6" "#eab308" "#ef4444" "#0f766e" "#7c3aed" "#ec4899" "#84cc16" "#06b6d4" "#f59e0b" }}
   {{- $currentYear := now.Year }}
@@ -220,8 +226,12 @@
     <section class="stat-section">
       <h3>时间线</h3>
       <ul class="stat-timeline">
-        {{- with index $oldest 0 }}<li>最早文章：<a href="{{ .RelPermalink }}">{{ .Title }}</a>（{{ .Date.Format "2006-01-02" }}）</li>{{- end }}
-        {{- with index $newest 0 }}<li>最新文章：<a href="{{ .RelPermalink }}">{{ .Title }}</a>（{{ .Date.Format "2006-01-02" }}）</li>{{- end }}
+        {{- if gt (len $oldest) 0 }}
+          {{- with index $oldest 0 }}<li>最早文章：<a href="{{ .RelPermalink }}">{{ .Title }}</a>（{{ .Date.Format "2006-01-02" }}）</li>{{- end }}
+          {{- with index $newest 0 }}<li>最新文章：<a href="{{ .RelPermalink }}">{{ .Title }}</a>（{{ .Date.Format "2006-01-02" }}）</li>{{- end }}
+        {{- else }}
+          <li>暂无已发布文章</li>
+        {{- end }}
       </ul>
     </section>
 
@@ -326,8 +336,12 @@
     <section class="stat-section">
       <h3>时间线</h3>
       <ul class="stat-timeline">
-        {{- with index $oldestMoment 0 }}<li>最早动态：<a href="{{ .RelPermalink }}">{{ .Title }}</a>（{{ .Date.Format "2006-01-02" }}）</li>{{- end }}
-        {{- with index $newestMoment 0 }}<li>最新动态：<a href="{{ .RelPermalink }}">{{ .Title }}</a>（{{ .Date.Format "2006-01-02" }}）</li>{{- end }}
+        {{- if gt (len $oldestMoment) 0 }}
+          {{- with index $oldestMoment 0 }}<li>最早动态：<a href="{{ .RelPermalink }}">{{ .Title }}</a>（{{ .Date.Format "2006-01-02" }}）</li>{{- end }}
+          {{- with index $newestMoment 0 }}<li>最新动态：<a href="{{ .RelPermalink }}">{{ .Title }}</a>（{{ .Date.Format "2006-01-02" }}）</li>{{- end }}
+        {{- else }}
+          <li>暂无已发布动态</li>
+        {{- end }}
       </ul>
     </section>
 

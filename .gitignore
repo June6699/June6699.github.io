@@ -19,5 +19,12 @@ codex_run_server_test.log
 local-secrets.md
 .env.local
 
+# Editor-local state
+/.cursor/
+
+# Python caches
+__pycache__/
+*.py[cod]
+
 # moments
 # content/moments/
