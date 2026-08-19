@@ -49,6 +49,10 @@ class NormalizeMarkdownImagePathsTest(unittest.TestCase):
         source = r"![photo](./images/a\ directory/photo.png)" + "\n"
         self.assertEqual(normalize_document(source), (source, 0))
 
+    def test_leaves_local_path_without_spaces_unchanged(self) -> None:
+        source = "![photo](./images/谷歌邮箱/photo.png)\n"
+        self.assertEqual(normalize_document(source), (source, 0))
+
     def test_leaves_external_destination_unchanged(self) -> None:
         source = "![photo](https://example.com/a directory/photo.png)\n"
         self.assertEqual(normalize_document(source), (source, 0))

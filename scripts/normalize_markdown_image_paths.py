@@ -17,7 +17,9 @@ from __future__ import annotations
 
 import argparse
 import re
+import subprocess
 import sys
+import time
 from pathlib import Path
 
 
@@ -188,6 +190,10 @@ def normalize_document(text: str) -> tuple[str, int]:
     return "".join(output), changes
 
 
+def iter_markdown_files() -> list[Path]:
+    return sorted(CONTENT_DIR.rglob("*.md"), key=lambda item: item.as_posix())
+
+
 def normalize_file(path: Path, check_only: bool) -> int:
     with path.open("r", encoding="utf-8", errors="strict", newline="") as source:
         original = source.read()
@@ -198,6 +204,99 @@ def normalize_file(path: Path, check_only: bool) -> int:
     return changes
 
 
+def normalize_content(check_only: bool) -> tuple[int, int]:
+    changed_files = 0
+    changed_destinations = 0
+
+    for path in iter_markdown_files():
+        changes = normalize_file(path, check_only)
+        if not changes:
+            continue
+        changed_files += 1
+        changed_destinations += changes
+        action = "needs normalization" if check_only else "normalized"
+        print(f"[markdown-images] {action}: {path.relative_to(ROOT)} ({changes})", flush=True)
+
+    if not changed_files:
+        print("[markdown-images] all image destinations are valid", flush=True)
+        return 0, 0
+
+    print(
+        f"[markdown-images] {'found' if check_only else 'updated'} "
+        f"{changed_destinations} destination(s) in {changed_files} file(s)",
+        flush=True,
+    )
+    return changed_files, changed_destinations
+
+
+def _file_signature(path: Path) -> tuple[int, int] | None:
+    try:
+        stat = path.stat()
+    except OSError:
+        return None
+    return stat.st_mtime_ns, stat.st_size
+
+
+def watch_content(interval: float, command: list[str]) -> int:
+    """Normalize changed Markdown files while an optional child command runs."""
+    if interval <= 0:
+        raise ValueError("watch interval must be greater than zero")
+
+    normalize_content(check_only=False)
+    signatures = {
+        path: signature
+        for path in iter_markdown_files()
+        if (signature := _file_signature(path)) is not None
+    }
+
+    process: subprocess.Popen[bytes] | None = None
+    if command:
+        print(f"[markdown-images] watching content while running: {' '.join(command)}", flush=True)
+        process = subprocess.Popen(command, cwd=ROOT)
+    else:
+        print("[markdown-images] watching content; press Ctrl+C to stop", flush=True)
+
+    exit_code = 0
+    try:
+        while process is None or process.poll() is None:
+            current_signatures: dict[Path, tuple[int, int]] = {}
+            for path in iter_markdown_files():
+                signature = _file_signature(path)
+                if signature is None:
+                    continue
+                if signatures.get(path) != signature:
+                    try:
+                        changes = normalize_file(path, check_only=False)
+                    except (OSError, UnicodeDecodeError) as error:
+                        # Editors can briefly expose a partially-written file; retry next tick.
+                        print(f"[markdown-images] retrying {path.relative_to(ROOT)}: {error}", flush=True)
+                        if path in signatures:
+                            current_signatures[path] = signatures[path]
+                        continue
+                    if changes:
+                        print(f"[markdown-images] normalized: {path.relative_to(ROOT)} ({changes})", flush=True)
+                    signature = _file_signature(path) or signature
+                current_signatures[path] = signature
+            signatures = current_signatures
+            if process is not None and process.poll() is not None:
+                break
+            time.sleep(interval)
+    except KeyboardInterrupt:
+        exit_code = 130
+    finally:
+        if process is not None and process.poll() is None:
+            process.terminate()
+            try:
+                process.wait(timeout=5)
+            except subprocess.TimeoutExpired:
+                process.kill()
+                process.wait()
+
+    if process is not None and exit_code == 0:
+        exit_code = process.returncode or 0
+    return exit_code
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
@@ -205,32 +304,39 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help="Report files that need normalization without changing them.",
     )
+    parser.add_argument(
+        "--watch",
+        action="store_true",
+        help="Keep watching content Markdown files for newly pasted image paths.",
+    )
+    parser.add_argument(
+        "--interval",
+        type=float,
+        default=0.5,
+        help="Polling interval in seconds for --watch (default: 0.5).",
+    )
+    parser.add_argument(
+        "command",
+        nargs=argparse.REMAINDER,
+        help="Optional command to run while watching; place it after --.",
+    )
     return parser.parse_args()
 
 
 def main() -> int:
     args = parse_args()
-    changed_files = 0
-    changed_destinations = 0
+    if args.watch and args.check:
+        raise SystemExit("--check cannot be combined with --watch")
 
-    for path in sorted(CONTENT_DIR.rglob("*.md"), key=lambda item: item.as_posix()):
-        changes = normalize_file(path, args.check)
-        if not changes:
-            continue
-        changed_files += 1
-        changed_destinations += changes
-        action = "needs normalization" if args.check else "normalized"
-        print(f"[markdown-images] {action}: {path.relative_to(ROOT)} ({changes})")
+    command = list(args.command)
+    if command and command[0] == "--":
+        command = command[1:]
 
-    if not changed_files:
-        print("[markdown-images] all image destinations are valid")
-        return 0
+    if args.watch:
+        return watch_content(args.interval, command)
 
-    print(
-        f"[markdown-images] {'found' if args.check else 'updated'} "
-        f"{changed_destinations} destination(s) in {changed_files} file(s)"
-    )
-    return 1 if args.check else 0
+    changed_files, _ = normalize_content(args.check)
+    return 1 if args.check and changed_files else 0
 
 
 if __name__ == "__main__":

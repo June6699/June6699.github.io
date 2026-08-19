@@ -105,9 +105,10 @@ echo   %HUGO_BASEURL%
 echo.
 echo Press Ctrl+C to stop the server.
 start "" cmd /c "timeout /t 2 /nobreak >nul && start "" "%HUGO_BASEURL%""
-"%HUGO_EXE%" server -D --buildFuture --baseURL "%HUGO_BASEURL%" --appendPort=false --disableFastRender --port %HUGO_SERVER_PORT%
+echo Watching Markdown image paths; newly pasted images are normalized automatically after saving.
+"%PYTHON_EXE%" -X utf8 scripts\normalize_markdown_image_paths.py --watch --interval 0.5 -- "%HUGO_EXE%" server -D --buildFuture --baseURL "%HUGO_BASEURL%" --appendPort=false --disableFastRender --port %HUGO_SERVER_PORT%
 if errorlevel 1 (
-  echo [ERROR] Hugo failed to start. See messages above.
+  echo [ERROR] Markdown watcher or Hugo failed. See messages above.
   pause
   exit /b 1
 )
