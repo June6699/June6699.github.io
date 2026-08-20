@@ -86,8 +86,7 @@ GitHub Actions 已在工作流中读取仓库 **Secrets**：`GITALK_CLIENT_ID`�
 
 - 文章：`content/posts/卜算子·自嘲.md`（保留可见文件名，不用 index.md）
 - **正文里图片路径**：`./images/卜算子·自嘲/xxx.png`（相对路径，和文件名一致）
-- 图片目录或文件名可以包含中文和空格；构建脚本会把 `![说明](./images/中文 目录/图片.png)` 自动规范化为 CommonMark 可解析的写法。
-- 使用 `run_server.bat` 时会持续监视 `content` 下的 Markdown；在 Typora 贴图并保存后，含空格的本地图片路径通常会在 0.5 秒内自动补成 `![说明](<./images/中文 目录/图片.png>)`，不用手改尖括号。
+- 图片目录或文件名可以包含中文和空格；`run_server.bat` 启动前和 `npm run build` 构建前会各检查一次，把 `![说明](./images/中文 目录/图片.png)` 自动规范化为 CommonMark 可解析的写法，不会常驻监控或重复包裹已有的 `<...>`。
 - **图片只提交在 `content` 里**（`static/images/` 由脚本生成，已 `.gitignore`，避免仓库双份）：
   - 文章：`content/posts/images/<与 md 对应的子目录>/` → 本地打开 `content/posts/某文.md` 时写 `./images/子目录/xxx.png` **能看图**
   - 动态：`content/moments/` 下放图，`photos` 写 `图名.png` 或 `./图名.png`
