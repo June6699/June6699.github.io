@@ -145,7 +145,13 @@ https://lao1.me/user/137?path=index
 
 [对Linux DO论坛及其站长、管理人员所作所为的揭露与批判 - A FreeFlarum Forum](https://pandafiredoge.freeflarum.com/d/4-dui-linux-dolun-tan-ji-qi-zhan-chang-guan-li-ren-yuan-suo-zuo-suo-wei-de-jie-lu-yu-pi-pan)
 
+[在LINUX DO发帖时，“屎黄”会被自动替换成“始皇” - 日常 奶昔论坛](https://forum.naixi.net/thread-10099-1-1.html)
 
+还有赵高的事，谁能绷住？
+
+![img](./images/linux-do站与他的“朋友”们/120151bhkokc563ov5wvcr.png)
+
+![img](./images/linux-do站与他的“朋友”们/120207yfvf1hf4iy3hy4bh-1787237563839-12.png)
 
 ### 5、总结
 
