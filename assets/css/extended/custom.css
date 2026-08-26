@@ -1518,6 +1518,17 @@ a.sidebar-tag-nav__flat:hover {
     color: var(--primary);
 }
 
+/* 正文强调：确保 Typora 的 **加粗** 在列表和段落中保持清晰一致 */
+.post-content strong,
+.post-content b {
+    color: var(--primary);
+    font-weight: 700;
+}
+
+.post-content li > p:first-child {
+    margin-top: 0;
+}
+
 /* 表格：好看一点，带表头与斑马纹 */
 .post-content table {
     width: fit-content;
