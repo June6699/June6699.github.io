@@ -1,7 +1,10 @@
-{{- /* 仅文章页且有右侧目录时：TOC 滚动高亮（scroll spy），文章滚动驱动高亮；滑 TOC 不驱动文章，只有点击才跳转 */ -}}
-{{- if and (eq .Kind "page") (ne .Layout "archives") (ne .Layout "search") (.Param "ShowToc") -}}
+{{- /* 文章页 TOC 滚动高亮（scroll spy）+ 移动端抽屉。footer 经 partialCached 缓存（variant 只含 Layout/Kind 等），
+       所有 Kind=page、Layout="" 的页面共用一份输出，因此这里只做粗粒度模板过滤，
+       moments 页（由 moments-gate.js 接管）与无目录页在运行时自行退出 */ -}}
+{{- if and (eq .Kind "page") (ne .Layout "archives") (ne .Layout "search") (ne .Layout "statistics") -}}
 <script>
 (function() {
+    if (document.querySelector('.moments-toc')) return;
     const sidebar = document.querySelector('.toc-sidebar');
     const postContent = document.querySelector('.post-content');
     if (!sidebar || !postContent) return;
@@ -16,7 +19,11 @@
 
     function setActive(id) {
         tocLinks.forEach(function(a) {
-            const href = a.getAttribute('href');
+            /* toc 锚点是百分号编码（CJK 标题），需解码后再与 heading id 比较 */
+            let href = a.getAttribute('href') || '';
+            if (href.startsWith('#')) {
+                try { href = '#' + decodeURIComponent(href.slice(1)); } catch (e) {}
+            }
             if (href === '#' + id) {
                 a.classList.add('active');
             } else {

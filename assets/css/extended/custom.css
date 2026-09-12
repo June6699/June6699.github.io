@@ -2838,6 +2838,11 @@ a.sidebar-tag-nav__flat:hover {
     display: block !important;
 }
 
+/* reset.css 的 section{display:block} 会盖过 UA 的 [hidden]，解锁后需强制隐藏口令门 */
+.moments-gate[hidden] {
+    display: none !important;
+}
+
 .moments-feed::before {
     content: "";
     position: absolute;
@@ -3825,4 +3830,25 @@ a.sidebar-tag-nav__flat:hover {
     #searchResults .search-result {
         padding: 0.85rem;
     }
+}
+
+/* ===== moments 右侧目录栏：复用文章页 .toc-sidebar 全套视觉，桌面端为镜像左侧时间轴的右侧浮层 ===== */
+@media (min-width: 921px) {
+    .moments-shell .moments-toc {
+        position: fixed;
+        top: calc(var(--header-height, 60px) + 0.8rem);
+        right: 8px;
+        width: var(--toc-sidebar-width, 218px);
+        max-height: calc(100vh - var(--header-height, 60px) - 1.6rem);
+        z-index: 60;
+    }
+}
+
+/* 当前动态没有小节标题时隐藏目录栏与移动端入口 */
+[data-moments-gate-root].moments-toc-empty .moments-toc {
+    display: none !important;
+}
+
+[data-moments-gate-root].moments-toc-empty .toc-mobile-toggle {
+    display: none !important;
 }

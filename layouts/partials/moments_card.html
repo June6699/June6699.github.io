@@ -22,7 +22,9 @@
     </h2>
 
     <div class="moments-card__content post-content">
-      {{ $srcPage.Content }}
+      {{- /* 正文里 Typora 导出的裸 <img src="./..."> 不走 render-image 钩子，这里统一改写为站点路径 */ -}}
+      {{- $content := $srcPage.Content | replaceRE `src="\./` `src="/images/moments/` | replaceRE `src='\./` `src='/images/moments/` | safeHTML -}}
+      {{ $content }}
     </div>
 
     {{- with $srcPage.Params.photos }}

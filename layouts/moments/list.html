@@ -5,9 +5,8 @@
 {{- with getenv "HUGO_MOMENTS_RECOVERY_EMAIL" | strings.TrimSpace }}{{ $rs.Set "recovery" . }}{{ end -}}
 {{- $recoveryEmail := $rs.Get "recovery" | strings.TrimSpace -}}
 {{- $sessionSeed := $passwordHash | default "missing-password-hash" -}}
-{{- $buildNonce := now.Unix -}}
 
-<section class="moments-shell" data-moments-gate-root data-password-hash="{{ $passwordHash }}" data-session-key="moments-access-{{ slicestr $sessionSeed 0 12 }}-{{ $buildNonce }}" data-recovery-email="{{ $recoveryEmail }}">
+<section class="moments-shell" data-moments-gate-root data-password-hash="{{ $passwordHash }}" data-session-key="moments-access-{{ slicestr $sessionSeed 0 12 }}" data-recovery-email="{{ $recoveryEmail }}">
   <header class="moments-hero">
     <div class="moments-hero__copy">
       <p class="moments-hero__eyebrow">Private Stream</p>
@@ -90,6 +89,29 @@
       </section>
       {{- end -}}
     </div>
+
+    <button
+      class="toc-mobile-toggle"
+      type="button"
+      aria-controls="toc-sidebar-drawer"
+      aria-expanded="false"
+      aria-label="打开动态目录">
+      目录
+    </button>
+    <div class="toc-mobile-backdrop" aria-hidden="true"></div>
+    <aside class="toc-sidebar moments-toc" id="toc-sidebar-drawer" data-moments-toc aria-label="动态目录" aria-hidden="true">
+      <div class="toc-mobile-header">
+        <strong class="toc-mobile-title">动态目录</strong>
+        <button class="toc-mobile-close" type="button" aria-label="关闭动态目录">
+          关闭
+        </button>
+      </div>
+      {{- range $idx, $p := $pages -}}
+      <div class="moments-toc-panel" data-moment-toc-panel data-for="moment-{{ $idx }}" hidden>
+        {{- partial "toc.html" $p -}}
+      </div>
+      {{- end -}}
+    </aside>
     {{- else -}}
     <article class="moments-card moments-card--empty">
       <div class="moments-card__body">

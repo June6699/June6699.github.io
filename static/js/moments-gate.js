@@ -209,6 +209,149 @@
     root.dataset.vTimelineReady = "1";
   }
 
+  function initMomentsToc(root) {
+    var toc = root.querySelector("[data-moments-toc]");
+    if (!toc || toc.dataset.tocReady === "1") return;
+    var moments = Array.prototype.slice.call(root.querySelectorAll("[data-moment-id]"));
+    if (!moments.length) return;
+
+    var panels = {};
+    Array.prototype.slice.call(toc.querySelectorAll("[data-moment-toc-panel]")).forEach(function (panel) {
+      panels[panel.dataset.for] = panel;
+    });
+
+    var toggleButton = root.querySelector(".toc-mobile-toggle");
+    var backdrop = root.querySelector(".toc-mobile-backdrop");
+    var closeButton = toc.querySelector(".toc-mobile-close");
+    var mobileQuery = window.matchMedia("(max-width: 920px)");
+    var activeMomentId = null;
+
+    function setDrawerState(open) {
+      var isMobile = mobileQuery.matches && !!toggleButton;
+      document.body.classList.toggle("toc-mobile-open", isMobile && open);
+      if (toggleButton) toggleButton.setAttribute("aria-expanded", isMobile && open ? "true" : "false");
+      if (isMobile) {
+        toc.setAttribute("aria-hidden", open ? "false" : "true");
+        if (open) toc.removeAttribute("inert");
+        else toc.setAttribute("inert", "");
+      } else {
+        toc.removeAttribute("aria-hidden");
+        toc.removeAttribute("inert");
+      }
+    }
+
+    function applyActiveMoment(id) {
+      if (activeMomentId === id) return;
+      activeMomentId = id;
+      Object.keys(panels).forEach(function (key) {
+        panels[key].hidden = key !== id;
+      });
+      var panel = panels[id];
+      var hasToc = !!(panel && panel.querySelector(".toc .inner a"));
+      root.classList.toggle("moments-toc-empty", !hasToc);
+    }
+
+    function currentHeadingId(node) {
+      var headings = Array.prototype.slice.call(
+        node.querySelectorAll("h1[id], h2[id], h3[id], h4[id], h5[id], h6[id]")
+      );
+      var current = null;
+      var minOffset = Infinity;
+      headings.forEach(function (h) {
+        var top = h.getBoundingClientRect().top;
+        if (top <= 120 && top > -200) {
+          var off = Math.abs(top - 80);
+          if (off < minOffset) {
+            minOffset = off;
+            current = h.id;
+          }
+        } else if (current === null && top > 0 && top < 300) {
+          current = h.id;
+          minOffset = Math.abs(top - 80);
+        }
+      });
+      return current;
+    }
+
+    function setActiveHeading(node) {
+      var panel = panels[node.dataset.momentId];
+      if (!panel) return;
+      var links = Array.prototype.slice.call(panel.querySelectorAll(".toc .inner a[href^='#']"));
+      if (!links.length) return;
+      var headingId = currentHeadingId(node);
+      links.forEach(function (link) {
+        var raw = (link.getAttribute("href") || "").slice(1);
+        var decoded = raw;
+        try {
+          decoded = decodeURIComponent(raw);
+        } catch (_err) {}
+        var on = headingId !== null && decoded === headingId;
+        link.classList.toggle("active", on);
+      });
+    }
+
+    function refreshByScroll() {
+      var threshold = getHeaderOffset() + 40;
+      var current = moments[0];
+      moments.forEach(function (node) {
+        if (node.getBoundingClientRect().top <= threshold) current = node;
+      });
+      applyActiveMoment(current.dataset.momentId);
+      setActiveHeading(current);
+    }
+
+    toc.addEventListener("click", function (event) {
+      var target = event.target instanceof Element ? event.target : null;
+      var link = target ? target.closest("a[href^='#']") : null;
+      if (!link) return;
+      var rawTargetId = (link.getAttribute("href") || "").slice(1);
+      var targetId = rawTargetId;
+      try {
+        targetId = decodeURIComponent(rawTargetId);
+      } catch (_err) {}
+      var heading = document.getElementById(targetId);
+      if (!heading) return;
+      event.preventDefault();
+      var top = heading.getBoundingClientRect().top + window.pageYOffset - getHeaderOffset();
+      window.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
+      history.replaceState(null, "", "#" + targetId);
+      setDrawerState(false);
+    });
+
+    if (toggleButton) {
+      toggleButton.addEventListener("click", function () {
+        if (document.body.classList.contains("toc-mobile-open")) return;
+        setDrawerState(true);
+      });
+    }
+    if (backdrop) {
+      backdrop.addEventListener("click", function () {
+        setDrawerState(false);
+      });
+    }
+    if (closeButton) {
+      closeButton.addEventListener("click", function () {
+        setDrawerState(false);
+      });
+    }
+    document.addEventListener("keydown", function (event) {
+      if (event.key === "Escape" && document.body.classList.contains("toc-mobile-open")) {
+        setDrawerState(false);
+      }
+    });
+    if (typeof mobileQuery.addEventListener === "function") {
+      mobileQuery.addEventListener("change", function () {
+        setDrawerState(false);
+      });
+    }
+
+    window.addEventListener("scroll", refreshByScroll, { passive: true });
+    window.addEventListener("resize", refreshByScroll, { passive: true });
+    toc.dataset.tocReady = "1";
+    setDrawerState(false);
+    refreshByScroll();
+  }
+
   function unlock(root, feed, gate, sessionKey, remember) {
     root.classList.add("is-unlocked");
     if (gate) gate.hidden = true;
@@ -219,6 +362,11 @@
       initVerticalTimeline(root);
     } catch (error) {
       console.warn("[moments-gate] timeline init failed:", error);
+    }
+    try {
+      initMomentsToc(root);
+    } catch (error) {
+      console.warn("[moments-gate] toc init failed:", error);
     }
   }
 

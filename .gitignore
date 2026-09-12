@@ -21,6 +21,8 @@ local-secrets.md
 
 # Editor-local state
 /.cursor/
+/.zcode/
+/.codex/
 
 # Python caches
 __pycache__/
