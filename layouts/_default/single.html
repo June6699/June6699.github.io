@@ -36,6 +36,10 @@
       {{- if not (.Param "hideMeta") }}
       <div class="post-meta">
         {{- partial "post_meta.html" . -}}
+        {{- /* 不蒜子文章阅读量（PV）：仅 posts 正式文章显示，数字返回前保持 hidden */ -}}
+        {{- if $isPost }}
+        &nbsp;·&nbsp;<span class="post-meta__views" id="busuanzi_container_page_pv" hidden>阅读 <span id="busuanzi_value_page_pv"></span> 次</span>
+        {{- end }}
         {{- partial "translation_list.html" . -}}
         {{- partial "edit_post.html" . -}}
         {{- partial "post_canonical.html" . -}}
@@ -104,6 +108,26 @@
 </div>
 {{- else }}
 </div>
+{{- end }}
+
+{{- /* 不蒜子阅读量（PV）：仅 posts 正式文章加载；按页面 URL 自动计数，新文章无需任何配置 */ -}}
+{{- if $isPost }}
+<script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<script>
+(function () {
+  var box = document.getElementById('busuanzi_container_page_pv');
+  var val = document.getElementById('busuanzi_value_page_pv');
+  if (!box || !val) return;
+  // 不蒜子成功填充数字后再显示；后端不可达时保持隐藏，不影响阅读
+  var tries = 0;
+  var timer = setInterval(function () {
+    tries++;
+    var n = (val.textContent || '').trim();
+    if (n) { box.removeAttribute('hidden'); clearInterval(timer); }
+    else if (tries > 24) { clearInterval(timer); } // 最多等 12 秒
+  }, 500);
+})();
+</script>
 {{- end }}
 
 {{- end }}{{/* end main */}}
