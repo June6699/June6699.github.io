@@ -1181,7 +1181,7 @@ a.sidebar-tag-nav__flat:hover {
     height: auto;
 }
 
-/* 图片灯箱（medium-zoom）：可点击放大的正文图片显示放大镜光标；
+/* 图片灯箱（PhotoSwipe）：可点击放大的正文图片显示放大镜光标；
    带链接的图片和手动标记 data-no-zoom 的图片不放大，保持默认 */
 .post-content :not(a) > img:not([data-no-zoom]) {
     cursor: zoom-in;

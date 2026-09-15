@@ -130,19 +130,45 @@
 </script>
 {{- end }}
 
-{{- /* 图片灯箱：仅 posts 正式文章加载，点击正文图片放大；本地脚本不依赖外部 CDN。
+{{- /* 图片灯箱 PhotoSwipe：仅 posts 正式文章加载，本地脚本不依赖外部 CDN。
+     点击正文图片打开，支持鼠标滚轮/双指捏合连续缩放、拖拽平移、左右键切换；
      只作用于正文容器，排除带链接的图片和手动标记 data-no-zoom 的图片 */ -}}
 {{- if $isPost }}
-<script defer src="{{ "js/medium-zoom.js" | relURL }}"></script>
-<script>
-document.addEventListener('DOMContentLoaded', function () {
-  if (!window.mediumZoom) return;
-  window.mediumZoom('.post-content :not(a) > img:not([data-no-zoom])', {
-    background: 'rgba(0, 0, 0, 0.86)',
-    margin: 24,
-    scrollOffset: 40
-  });
-});
+<script type="module">
+  import PhotoSwipe from {{ ("js/photoswipe.esm.js" | relURL) | jsonify | safeJS }};
+
+  (function () {
+    var content = document.querySelector('.post-content');
+    if (!content) return;
+    var imgs = Array.prototype.slice.call(
+      content.querySelectorAll(':not(a) > img:not([data-no-zoom])')
+    );
+    if (!imgs.length) return;
+
+    imgs.forEach(function (img, index) {
+      img.addEventListener('click', function (event) {
+        event.preventDefault();
+        var slides = imgs.map(function (el) {
+          return {
+            src: el.currentSrc || el.src,
+            width: parseInt(el.getAttribute('width'), 10) || el.naturalWidth || 1600,
+            height: parseInt(el.getAttribute('height'), 10) || el.naturalHeight || 1000,
+            alt: el.alt || ''
+          };
+        });
+        var pswp = new PhotoSwipe({
+          dataSource: slides,
+          index: index,
+          bgOpacity: 0.88,
+          wheelToZoom: true,
+          imageClickAction: 'zoom',
+          tapAction: 'toggle-controls',
+          showHideAnimationType: 'zoom'
+        });
+        pswp.init();
+      });
+    });
+  })();
 </script>
 {{- end }}
 

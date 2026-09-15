@@ -1,0 +1,4 @@
+{{- /* PhotoSwipe 图片灯箱样式：仅 posts 正式文章页加载，其余页面不引入 */ -}}
+{{- if and (eq .Kind "page") (in site.Params.mainSections .Section) }}
+<link rel="stylesheet" href="{{ "css/photoswipe.css" | relURL }}">
+{{- end }}
