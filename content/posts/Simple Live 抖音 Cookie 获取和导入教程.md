@@ -95,7 +95,7 @@ ttwid=...
 
 4. 在 Network 面板打开的情况下，按 `Ctrl + R` 刷新页面。
 
-![image-20260914214640980](./images/Simple Live 抖音 Cookie 获取和导入教程/image-20260914214640980.png)
+![image-20260914214640980](<./images/Simple Live 抖音 Cookie 获取和导入教程/image-20260914214640980.png>)
 
 5. 在请求列表里，我们可以看到名称这一列，然后我们去找名称前面几个字符就可以看到`/`的，比如`self/`、`info/`、`update/`等等。
 
@@ -110,7 +110,7 @@ ttwid=...
 
      - **展开状态：**还有相当一部分用户打开之后会是展开状态，有一大堆的东西，这些标头全部展开了，怎么办呢？还是一样的，我们只需要往下滑，还是去找`Cookie`的字眼，这个东西很长，所以他在的地方，一般会很长很长。所以还是很好找的。
 
-![image-20260914215246196](./images/Simple Live 抖音 Cookie 获取和导入教程/image-20260914215246196.png)
+![image-20260914215246196](<./images/Simple Live 抖音 Cookie 获取和导入教程/image-20260914215246196.png>)
 
 注意，是 `Request Headers` 里的 `cookie`。不要复制 `Response Headers` 里的 `set-cookie`。
 
@@ -202,7 +202,7 @@ Cookie 已保存，但缺少 kwfv1，弹幕可能需要重新网页登录
 
 4. 点上方的 `Network`，中文浏览器里一般叫“网络”。如图，我们直接去这个`userFollowCount`，然后把右边的cookie整个复制下来。
 
-![image-20260914221149658](./images/Simple Live 抖音 Cookie 获取和导入教程/image-20260914221149658.png)
+![image-20260914221149658](<./images/Simple Live 抖音 Cookie 获取和导入教程/image-20260914221149658.png>)
 
 你可以复制整行：
 

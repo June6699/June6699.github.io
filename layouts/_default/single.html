@@ -130,4 +130,20 @@
 </script>
 {{- end }}
 
+{{- /* 图片灯箱：仅 posts 正式文章加载，点击正文图片放大；本地脚本不依赖外部 CDN。
+     只作用于正文容器，排除带链接的图片和手动标记 data-no-zoom 的图片 */ -}}
+{{- if $isPost }}
+<script defer src="{{ "js/medium-zoom.js" | relURL }}"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  if (!window.mediumZoom) return;
+  window.mediumZoom('.post-content :not(a) > img:not([data-no-zoom])', {
+    background: 'rgba(0, 0, 0, 0.86)',
+    margin: 24,
+    scrollOffset: 40
+  });
+});
+</script>
+{{- end }}
+
 {{- end }}{{/* end main */}}

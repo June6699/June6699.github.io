@@ -29,10 +29,10 @@ tags:
 
 今天终于拿下了1K stars，得益于周末的帮助哈哈。
 
-![image-20260914133541962](./images/SimpleLive 千星展望/image-20260914133541962.png)
+![image-20260914133541962](<./images/SimpleLive 千星展望/image-20260914133541962.png>)
 
 而且突然网页端收到github的一个邀请，也就是 GitHub Account Successor（账户继任者） 功能的提示，目的是：万一无法继续管理账号、账号登不上去，通过提前指定一个可信用户，后续使用那个账户继续接管这个公开仓库，保证开源项目代码不会彻底无人维护。
 
-![image-20260914133615976](./images/SimpleLive 千星展望/image-20260914133615976.png)
+![image-20260914133615976](<./images/SimpleLive 千星展望/image-20260914133615976.png>)
 
 而且刚好只在我这个仓库里面出现，其他仓库都没有，可能是我这个仓库的stars、forks、issues达到了标准？
