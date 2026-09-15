@@ -29,22 +29,25 @@
   {{- $topLevelTags := slice }}
   {{- range $posts }}
     {{- $chars := countrunes (plainify .Content) -}}
-    {{- $seenTopTags := slice -}}
+    {{- /* 每篇只归入第一个有效一级标签，避免多标签文章在多个扇区重复计字数 */ -}}
+    {{- $primaryTop := "" -}}
     {{- with .Params.tags }}
       {{- range . }}
-        {{- $t := . | string -}}
-        {{- if in $excludeTerms $t -}}{{- continue -}}{{- end -}}
-        {{- $top := index (split $t "/") 0 -}}
-        {{- if in $excludeTerms $top -}}{{- continue -}}{{- end -}}
-        {{- if not (in $seenTopTags $top) -}}
-          {{- $seenTopTags = $seenTopTags | append $top -}}
-          {{- if not (in $topLevelTags $top) -}}
-            {{- $topLevelTags = $topLevelTags | append $top -}}
-          {{- end -}}
-          {{- $topTagChars.Set (printf "chars_%s" $top) (add ($topTagChars.Get (printf "chars_%s" $top) | default 0) $chars) -}}
-          {{- $topTagPostCount.Set (printf "posts_%s" $top) (add ($topTagPostCount.Get (printf "posts_%s" $top) | default 0) 1) -}}
+        {{- if eq $primaryTop "" -}}
+          {{- $t := . | string -}}
+          {{- if in $excludeTerms $t -}}{{- continue -}}{{- end -}}
+          {{- $cand := index (split $t "/") 0 -}}
+          {{- if in $excludeTerms $cand -}}{{- continue -}}{{- end -}}
+          {{- $primaryTop = $cand -}}
         {{- end -}}
       {{- end }}
+    {{- end }}
+    {{- with $primaryTop }}
+      {{- if not (in $topLevelTags .) -}}
+        {{- $topLevelTags = $topLevelTags | append . -}}
+      {{- end -}}
+      {{- $topTagChars.Set (printf "chars_%s" .) (add ($topTagChars.Get (printf "chars_%s" .) | default 0) $chars) -}}
+      {{- $topTagPostCount.Set (printf "posts_%s" .) (add ($topTagPostCount.Get (printf "posts_%s" .) | default 0) 1) -}}
     {{- end }}
   {{- end }}
   {{- $totalChars := $postScratch.Get "totalChars" }}
@@ -101,23 +104,24 @@
   {{- range $moments }}
     {{- $chars := countrunes (plainify .Content) -}}
     {{- $momentScratch.Add "totalChars" $chars -}}
-    {{- $seenMomentTopTags := slice -}}
+    {{- /* 标签云仍统计每个具体标签出现次数；但每条动态只归入第一个有效一级标签计字数，避免重复 */ -}}
+    {{- $primaryMomentTop := "" -}}
     {{- with .Params.tags }}
       {{- range . }}
         {{- $t := . | string -}}
         {{- if in $excludeTerms $t -}}{{- continue -}}{{- end -}}
         {{- $momentTagCount.Set (printf "mc_%s" $t) (add ($momentTagCount.Get (printf "mc_%s" $t) | default 0) 1) -}}
-        {{- $top := index (split $t "/") 0 -}}
-        {{- if in $excludeTerms $top -}}{{- continue -}}{{- end -}}
-        {{- if not (in $seenMomentTopTags $top) -}}
-          {{- $seenMomentTopTags = $seenMomentTopTags | append $top -}}
-          {{- if not (in $momentTopLevelTags $top) -}}
-            {{- $momentTopLevelTags = $momentTopLevelTags | append $top -}}
-          {{- end -}}
-          {{- $momentTopTagChars.Set (printf "chars_%s" $top) (add ($momentTopTagChars.Get (printf "chars_%s" $top) | default 0) $chars) -}}
-          {{- $momentTopTagPostCount.Set (printf "posts_%s" $top) (add ($momentTopTagPostCount.Get (printf "posts_%s" $top) | default 0) 1) -}}
-        {{- end -}}
+        {{- $cand := index (split $t "/") 0 -}}
+        {{- if in $excludeTerms $cand -}}{{- continue -}}{{- end -}}
+        {{- if eq $primaryMomentTop "" -}}{{- $primaryMomentTop = $cand -}}{{- end -}}
       {{- end }}
+    {{- end }}
+    {{- with $primaryMomentTop }}
+      {{- if not (in $momentTopLevelTags .) -}}
+        {{- $momentTopLevelTags = $momentTopLevelTags | append . -}}
+      {{- end -}}
+      {{- $momentTopTagChars.Set (printf "chars_%s" .) (add ($momentTopTagChars.Get (printf "chars_%s" .) | default 0) $chars) -}}
+      {{- $momentTopTagPostCount.Set (printf "posts_%s" .) (add ($momentTopTagPostCount.Get (printf "posts_%s" .) | default 0) 1) -}}
     {{- end }}
   {{- end }}
   {{- $momentTotalChars := $momentScratch.Get "totalChars" }}
@@ -248,12 +252,12 @@
               {{ if $chartGradient }}style="background: conic-gradient({{ $chartGradient }});"{{ end }}>
               <div class="stat-pie-hole">
                 <span class="stat-pie-total">{{ $topTaggedCharsTotal }}</span>
-                <span class="stat-pie-caption">标签字符数</span>
+                <span class="stat-pie-caption">已分类字符数</span>
               </div>
             </div>
             <div class="stat-pie-tooltip" hidden></div>
           </div>
-          <p class="stat-pie-note">按文章一级标签汇总字符数，子标签如 `诗/人物/柳宗元` 会归入 `诗`。</p>
+          <p class="stat-pie-note">每篇按其第一个一级标签归类一次（子标签如 `诗/人物/柳宗元` 归入 `诗`），多标签不重复计数；未打标签或仅含「日常/博客」的文章不计入饼图，因此中心数 ≤ 上方总字数。</p>
         </div>
         <div class="stat-pie-legend">
           <ol class="stat-tag-breakdown">
@@ -358,12 +362,12 @@
               {{ if $momentChartGradient }}style="background: conic-gradient({{ $momentChartGradient }});"{{ end }}>
               <div class="stat-pie-hole">
                 <span class="stat-pie-total">{{ $momentTopTaggedCharsTotal }}</span>
-                <span class="stat-pie-caption">动态标签字符数</span>
+                <span class="stat-pie-caption">已分类字符数</span>
               </div>
             </div>
             <div class="stat-pie-tooltip" hidden></div>
           </div>
-          <p class="stat-pie-note">按动态一级标签汇总字符数，子标签会归入对应的顶层标签。</p>
+          <p class="stat-pie-note">每条动态按其第一个一级标签归类一次，多标签不重复计数；未打标签或仅含「日常/博客」的动态不计入饼图，因此中心数 ≤ 上方总字数。</p>
         </div>
         <div class="stat-pie-legend">
           <ol class="stat-tag-breakdown">
