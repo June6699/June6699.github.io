@@ -63,8 +63,10 @@
         {{- partial "cover.html" (dict "cxt" . "IsSingle" false "isHidden" $isHidden) }}
         <header class="entry-header">
           <h2 class="entry-hint-parent">
+            <span class="entry-title-text">
             {{- if .Params.pinned }}<span class="pinned-badge" title="置顶文章" aria-label="置顶">置顶</span>{{- end }}
             {{- .Title }}
+            </span>
             {{- if .Draft }}
             <span class="entry-hint" title="Draft">
               <svg xmlns="http://www.w3.org/2000/svg" height="20" viewBox="0 -960 960 960" fill="currentColor">
