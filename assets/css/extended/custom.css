@@ -3858,3 +3858,18 @@ a.sidebar-tag-nav__flat:hover {
 [data-moments-gate-root].moments-toc-empty .toc-mobile-toggle {
     display: none !important;
 }
+
+/* ========== 文章置顶标记 ========== */
+.pinned-badge {
+    display: inline-block;
+    margin-right: 0.5rem;
+    padding: 0.1rem 0.5rem;
+    font-size: 0.72rem;
+    font-weight: 600;
+    line-height: 1.5;
+    color: #fff;
+    background: var(--accent, #2563eb);
+    border-radius: 6px;
+    vertical-align: middle;
+    letter-spacing: 0.03em;
+}

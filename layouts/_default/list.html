@@ -45,6 +45,13 @@
       {{- $pages = where site.RegularPages "Type" "in" site.Params.mainSections }}
       {{- $pages = where $pages "Params.hiddenInHomeList" "!=" "true" }}
     {{- end }}
+    {{- /* 文章置顶：front matter 中 pinned: true 的文章按发布时间倒序排在主页最前；未设置或为 false 保持原顺序 */ -}}
+    {{- if .IsHome }}
+      {{- $pinnedPages := where $pages "Params.pinned" true }}
+      {{- $normalPages := where $pages "Params.pinned" "!=" true }}
+      {{- $pinnedPages = $pinnedPages.ByDate.Reverse }}
+      {{- $pages = $pinnedPages | append $normalPages }}
+    {{- end }}
     {{- $paginator := .Paginate $pages }}
 
     {{- $term := .Data.Term }}
@@ -56,6 +63,7 @@
         {{- partial "cover.html" (dict "cxt" . "IsSingle" false "isHidden" $isHidden) }}
         <header class="entry-header">
           <h2 class="entry-hint-parent">
+            {{- if .Params.pinned }}<span class="pinned-badge" title="置顶文章" aria-label="置顶">置顶</span>{{- end }}
             {{- .Title }}
             {{- if .Draft }}
             <span class="entry-hint" title="Draft">
