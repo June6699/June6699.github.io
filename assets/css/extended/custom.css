@@ -930,7 +930,7 @@ a.sidebar-tag-nav__flat:hover {
     background: var(--entry);
     border: 1px solid var(--border);
     border-radius: var(--radius-sm);
-    font-size: 0.8rem;
+    font-size: 0.88rem;
     box-shadow: var(--shadow-md);
 }
 
@@ -955,9 +955,9 @@ a.sidebar-tag-nav__flat:hover {
 }
 
 .toc-sidebar .toc .inner ul {
-    padding-left: 0.3rem;
-    margin-left: 0.2rem;
-    border-left: 1px dashed color-mix(in srgb, var(--border) 68%, transparent 32%);
+    padding-left: 0.55rem;
+    margin-left: 0.15rem;
+    border-left: 1px solid color-mix(in srgb, var(--border) 45%, transparent 55%);
 }
 
 .toc-sidebar .toc .inner a {
@@ -966,18 +966,31 @@ a.sidebar-tag-nav__flat:hover {
     overflow: hidden;
     text-overflow: ellipsis;
     color: var(--secondary);
-    padding: 0.2em 0;
-    line-height: 1.35;
+    padding: 0.32em 0.45rem;
+    margin: 0.08rem 0;
+    line-height: 1.4;
+    border-radius: 0 6px 6px 0;
+    border-left: 2px solid transparent;
+    transition: color .15s ease, background-color .15s ease, border-color .15s ease;
 }
 
 .toc-sidebar .toc .inner a:hover {
     color: var(--primary);
+    background: color-mix(in srgb, var(--accent) 6%, transparent 94%);
 }
 
-/* 当前阅读位置高亮（由 JS scroll spy 设置 .active） */
+/* 层级区分：一级标题更粗更深 */
+.toc-sidebar .toc .inner > ul > li > a {
+    font-weight: 600;
+    color: var(--primary);
+}
+
+/* 当前阅读位置高亮：左侧色条 + 浅色背景块 */
 .toc-sidebar .toc .inner a.active {
     color: var(--primary);
     font-weight: 600;
+    background: color-mix(in srgb, var(--accent) 10%, transparent 90%);
+    border-left-color: var(--accent);
 }
 
 @media (max-width: 920px) {
