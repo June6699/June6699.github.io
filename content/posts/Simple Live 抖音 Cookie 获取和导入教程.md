@@ -12,6 +12,8 @@ pinned: true
 
 ## 一、前言
 
+本文教程供 [June6699/dart_simple_live](https://github.com/June6699/dart_simple_live) 及其其他类似项目使用，可以让他拥有抖音平台、快手平台的更多功能，如搜索、弹幕以及更高的并发上限。
+
 Simple Live 里抖音和快手都可以配置 Cookie，但两家的用途和表现不完全一样。
 
 - 如果对`F12`开发者工具有一些了解，请直接看第三节（抖音）、第四节（快手）。
@@ -50,13 +52,7 @@ cookie: key1=value1; key2=value2; key3=value3
 
 ### 3.1 不要只复制 ttwid
 
-很多人第一次会去浏览器 Cookie 列表里找 `ttwid`，然后只复制这一项。
-
-这通常不够。
-
-`ttwid` 更像一个设备 / 访客标识，它对播放有帮助，但它不一定代表“你已经登录”。搜索主播、房间名时，接口更关心完整的登录 Cookie，里面可能还会有 `sid_guard`、`sessionid`、`passport_csrf_token`、`msToken` 等一批字段。
-
-所以这篇教程里说的抖音 Cookie，默认都指“完整 Cookie”，也就是一整串字段。
+这篇教程里说的抖音 Cookie，默认都指“完整 Cookie”，也就是一整串字段。
 
 你要复制的是这种：
 
