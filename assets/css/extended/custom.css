@@ -13,10 +13,10 @@
     --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.06);
     --shadow-md: 0 8px 24px rgba(15, 23, 42, 0.08);
     /* 略增主栏宽度，文章页正文与右侧目录之间更饱满 */
-    --nav-width: 1240px;
-    --content-column-max: 820px;
+    --nav-width: 1280px;
+    --content-column-max: 860px;
     --list-sidebar-width: 280px;
-    --toc-sidebar-width: 218px;
+    --toc-sidebar-width: 232px;
     --list-sidebar-gap: 1rem;
     --single-sidebar-gap: 1rem;
     --as-inline-code: #c7254e;
@@ -962,9 +962,7 @@ a.sidebar-tag-nav__flat:hover {
 
 .toc-sidebar .toc .inner a {
     display: block;
-    white-space: nowrap;
     overflow: hidden;
-    text-overflow: ellipsis;
     color: var(--secondary);
     padding: 0.32em 0.45rem;
     margin: 0.08rem 0;
