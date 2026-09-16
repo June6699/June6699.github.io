@@ -6,7 +6,7 @@ languageCode = "zh-cn"
 defaultContentLanguage = "zh"
 defaultContentLanguageInSubdir = false
 hasCJKLanguage = true
-title = "June's Blog"
+title = "June6699's Blog"
 theme = "PaperMod"
 googleAnalytics = "G-S7DXV0QV58"
 
@@ -47,7 +47,7 @@ ignoreLogs = ["warning-goldmark-raw-html"]
   comments = true
   ba_track_id = "6a0eceeee843ef6235b91843cc1a936e"
   homeHeroImage = "/images/header_img/header.jpg"
-  homeHeroTitle = "June's Blog"
+  homeHeroTitle = "June6699's Blog"
   homeHeroSubtitle = "Who Changes? Who Benefits!"
   sidebarAboutTitle = "关于我"
   sidebarAboutText = "徐子昂 · 研究生 · 生信/前端/杂记"

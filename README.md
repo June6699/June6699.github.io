@@ -1,4 +1,4 @@
-# June's Blog (Hugo + PaperMod)
+# June6699's Blog (Hugo + PaperMod)
 
 由 Jekyll 迁移而来，使用 [Hugo](https://gohugo.io/) + [PaperMod](https://github.com/adityatelange/hugo-PaperMod) 主题。
 
