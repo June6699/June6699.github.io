@@ -16,7 +16,7 @@ tags:
 
 scHi-C（single-cell High-throughput Chromosome Conformation Capture）是**单细胞水平**的染色质三维空间互作捕获技术，核心目标是解析单个细胞内染色质的**多位点同时互作（Chromatin Hub）**。
 其实验核心原理：通过甲醛交联固定染色质天然空间构象，限制性内切酶切割基因组DNA，对**空间邻近的不同染色质区段**进行生物素标记与连接，形成跨多个基因组位点的**嵌合DNA片段**；利用高通量双端测序读取嵌合片段序列，通过生物信息学比对定位片段对应的基因组坐标，最终还原染色质的真实空间接触关系。
-区别于群体细胞Hi-C，scHi-C 高度依赖**嵌合read（chimeric read**）的捕获与分析，这是识别单细胞多位点互作的核心数据特征。
+区别于群体细胞Hi-C，scHi-C 高度依赖<strong>嵌合read（chimeric read）</strong>的捕获与分析，这是识别单细胞多位点互作的核心数据特征。
 
 ---
 
