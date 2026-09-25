@@ -991,6 +991,107 @@ a.sidebar-tag-nav__flat:hover {
     border-left-color: var(--accent);
 }
 
+/* ===== TOC 折叠/展开：含子级标题的条目带旋转箭头，子树高度用 grid-template-rows 0fr/1fr 过渡 ===== */
+.toc-sidebar .toc .inner li {
+    position: relative;
+}
+
+/* 有子级的条目给右侧箭头留位 */
+.toc-sidebar .toc .inner li.toc-has-children > a {
+    padding-right: 1.7rem;
+}
+
+.toc-sidebar .toc .inner .toc-toggle {
+    position: absolute;
+    top: 0.28em;
+    right: 0.2rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.4rem;
+    height: 1.4rem;
+    padding: 0;
+    border: 0;
+    border-radius: 999px;
+    background: transparent;
+    color: var(--secondary);
+    opacity: 0.5;
+    cursor: pointer;
+    transition: opacity 0.15s ease, background-color 0.15s ease, color 0.15s ease;
+}
+
+.toc-sidebar .toc .inner .toc-toggle:hover {
+    opacity: 1;
+    color: var(--accent);
+    background: color-mix(in srgb, var(--accent) 10%, transparent 90%);
+}
+
+.toc-sidebar .toc .inner .toc-toggle svg {
+    width: 0.72rem;
+    height: 0.72rem;
+    transition: transform 0.24s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.toc-sidebar .toc .inner li.toc-collapsed > .toc-toggle svg {
+    transform: rotate(-90deg);
+}
+
+/* 子树展开/收起动画 */
+.toc-sidebar .toc .inner li.toc-has-children > .toc-branch {
+    display: grid;
+    grid-template-rows: 1fr;
+    transition: grid-template-rows 0.26s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.toc-sidebar .toc .inner li.toc-collapsed > .toc-branch {
+    grid-template-rows: 0fr;
+}
+
+.toc-sidebar .toc .inner li.toc-has-children > .toc-branch > ul {
+    min-height: 0;
+    overflow: hidden;
+}
+
+/* 底部工具栏：展开全部 / 收起全部 */
+.toc-toolbar {
+    display: flex;
+    justify-content: flex-end;
+    margin: 0.45rem 0.4rem 0.1rem;
+    padding-top: 0.5rem;
+    border-top: 1px solid color-mix(in srgb, var(--border) 60%, transparent 40%);
+}
+
+.toc-toolbar__btn {
+    border: 0;
+    background: transparent;
+    color: var(--secondary);
+    font-size: 0.74rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    padding: 0.26rem 0.6rem;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: color 0.15s ease, background-color 0.15s ease;
+}
+
+.toc-toolbar__btn:hover {
+    color: var(--accent);
+    background: color-mix(in srgb, var(--accent) 9%, transparent 91%);
+}
+
+@media (max-width: 920px) {
+    .toc-toolbar {
+        margin: 0.4rem 0.95rem 0.75rem;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .toc-sidebar .toc .inner li.toc-has-children > .toc-branch,
+    .toc-sidebar .toc .inner .toc-toggle svg {
+        transition: none;
+    }
+}
+
 @media (max-width: 920px) {
     .page-with-sidebar {
         display: block;
