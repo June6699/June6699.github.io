@@ -1,5 +1,5 @@
 ---
-title:      Simple Live 抖音/快手 Cookie 获取和导入教程
+title:      Simple Live 抖音/快手/斗鱼 Cookie 获取和导入教程
 subtitle:   为什么不能只填 ttwid，以及怎么把完整 Cookie 从电脑带到手机和 TV
 date:       2026-06-01
 author:     June
