@@ -301,7 +301,7 @@ Simple Live 会尽量从你粘贴的内容里提取 Cookie。
 
 我们到`网络`——`Fetch/XHR`——`左侧找到房间号`——`里面就有一个Cookie的标头`——`复制下来，导入到SimpleLive`，如图去做。
 
-![image-20260925141611128](./images/Simple Live 抖音 Cookie 获取和导入教程/image-20260925141611128.png)
+![image-20260925141611128](<./images/Simple Live 抖音 Cookie 获取和导入教程/image-20260925141611128.png>)
 
 ## 六、如果浏览器显示成两行
 

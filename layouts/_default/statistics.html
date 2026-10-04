@@ -194,6 +194,78 @@
   {{- $oldestMoment := $moments.ByDate | first 1 }}
   {{- $newestMoment := $moments.ByDate.Reverse | first 1 }}
 
+  {{- /* ===== 阅读量（VerCount）：data/pv_stats.json 由 scripts/fetch_pv.mjs 抓取，
+        data/pv_base.json 可选设起始基数（数字或 {base, from, to}），from/to 用于日期分布均摊 ===== */ -}}
+  {{- $pvCounts := dict -}}
+  {{- $pvFetchedAt := "" -}}
+  {{- with site.Data.pv_stats -}}
+    {{- with .counts }}{{ $pvCounts = . }}{{ end -}}
+    {{- $pvFetchedAt = .fetched_at | default "" -}}
+  {{- end -}}
+  {{- $pvBaseMap := site.Data.pv_base | default dict -}}
+  {{- $pvSince := site.Params.pvSince | default "2026-10-04" -}}
+  {{- $pvItems := slice -}}
+  {{- range $posts }}
+    {{- $live := index $pvCounts .RelPermalink | default 0 -}}
+    {{- $base := 0 -}}{{- $bFrom := "" -}}{{- $bTo := "" -}}
+    {{- with index $pvBaseMap .RelPermalink -}}
+      {{- if reflect.IsMap . -}}
+        {{- $base = .base | default 0 -}}
+        {{- $bFrom = .from | default "" -}}
+        {{- $bTo = .to | default "" -}}
+      {{- else -}}
+        {{- $base = . -}}
+      {{- end -}}
+    {{- end -}}
+    {{- /* 主标签归入规则与上方字数饼图一致：第一个有效一级标签，避免重复计数 */ -}}
+    {{- $pTag := "" -}}
+    {{- with .Params.tags }}
+      {{- range . }}
+        {{- if eq $pTag "" -}}
+          {{- $t := . | string -}}
+          {{- if in $excludeTerms $t -}}{{- continue -}}{{- end -}}
+          {{- $cand := index (split $t "/") 0 -}}
+          {{- if in $excludeTerms $cand -}}{{- continue -}}{{- end -}}
+          {{- $pTag = $cand -}}
+        {{- end -}}
+      {{- end }}
+    {{- end }}
+    {{- $pvItems = $pvItems | append (dict
+        "path" .RelPermalink
+        "title" .Title
+        "live" $live
+        "base" $base
+        "bFrom" $bFrom
+        "bTo" $bTo
+        "tag" $pTag
+        "total" (add $live $base)
+    ) -}}
+  {{- end }}
+  {{- $pvTotal := 0 -}}
+  {{- range $pvItems }}{{- $pvTotal = add $pvTotal .total -}}{{- end }}
+  {{- $pvTop := sort $pvItems "total" "desc" -}}
+  {{- $pvMax := 0 -}}
+  {{- with index $pvTop 0 }}{{ $pvMax = .total }}{{ end -}}
+  {{- $pvTagSum := newScratch }}
+  {{- $pvTagNames := slice -}}
+  {{- range $item := $pvItems }}
+    {{- with $item.tag }}
+      {{- if not (in $pvTagNames .) }}{{ $pvTagNames = $pvTagNames | append . }}{{ end -}}
+      {{- $pvTagSum.Add . (add ($pvTagSum.Get . | default 0) $item.total) -}}
+    {{- end }}
+  {{- end }}
+  {{- $pvTagRows := slice -}}
+  {{- range $i, $name := $pvTagNames }}
+    {{- $pvTagRows = $pvTagRows | append (dict
+        "name" $name
+        "total" ($pvTagSum.Get $name | default 0)
+        "color" (index $palette (mod $i (len $palette)))
+    ) -}}
+  {{- end }}
+  {{- $pvTagRows = sort $pvTagRows "total" "desc" -}}
+  {{- $pvTagMax := 0 -}}
+  {{- with index $pvTagRows 0 }}{{ $pvTagMax = .total }}{{ end -}}
+
   <section class="stat-category">
     <header class="stat-category__header">
       <p class="stat-category__eyebrow">Posts</p>
@@ -204,6 +276,10 @@
       <div class="stat-card">
         <span class="stat-number">{{ $total }}</span>
         <span class="stat-label">文章总数</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-number" data-pv-countup="{{ $pvTotal }}">{{ $pvTotal }}</span>
+        <span class="stat-label">总阅读量</span>
       </div>
       <div class="stat-card">
         <span class="stat-number">{{ len $publicTags }}</span>
@@ -283,6 +359,53 @@
       </div>
     </section>
     {{- end }}
+
+    {{- if gt (len $pvTop) 0 }}
+    <section class="stat-section stat-pv">
+      <h3>阅读量 Top 10</h3>
+      <ol class="stat-pv-rank">
+        {{- range $i, $p := first 10 $pvTop }}
+        {{- $w := 0.0 -}}
+        {{- if gt $pvMax 0 }}{{- $w = mul (div (float $p.total) (float $pvMax)) 100.0 -}}{{- end -}}
+        <li class="stat-pv-rank__item{{ if lt $i 3 }} is-top{{ end }}">
+          <span class="stat-pv-rank__no">{{ add $i 1 }}</span>
+          <div class="stat-pv-rank__main">
+            <a class="stat-pv-rank__link" href="{{ $p.path }}" title="{{ $p.title }}">{{ $p.title }}</a>
+            <span class="stat-pv-rank__track"><span class="stat-pv-rank__bar" style="--pv-w: {{ printf "%.2f" $w }}%"></span></span>
+          </div>
+          <span class="stat-pv-rank__val">{{ $p.total }}</span>
+        </li>
+        {{- end }}
+      </ol>
+      <p class="stat-pie-note">阅读量 = VerCount 实时计数 + 起始基数（见 data/pv_base.json），基数为迁移前不蒜子的大致读数。</p>
+    </section>
+    {{- end }}
+
+    {{- if gt (len $pvTagRows) 0 }}
+    <section class="stat-section stat-pv">
+      <h3>标签阅读量 Top 10</h3>
+      <ol class="stat-pv-rank stat-pv-rank--tags">
+        {{- range $t := first 10 $pvTagRows }}
+        {{- $w := 0.0 -}}
+        {{- if gt $pvTagMax 0 }}{{- $w = mul (div (float $t.total) (float $pvTagMax)) 100.0 -}}{{- end -}}
+        <li class="stat-pv-rank__item">
+          <span class="stat-pv-tag-name" style="--pv-c: {{ $t.color }}"><i aria-hidden="true"></i>{{ $t.name }}</span>
+          <span class="stat-pv-rank__track"><span class="stat-pv-rank__bar" style="--pv-w: {{ printf "%.2f" $w }}%; background: {{ $t.color }}"></span></span>
+          <span class="stat-pv-rank__val">{{ $t.total }}</span>
+        </li>
+        {{- end }}
+      </ol>
+      <p class="stat-pie-note">与字数饼图同一归类规则：每篇只计入其第一个有效一级标签。</p>
+    </section>
+    {{- end }}
+
+    <section class="stat-section stat-pv">
+      <h3>阅读量日期分布</h3>
+      <div
+        class="stat-pv-daily"
+        data-pv-daily='{{ dict "since" $pvSince "fetchedAt" $pvFetchedAt "items" $pvItems | jsonify }}'></div>
+      <p class="stat-pie-note">历史基线按设定区间（如 09-25 ~ 10-04）逐日均摊；接入 VerCount 后的实时计数按抓取区间逐日均摊估算（VerCount 不提供逐日明细）。数据抓取：{{ with $pvFetchedAt }}{{ dateFormat "2006-01-02 15:04" . }} UTC{{ else }}尚未抓取{{ end }}，每日由 GitHub Actions 自动更新。</p>
+    </section>
 
     <section class="stat-section">
       <h3>热门标签</h3>
@@ -587,4 +710,144 @@
 })();
 </script>
 {{- end }}
+
+{{- /* 阅读量图表交互：滚动进入视口时条形图生长 + 数字滚动 + 按日分布渲染（含 tooltip） */ -}}
+<script>
+(function () {
+  var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  function countUp(el) {
+    var target = parseInt(el.getAttribute('data-pv-countup'), 10);
+    if (isNaN(target) || target <= 0) return;
+    if (reduceMotion) { el.textContent = String(target); return; }
+    var start = null, dur = 900;
+    el.textContent = '0';
+    function step(ts) {
+      if (!start) start = ts;
+      var p = Math.min((ts - start) / dur, 1);
+      p = 1 - Math.pow(1 - p, 3);
+      el.textContent = String(Math.round(target * p));
+      if (p < 1) requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+  }
+
+  var DAY = 86400000;
+  function parseDay(s) { var p = s.slice(0, 10).split('-'); return Date.UTC(+p[0], +p[1] - 1, +p[2]); }
+  function dayStr(ms) { return new Date(ms).toISOString().slice(0, 10); }
+
+  function renderDaily(el) {
+    var data;
+    try { data = JSON.parse(el.getAttribute('data-pv-daily') || '{}'); } catch (err) { return; }
+    var items = (data.items || []).map(function (it) {
+      return {
+        live: +it.live || 0,
+        base: +it.base || 0,
+        bFrom: it.bFrom ? parseDay(it.bFrom) : null,
+        bTo: it.bTo ? parseDay(it.bTo) : null,
+        bDays: 0
+      };
+    });
+    items.forEach(function (it) {
+      if (it.bFrom !== null) it.bDays = Math.round((it.bTo - it.bFrom) / DAY) + 1;
+    });
+
+    var today = parseDay(dayStr(Date.now()));
+    var since = parseDay(data.since || dayStr(today));
+    var fetched = data.fetchedAt ? parseDay(data.fetchedAt) : today;
+    var end = Math.max(fetched, today);
+    var start = since;
+    items.forEach(function (it) { if (it.bFrom !== null && it.bFrom < start) start = it.bFrom; });
+    if (end - start > 120 * DAY) start = end - 120 * DAY + DAY;
+    var nLive = Math.max(1, Math.round((fetched - since) / DAY) + 1);
+
+    var series = [];
+    for (var ms = start; ms <= end; ms += DAY) {
+      var baseV = 0, liveV = 0;
+      items.forEach(function (it) {
+        if (it.base > 0 && it.bFrom !== null && ms >= it.bFrom && ms <= it.bTo) baseV += it.base / it.bDays;
+        if (it.live > 0 && ms >= since && ms <= fetched) liveV += it.live / nLive;
+      });
+      series.push({ ms: ms, base: baseV, live: liveV, total: baseV + liveV });
+    }
+    var max = 0;
+    series.forEach(function (d) { if (d.total > max) max = d.total; });
+
+    var html = '<div class="stat-pv-daily__meta"><div class="stat-pv-daily__legend">'
+      + '<span><i class="stat-pv-daily__seg stat-pv-daily__seg--live" aria-hidden="true"></i>实时计数</span>'
+      + '<span><i class="stat-pv-daily__seg stat-pv-daily__seg--base" aria-hidden="true"></i>历史基线</span>'
+      + '</div><span>峰值 ' + Math.round(max) + '/天</span></div>'
+      + '<div class="stat-pv-daily__plot">';
+    if (!max) {
+      el.innerHTML = html + '</div><p class="stat-pv-empty">暂无阅读量数据，等待每日定时抓取。</p>';
+      el.classList.add('is-inview');
+      return;
+    }
+    var labelEvery = Math.max(1, Math.ceil(series.length / 10));
+    series.forEach(function (d, i) {
+      var h = Math.max(2, Math.round((d.total / max) * 100));
+      var baseH = d.total > 0 ? Math.max(0, Math.round((d.base / d.total) * 100)) : 0;
+      var label = (i % labelEvery === 0 || i === series.length - 1)
+        ? '<span class="stat-pv-daily__xlabel">' + dayStr(d.ms).slice(5).replace('-', '/') + '</span>'
+        : '';
+      html += '<div class="stat-pv-daily__col" data-i="' + i + '" style="transition-delay:' + Math.min(i * 18, 500) + 'ms">'
+        + '<div class="stat-pv-daily__bar" style="--h:' + h + '%">'
+        + '<span class="stat-pv-daily__seg stat-pv-daily__seg--base" style="height:' + baseH + '%"></span>'
+        + '<span class="stat-pv-daily__seg stat-pv-daily__seg--live" style="height:' + (100 - baseH) + '%"></span>'
+        + '</div>' + label + '</div>';
+    });
+    html += '</div><div class="stat-pv-daily__tooltip" hidden></div>';
+    el.innerHTML = html;
+
+    var tooltip = el.querySelector('.stat-pv-daily__tooltip');
+    var plot = el.querySelector('.stat-pv-daily__plot');
+    Array.prototype.forEach.call(el.querySelectorAll('.stat-pv-daily__col'), function (col) {
+      function show() {
+        var d = series[+col.getAttribute('data-i')];
+        tooltip.hidden = false;
+        tooltip.innerHTML = '<strong>' + dayStr(d.ms) + '</strong>'
+          + '<span>阅读 ≈ ' + Math.round(d.total) + '</span>'
+          + (d.base ? '<span>基线 ' + Math.round(d.base) + ' + 实时 ' + Math.round(d.live) + '</span>' : '');
+        var cr = col.getBoundingClientRect();
+        var er = el.getBoundingClientRect();
+        // 钳制在容器内，避免首尾柱子的 tooltip 在窄屏上撑出横向滚动
+        var leftPx = cr.left - er.left + cr.width / 2;
+        var half = tooltip.offsetWidth / 2 + 2;
+        leftPx = Math.max(half, Math.min(leftPx, el.clientWidth - half));
+        tooltip.style.left = leftPx + 'px';
+        tooltip.style.top = (cr.top - er.top - 8) + 'px';
+      }
+      col.addEventListener('mouseenter', show);
+      col.addEventListener('focus', show);
+      col.addEventListener('mouseleave', function () { tooltip.hidden = true; });
+      col.addEventListener('blur', function () { tooltip.hidden = true; });
+    });
+    plot && (plot.__pvSeries = series);
+    requestAnimationFrame(function () { el.classList.add('is-inview'); });
+  }
+
+  function onIntersect(entries) {
+    entries.forEach(function (en) {
+      if (!en.isIntersecting) return;
+      io.unobserve(en.target);
+      var t = en.target;
+      if (t.hasAttribute('data-pv-countup')) { countUp(t); return; }
+      t.classList.add('is-inview');
+      if (t.hasAttribute('data-pv-daily')) renderDaily(t);
+    });
+  }
+  var io = ('IntersectionObserver' in window) ? new IntersectionObserver(onIntersect, { threshold: 0.2 }) : null;
+
+  function activate(el) {
+    if (io) { io.observe(el); return; }
+    if (el.hasAttribute('data-pv-countup')) countUp(el);
+    else if (el.hasAttribute('data-pv-daily')) { renderDaily(el); el.classList.add('is-inview'); }
+    else el.classList.add('is-inview');
+  }
+  Array.prototype.forEach.call(
+    document.querySelectorAll('.stat-pv-rank, .stat-pv-daily, [data-pv-countup]'),
+    activate
+  );
+})();
+</script>
 {{- end }}

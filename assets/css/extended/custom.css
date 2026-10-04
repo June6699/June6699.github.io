@@ -3991,3 +3991,298 @@ a.sidebar-tag-nav__flat:hover {
     border-radius: 5px;
     letter-spacing: 0.02em;
 }
+
+/* ========== 统计页：阅读量图表（VerCount） ========== */
+.stat-pv-empty {
+    margin: 1.2rem 0 0;
+    color: var(--secondary);
+    font-size: 0.92rem;
+    text-align: center;
+}
+
+/* — Top 10 横向条形榜 — */
+.stat-pv-rank {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
+}
+
+.stat-pv-rank__item {
+    display: grid;
+    grid-template-columns: 2rem minmax(0, 1fr) 4.2rem;
+    gap: 0.7rem;
+    align-items: center;
+    padding: 0.42rem 0.6rem;
+    border-radius: 8px;
+    transition: background 0.18s ease, transform 0.18s ease;
+}
+
+.stat-pv-rank__item:hover,
+.stat-pv-rank__item:focus-within {
+    background: color-mix(in srgb, var(--entry) 90%, var(--accent) 10%);
+    transform: translateX(3px);
+}
+
+.stat-pv-rank__no {
+    color: var(--secondary);
+    font-size: 0.84rem;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+    text-align: center;
+}
+
+.stat-pv-rank__item.is-top .stat-pv-rank__no {
+    color: var(--accent);
+}
+
+.stat-pv-rank__main {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.28rem;
+}
+
+.stat-pv-rank__link {
+    color: var(--primary);
+    font-size: 0.94rem;
+    font-weight: 650;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.stat-pv-rank__track {
+    display: block;
+    height: 8px;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--secondary) 16%, transparent 84%);
+    overflow: hidden;
+}
+
+.stat-pv-rank__bar {
+    display: block;
+    height: 100%;
+    width: 0;
+    border-radius: inherit;
+    background: linear-gradient(90deg, color-mix(in srgb, var(--accent) 72%, #fff 28%), var(--accent));
+    transition: width 0.9s cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+.stat-pv-rank.is-inview .stat-pv-rank__bar {
+    width: var(--pv-w);
+}
+
+.stat-pv-rank__val {
+    color: var(--primary);
+    font-size: 0.95rem;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+    text-align: right;
+}
+
+/* — 标签阅读量：名称 + 单行进度条 — */
+.stat-pv-rank--tags .stat-pv-rank__item {
+    grid-template-columns: minmax(5.5rem, 7.5rem) minmax(0, 1fr) 3.6rem;
+}
+
+.stat-pv-tag-name {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    color: var(--primary);
+    font-size: 0.92rem;
+    font-weight: 650;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.stat-pv-tag-name i {
+    flex: none;
+    width: 0.62rem;
+    height: 0.62rem;
+    border-radius: 3px;
+    background: var(--pv-c, var(--accent));
+}
+
+.stat-pv-rank--tags .stat-pv-rank__track {
+    height: 10px;
+    margin: auto 0;
+}
+
+/* — 按日分布柱状图 — */
+.stat-pv-daily {
+    position: relative;
+    /* 容器渲染前为空：给最小高度，保证 IntersectionObserver(0.2) 能触发首屏渲染 */
+    min-height: 240px;
+}
+
+.stat-pv-daily__meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 0.55rem;
+    color: var(--secondary);
+    font-size: 0.85rem;
+}
+
+.stat-pv-daily__legend {
+    display: flex;
+    gap: 0.9rem;
+}
+
+.stat-pv-daily__legend span {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+}
+
+.stat-pv-daily__legend i {
+    width: 0.72rem;
+    height: 0.72rem;
+    border-radius: 3px;
+}
+
+.stat-pv-daily__plot {
+    position: relative;
+    display: flex;
+    align-items: flex-end;
+    gap: 3px;
+    height: 180px;
+    padding: 0.35rem 0.25rem 1.45rem;
+    border-bottom: 1px solid var(--border);
+    background: repeating-linear-gradient(
+        to top,
+        transparent 0,
+        transparent calc(33.333% - 1px),
+        color-mix(in srgb, var(--border) 55%, transparent 45%) calc(33.333% - 1px),
+        color-mix(in srgb, var(--border) 55%, transparent 45%) 33.333%
+    );
+    border-radius: 8px 8px 0 0;
+}
+
+.stat-pv-daily__col {
+    position: relative;
+    flex: 1 1 0;
+    min-width: 0;
+    height: 100%;
+    display: flex;
+    align-items: flex-end;
+    transition: background 0.15s ease;
+}
+
+.stat-pv-daily__col:hover,
+.stat-pv-daily__col:focus {
+    background: color-mix(in srgb, var(--accent) 7%, transparent 93%);
+}
+
+.stat-pv-daily__bar {
+    width: 100%;
+    max-width: 26px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    height: 0;
+    border-radius: 4px 4px 0 0;
+    overflow: hidden;
+    transition: height 0.7s cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+.stat-pv-daily.is-inview .stat-pv-daily__bar {
+    height: var(--h);
+}
+
+.stat-pv-daily__seg {
+    display: block;
+    width: 100%;
+}
+
+.stat-pv-daily__seg--live {
+    background: var(--accent);
+}
+
+.stat-pv-daily__seg--base {
+    background: color-mix(in srgb, var(--secondary) 42%, var(--accent) 22%);
+}
+
+.stat-pv-daily__col:hover .stat-pv-daily__bar {
+    outline: 1px solid color-mix(in srgb, var(--accent) 65%, transparent 35%);
+}
+
+.stat-pv-daily__xlabel {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0.3rem;
+    color: var(--secondary);
+    font-size: 0.62rem;
+    font-variant-numeric: tabular-nums;
+    text-align: center;
+    white-space: nowrap;
+    pointer-events: none;
+}
+
+.stat-pv-daily__tooltip {
+    position: absolute;
+    z-index: 3;
+    min-width: 148px;
+    padding: 0.6rem 0.75rem;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: color-mix(in srgb, var(--theme) 92%, var(--primary) 8%);
+    box-shadow: var(--shadow-md);
+    color: var(--primary);
+    font-size: 0.84rem;
+    line-height: 1.5;
+    pointer-events: none;
+    transform: translate(-50%, -100%);
+}
+
+.stat-pv-daily__tooltip strong {
+    display: block;
+    margin-bottom: 0.1rem;
+    color: var(--accent);
+}
+
+.stat-pv-daily__tooltip span {
+    display: block;
+    color: var(--secondary);
+    font-size: 0.8rem;
+    font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 640px) {
+    .stat-pv-rank__item {
+        grid-template-columns: 1.5rem minmax(0, 1fr) 3.2rem;
+        gap: 0.45rem;
+    }
+
+    .stat-pv-rank--tags .stat-pv-rank__item {
+        grid-template-columns: minmax(4.6rem, 6rem) minmax(0, 1fr) 2.8rem;
+    }
+
+    .stat-pv-daily__plot {
+        gap: 2px;
+        height: 150px;
+    }
+
+    .stat-pv-daily__xlabel {
+        font-size: 0.56rem;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .stat-pv-rank__bar,
+    .stat-pv-daily__bar {
+        transition: none;
+    }
+
+    .stat-pv-rank__item {
+        transform: none;
+        transition: none;
+    }
+}

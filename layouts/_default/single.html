@@ -110,22 +110,36 @@
 </div>
 {{- end }}
 
-{{- /* 不蒜子阅读量（PV）：仅 posts 正式文章加载；按页面 URL 自动计数，新文章无需任何配置 */ -}}
+{{- /* 阅读量（PV）：VerCount（不蒜子替代，元素 ID 兼容），仅 posts 正文加载，按页面 URL 自动计数。
+     data/pv_base.json 可给单篇文章设起始基数（数字或 {base, from, to}），显示值 = 实时计数 + 基数；
+     from/to 同时用于统计页「阅读量日期分布」把基线均摊到指定日期区间 */ -}}
+{{- $pvBase := 0 -}}
+{{- with site.Data.pv_base -}}
+  {{- with index . $.RelPermalink -}}
+    {{- if reflect.IsMap . -}}{{- $pvBase = .base | default 0 -}}{{- else -}}{{- $pvBase = . -}}{{- end -}}
+  {{- end -}}
+{{- end -}}
 {{- if $isPost }}
-<script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<script defer src="https://events.vercount.one/js"></script>
 <script>
 (function () {
   var box = document.getElementById('busuanzi_container_page_pv');
   var val = document.getElementById('busuanzi_value_page_pv');
   if (!box || !val) return;
-  // 不蒜子成功填充数字后再显示；后端不可达时保持隐藏，不影响阅读
-  var tries = 0;
-  var timer = setInterval(function () {
-    tries++;
-    var n = (val.textContent || '').trim();
-    if (n) { box.removeAttribute('hidden'); clearInterval(timer); }
-    else if (tries > 24) { clearInterval(timer); } // 最多等 12 秒
-  }, 500);
+  var base = {{ $pvBase }};
+  // VerCount 填充原始数字后显示（显示值加起始基数）；后端不可达时保持隐藏，不影响阅读。
+  // 用 MutationObserver 持续归一化：防止客户端先用 localStorage 缓存值、后用服务器值回填时覆盖掉基数
+  function normalize() {
+    var t = (val.textContent || '').trim();
+    if (!t) return;
+    var num = parseInt(t, 10);
+    if (isNaN(num)) return;
+    var shown = base > 0 ? num + base : num;
+    if (t !== String(shown)) val.textContent = String(shown);
+    if (box.hidden) box.hidden = false;
+  }
+  normalize();
+  new MutationObserver(normalize).observe(val, { childList: true, characterData: true, subtree: true });
 })();
 </script>
 {{- end }}

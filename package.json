@@ -4,6 +4,7 @@
   "scripts": {
     "test": "node scripts/site_tasks.mjs test",
     "build": "node scripts/site_tasks.mjs build",
+    "fetch-pv": "node scripts/fetch_pv.mjs",
     "deploy": "wrangler deploy"
   },
   "devDependencies": {

@@ -2,11 +2,19 @@
 /public/
 /resources/_gen/
 /public_check/
+.hugo_build.lock
 
 # 由 scripts/sync_images.py 生成（唯一源：content/posts/images、content/moments 内图片）
 /static/images/**
 !/static/images/底特律·变包.png
 !/static/images/kara.png
+
+# Node（wrangler 等本地依赖）
+node_modules/
+
+# VerCount 阅读量抓取结果：CI 每次构建由 npm run fetch-pv 重新生成，无需提交。
+# 注意 data/pv_base.json 是起始基数配置（如 Simple Live 教程的 367），必须提交，别误加进来。
+/data/pv_stats.json
 
 # OS
 .DS_Store
