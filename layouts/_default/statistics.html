@@ -377,7 +377,7 @@
         </li>
         {{- end }}
       </ol>
-      <p class="stat-pie-note">阅读量 = VerCount 实时计数 + 起始基数（见 data/pv_base.json），基数为迁移前不蒜子的大致读数。</p>
+      <p class="stat-pie-note">阅读量为 VerCount 实时计数，自接入日（{{ $pvSince }}）起累计，此前的不蒜子历史读数未迁移。</p>
     </section>
     {{- end }}
 
@@ -404,7 +404,7 @@
       <div
         class="stat-pv-daily"
         data-pv-daily='{{ dict "since" $pvSince "fetchedAt" $pvFetchedAt "items" $pvItems | jsonify }}'></div>
-      <p class="stat-pie-note">历史基线按设定区间（如 09-25 ~ 10-04）逐日均摊；接入 VerCount 后的实时计数按抓取区间逐日均摊估算（VerCount 不提供逐日明细）。数据抓取：{{ with $pvFetchedAt }}{{ dateFormat "2006-01-02 15:04" . }} UTC{{ else }}尚未抓取{{ end }}，每日由 GitHub Actions 自动更新。</p>
+      <p class="stat-pie-note">每日数值为估算：接入以来的阅读量按抓取区间逐日均摊（VerCount 不提供逐日明细）。数据抓取：{{ with $pvFetchedAt }}{{ dateFormat "2006-01-02 15:04" . }} UTC{{ else }}尚未抓取{{ end }}，每日由 GitHub Actions 自动更新。</p>
     </section>
 
     <section class="stat-section">
@@ -773,9 +773,10 @@
     var max = 0;
     series.forEach(function (d) { if (d.total > max) max = d.total; });
 
+    var hasBase = items.some(function (it) { return it.base > 0; });
     var html = '<div class="stat-pv-daily__meta"><div class="stat-pv-daily__legend">'
       + '<span><i class="stat-pv-daily__seg stat-pv-daily__seg--live" aria-hidden="true"></i>实时计数</span>'
-      + '<span><i class="stat-pv-daily__seg stat-pv-daily__seg--base" aria-hidden="true"></i>历史基线</span>'
+      + (hasBase ? '<span><i class="stat-pv-daily__seg stat-pv-daily__seg--base" aria-hidden="true"></i>历史基线</span>' : '')
       + '</div><span>峰值 ' + Math.round(max) + '/天</span></div>'
       + '<div class="stat-pv-daily__plot">';
     if (!max) {
