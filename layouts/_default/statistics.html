@@ -6,6 +6,27 @@
   {{- end }}
 </header>
 
+{{- /* 页内章节导航：吸顶胶囊栏，指示胶囊在章节间磁性滑动，底部细线显示阅读进度；点击自绘缓动滚动 */ -}}
+<nav class="stat-nav" aria-label="统计页章节导航">
+  <div class="stat-nav__scroller">
+    <a class="stat-nav__chip" href="#stat-overview">文章总览</a>
+    <a class="stat-nav__chip" href="#stat-chars">字数分布</a>
+    <a class="stat-nav__chip" href="#stat-rank">阅读榜</a>
+    <a class="stat-nav__chip" href="#stat-daily">日期分布</a>
+    <a class="stat-nav__chip" href="#stat-tags">热门标签</a>
+    <a class="stat-nav__chip" href="#stat-latest">最新文章</a>
+    <a class="stat-nav__chip" href="#stat-archives">文章归档</a>
+    <span class="stat-nav__divider" aria-hidden="true"></span>
+    <a class="stat-nav__chip" href="#stat-moments">动态总览</a>
+    <a class="stat-nav__chip" href="#stat-moment-chars">动态字数分布</a>
+    <a class="stat-nav__chip" href="#stat-moment-tags">动态标签</a>
+    <a class="stat-nav__chip" href="#stat-moment-latest">最新动态</a>
+    <a class="stat-nav__chip" href="#stat-moment-archives">动态归档</a>
+    <span class="stat-nav__indicator" aria-hidden="true"></span>
+  </div>
+  <span class="stat-nav__progress" aria-hidden="true"></span>
+</nav>
+
 <div class="statistics-page">
   {{- $posts := where site.RegularPages "Section" "posts" }}
   {{- $posts = where $posts "Draft" false }}
@@ -272,7 +293,7 @@
       <h2>文章统计</h2>
     </header>
 
-    <section class="stat-cards">
+    <section class="stat-cards" id="stat-overview">
       <div class="stat-card">
         <span class="stat-number">{{ $total }}</span>
         <span class="stat-label">文章总数</span>
@@ -316,7 +337,7 @@
     </section>
 
     {{- if gt (len $topTagStats) 0 }}
-    <section class="stat-section">
+    <section class="stat-section" id="stat-chars">
       <h3>一级标签字数分布</h3>
       <div class="stat-pie-grid">
         <div class="stat-pie-card">
@@ -361,7 +382,7 @@
     {{- end }}
 
     {{- if gt (len $pvTop) 0 }}
-    <section class="stat-section stat-pv">
+    <section class="stat-section stat-pv" id="stat-rank">
       <h3>阅读量 Top 10</h3>
       <ol class="stat-pv-rank">
         {{- range $i, $p := first 10 $pvTop }}
@@ -399,7 +420,7 @@
     </section>
     {{- end }}
 
-    <section class="stat-section stat-pv">
+    <section class="stat-section stat-pv" id="stat-daily">
       <h3>阅读量日期分布</h3>
       <div
         class="stat-pv-daily"
@@ -407,7 +428,7 @@
       <p class="stat-pie-note">每日数值为估算：接入以来的阅读量按抓取区间逐日均摊（VerCount 不提供逐日明细）。数据抓取：{{ with $pvFetchedAt }}{{ dateFormat "2006-01-02 15:04" . }} UTC{{ else }}尚未抓取{{ end }}，每日由 GitHub Actions 自动更新。</p>
     </section>
 
-    <section class="stat-section">
+    <section class="stat-section" id="stat-tags">
       <h3>热门标签</h3>
       <ul class="terms-tags tag-cloud">
         {{- range first 20 (sort $publicTags "count" "desc") }}
@@ -416,7 +437,7 @@
       </ul>
     </section>
 
-    <section class="stat-section">
+    <section class="stat-section" id="stat-latest">
       <h3>最新文章</h3>
       <ul class="stat-posts-list">
         {{- range first 10 $posts.ByDate.Reverse }}
@@ -425,7 +446,7 @@
       </ul>
     </section>
 
-    <section class="stat-section">
+    <section class="stat-section" id="stat-archives">
       <h3>按年归档</h3>
       <ul class="stat-archives">
         {{- range $posts.GroupByDate "2006" }}
@@ -435,7 +456,7 @@
     </section>
   </section>
 
-  <section class="stat-category stat-category--moments">
+  <section class="stat-category stat-category--moments" id="stat-moments">
     <header class="stat-category__header">
       <p class="stat-category__eyebrow">Moments</p>
       <h2>动态统计</h2>
@@ -473,7 +494,7 @@
     </section>
 
     {{- if gt (len $momentTopTagStats) 0 }}
-    <section class="stat-section">
+    <section class="stat-section" id="stat-moment-chars">
       <h3>一级标签字数分布</h3>
       <div class="stat-pie-grid">
         <div class="stat-pie-card">
@@ -517,7 +538,7 @@
     </section>
     {{- end }}
 
-    <section class="stat-section">
+    <section class="stat-section" id="stat-moment-tags">
       <h3>热门标签</h3>
       <ul class="terms-tags tag-cloud">
         {{- range first 20 (sort $momentPublicTags "count" "desc") }}
@@ -526,7 +547,7 @@
       </ul>
     </section>
 
-    <section class="stat-section">
+    <section class="stat-section" id="stat-moment-latest">
       <h3>最新动态</h3>
       <ul class="stat-posts-list">
         {{- range first 10 $moments.ByDate.Reverse }}
@@ -535,7 +556,7 @@
       </ul>
     </section>
 
-    <section class="stat-section">
+    <section class="stat-section" id="stat-moment-archives">
       <h3>按年归档</h3>
       <ul class="stat-archives">
         {{- range $moments.GroupByDate "2006" }}
@@ -849,6 +870,85 @@
     document.querySelectorAll('.stat-pv-rank, .stat-pv-daily, [data-pv-countup]'),
     activate
   );
+})();
+
+{{- /* 页内章节导航：滚动监听高亮当前章节、指示胶囊磁性滑动、进度线、点击自绘缓动滚动（与全站锚点缓动同一手感） */ -}}
+(function () {
+  var nav = document.querySelector('.stat-nav');
+  if (!nav) return;
+  var scroller = nav.querySelector('.stat-nav__scroller');
+  var chips = Array.prototype.slice.call(nav.querySelectorAll('.stat-nav__chip'));
+  var indicator = nav.querySelector('.stat-nav__indicator');
+  var progress = nav.querySelector('.stat-nav__progress');
+  var targets = chips.map(function (c) { return document.querySelector(c.getAttribute('href')); });
+  var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var headerH = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--header-height')) || 60;
+  var current = -1;
+
+  function setActive(i, animate) {
+    chips.forEach(function (c, j) { c.classList.toggle('is-active', j === i); });
+    var chip = chips[i];
+    if (!chip || !indicator) return;
+    indicator.style.width = chip.offsetWidth + 'px';
+    indicator.style.transform = 'translateX(' + chip.offsetLeft + 'px)';
+    // 窄屏横向滚动时让激活 chip 始终可见
+    var sl = scroller.scrollLeft;
+    var left = chip.offsetLeft;
+    var right = left + chip.offsetWidth;
+    if (left < sl + 8 || right > sl + scroller.clientWidth - 8) {
+      scroller.scrollTo({
+        left: left - scroller.clientWidth / 2 + chip.offsetWidth / 2,
+        behavior: animate && !reduceMotion ? 'smooth' : 'auto'
+      });
+    }
+  }
+
+  function onScroll() {
+    var doc = document.documentElement;
+    var max = doc.scrollHeight - window.innerHeight;
+    if (progress) progress.style.width = (max > 0 ? (window.scrollY / max) * 100 : 0) + '%';
+    var line = window.scrollY + headerH + nav.offsetHeight + 28;
+    var active = 0;
+    for (var i = 0; i < targets.length; i++) {
+      var t = targets[i];
+      if (t && t.getBoundingClientRect().top + window.scrollY <= line) active = i;
+    }
+    if (window.scrollY + window.innerHeight >= doc.scrollHeight - 4) active = targets.length - 1;
+    if (active !== current) { current = active; setActive(active, true); }
+  }
+
+  var ticking = false;
+  window.addEventListener('scroll', function () {
+    if (ticking) return;
+    ticking = true;
+    requestAnimationFrame(function () { ticking = false; onScroll(); });
+  }, { passive: true });
+  window.addEventListener('resize', function () { setActive(Math.max(current, 0), false); onScroll(); });
+
+  chips.forEach(function (chip, i) {
+    chip.addEventListener('click', function (e) {
+      var t = targets[i];
+      if (!t) return;
+      e.preventDefault();
+      e.stopPropagation();
+      var to = t.getBoundingClientRect().top + window.scrollY - headerH - nav.offsetHeight - 12;
+      if (reduceMotion) { window.scrollTo(0, to); return; }
+      var from = window.scrollY;
+      var dur = Math.min(850, 240 + Math.abs(to - from) * 0.32);
+      var start = null;
+      function ease(p) { return p < 0.5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2; }
+      function step(ts) {
+        if (start === null) start = ts;
+        var p = Math.min((ts - start) / dur, 1);
+        window.scrollTo(0, from + (to - from) * ease(p));
+        if (p < 1) requestAnimationFrame(step);
+      }
+      requestAnimationFrame(step);
+    });
+  });
+
+  setActive(0, false);
+  onScroll();
 })();
 </script>
 {{- end }}

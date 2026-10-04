@@ -4286,3 +4286,99 @@ a.sidebar-tag-nav__flat:hover {
         transition: none;
     }
 }
+
+/* ========== 统计页：页内章节导航（吸顶胶囊栏） ========== */
+/* 无 JS 时原生锚点跳转也留出吸顶头部+导航栏的空间 */
+.statistics-page [id^="stat-"] {
+    scroll-margin-top: calc(var(--header-height, 60px) + 64px);
+}
+
+.stat-nav {
+    position: sticky;
+    top: var(--header-height, 60px);
+    z-index: 90;
+    margin: 0 0 1.4rem;
+    border-bottom: 1px solid var(--border);
+    background: color-mix(in srgb, var(--theme) 86%, transparent 14%);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+
+.stat-nav__scroller {
+    position: relative;
+    display: flex;
+    gap: 0.25rem;
+    padding: 0.55rem 0.5rem;
+    overflow-x: auto;
+    scrollbar-width: none;
+}
+
+.stat-nav__scroller::-webkit-scrollbar {
+    display: none;
+}
+
+.stat-nav__divider {
+    flex: none;
+    align-self: center;
+    width: 1px;
+    height: 1.15rem;
+    margin: 0 0.3rem;
+    background: var(--border);
+}
+
+.stat-nav__chip {
+    position: relative;
+    z-index: 1;
+    flex: none;
+    padding: 0.42rem 0.95rem;
+    border-radius: 999px;
+    color: var(--secondary);
+    font-size: 0.9rem;
+    font-weight: 650;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: color 0.25s ease;
+}
+
+.stat-nav__chip:hover {
+    color: var(--primary);
+}
+
+.stat-nav__chip.is-active {
+    color: #fff;
+}
+
+.stat-nav__chip:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: -2px;
+}
+
+.stat-nav__indicator {
+    position: absolute;
+    top: 0.55rem;
+    left: 0;
+    height: calc(100% - 1.1rem);
+    width: 0;
+    border-radius: 999px;
+    background: var(--accent);
+    box-shadow: 0 4px 14px color-mix(in srgb, var(--accent) 42%, transparent 58%);
+    transition: transform 0.45s cubic-bezier(0.34, 1.3, 0.5, 1), width 0.45s cubic-bezier(0.34, 1.3, 0.5, 1);
+    will-change: transform, width;
+}
+
+.stat-nav__progress {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    height: 2px;
+    width: 0;
+    background: linear-gradient(90deg, var(--accent), color-mix(in srgb, var(--accent) 60%, #ec4899 40%));
+    transition: width 0.15s linear;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .stat-nav__indicator,
+    .stat-nav__progress {
+        transition: none;
+    }
+}
