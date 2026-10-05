@@ -104,7 +104,8 @@ echo   Hugo server starting on:
 echo   %HUGO_BASEURL%
 echo.
 echo Press Ctrl+C to stop the server.
-start "" cmd /c "timeout /t 2 /nobreak >nul && start "" "%HUGO_BASEURL%""
+REM Open the browser only once Hugo's port actually answers (poll up to 2 min), not on a fixed timer.
+start "" /b powershell -NoProfile -Command "$u='%HUGO_BASEURL%';for($i=0;$i -lt 240;$i++){try{$c=New-Object Net.Sockets.TcpClient;$c.Connect('127.0.0.1',%HUGO_SERVER_PORT%);$c.Close();Start-Process $u;exit}catch{if($i -gt 20 -and -not(Get-Process hugo -ErrorAction SilentlyContinue)){exit};Start-Sleep -Milliseconds 500}}"
 "%HUGO_EXE%" server -D --buildFuture --baseURL "%HUGO_BASEURL%" --appendPort=false --disableFastRender --port %HUGO_SERVER_PORT%
 if errorlevel 1 (
   echo [ERROR] Hugo failed to start. See messages above.
