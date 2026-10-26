@@ -2,7 +2,7 @@
 title:      Simple Live 关闭窗口弹出 Unknown Hard Error：一次搜狗输入法引出的排查
 subtitle:   从一条只有 8 秒的日志，到事件查看器里的 SogouPY.ime，再顺手修好中文输入法下的快捷键
 date:       2026-10-26
-author:     Claude
+author:     Claude & June
 tags:
     - 技术
     - 技术/Flutter
@@ -12,13 +12,14 @@ tags:
 
 阅读说明：本文按排查顺序记录。前半部分讲关闭窗口时的系统错误弹窗，后半部分讲排查中顺带发现的另一个问题：桌面端快捷键在中文输入法下不能用。两个问题都和输入法有关，但原因并不相同。
 
-## 一、问题现场
+## 一、问题展示
 
 [Simple Live](https://github.com/June6699/dart_simple_live) 的 Windows 版收到一条反馈：每次关闭窗口都会弹出一个系统错误框，标题是 "unknown hard error"。卸载重装、更新到最新的 1.13.2 都没有用。
 
+该问题，曾在两个issue中均出现，[Issue 151](https://github.com/June6699/dart_simple_live/issues/151)、[Issue 59](https://github.com/June6699/dart_simple_live/issues/59)，在排查该问题的过程中，还发现了另一个搜狗输入法导致的应用程序错误，尽管没有弹窗。
+
 ![关闭窗口时弹出的 Unknown Hard Error 对话框](<./images/Simple Live 关闭窗口弹出 Unknown Hard Error-搜狗输入法与桌面快捷键/01-unknown-hard-error.png>)
 
-> 【图片占位】关闭窗口时弹出的 Unknown Hard Error 对话框截图
 
 用户附带的应用日志很短，去掉系统信息只剩一行：
 
@@ -63,9 +64,11 @@ Windows 的应用程序崩溃会记录到事件查看器的"应用程序"日志�
 2. 左侧选择"Windows 日志 → 应用程序"；
 3. 右侧"筛选当前日志"，事件 ID 填 `1000`。
 
-![在事件查看器中筛选事件 ID 1000](<./images/Simple Live 关闭窗口弹出 Unknown Hard Error-搜狗输入法与桌面快捷键/02-eventvwr-filter-1000.png>)
+![image-20261026151702188](./images/Simple Live 关闭窗口弹出 Unknown Hard Error-搜狗输入法与桌面快捷键/image-20261026151702188.png)
 
-> 【图片占位】事件查看器 → 筛选当前日志 → 事件 ID 填 1000 的界面截图
+![image-20261026151831261](./images/Simple Live 关闭窗口弹出 Unknown Hard Error-搜狗输入法与桌面快捷键/image-20261026151831261.png)
+
+![image-20261026151859453](./images/Simple Live 关闭窗口弹出 Unknown Hard Error-搜狗输入法与桌面快捷键/image-20261026151859453.png)
 
 项目作者 June 在自己的电脑上也复现了这个问题，筛出来的记录是这样的：
 
@@ -77,9 +80,7 @@ Windows 的应用程序崩溃会记录到事件查看器的"应用程序"日志�
 Faulting 模块路径： C:\WINDOWS\system32\SogouPY.ime
 ```
 
-![事件 1000 的详细信息，出错模块为 SogouPY.ime](<./images/Simple Live 关闭窗口弹出 Unknown Hard Error-搜狗输入法与桌面快捷键/03-event-1000-sogou.png>)
-
-> 【图片占位】事件 1000 的"常规"页详情截图，能看到出错模块 SogouPY.ime
+![image-20261026151927859](./images/Simple Live 关闭窗口弹出 Unknown Hard Error-搜狗输入法与桌面快捷键/image-20261026151927859.png)
 
 出错模块不是 `simple_live_app.exe`，不是 `flutter_windows.dll`，也不是 `libmpv-2.dll`，而是搜狗拼音输入法。`0xc0000005` 是访问冲突，偏移落在搜狗自己的代码里，说明是它的代码读写了无效地址。
 
@@ -151,9 +152,9 @@ Raymond Chen 在 [The Old New Thing](https://devblogs.microsoft.com/oldnewthing/
 
 ## 八、顺带发现：快捷键为什么要先切英文
 
-看到出错模块是输入法，June 的第一反应是：会不会是快捷键那段"禁用输入法"的代码搞出来的？June 平时在直播间用 F（全屏）、R（刷新）这些单键快捷键，一直都得先切回英文才行。
+看到出错模块是输入法，June 的第一反应是：会不会是快捷键那段"禁用输入法"的代码搞出来的？June 平时在直播间用 F（全屏）、R（刷新）这些单键快捷键，一直都得先切回英文才行。这个一直没有找到bug在哪里，为什么必须切换输入法才能用，因为之前逻辑已经临时禁用了输入法的。
 
-先说结论：崩溃和这段代码无关。上面那位用户启动 8 秒就关、没进过直播间，而快捷键捕获只在直播间里才会开启，禁用输入法的代码根本没执行过，照样崩了。
+结论：崩溃和这段代码无关。上面那位用户启动 8 秒就关、没进过直播间，而快捷键捕获只在直播间里才会开启，禁用输入法的代码根本没执行过，照样崩了。
 
 不过顺着这个怀疑去读代码，确实发现快捷键这一套从来没生效过。
 
@@ -226,11 +227,12 @@ macOS 和 Linux 的 runner 本来就是在系统输入法之前拦截的：macOS
 
 回头看，这次两个问题都是"代码看起来对，但作用在了错误的地方"：
 
+- 用户发布的 “Unknown hard error” 问题其实并没有完全修复，或者说不确定是否修复完毕。但是通过这个问题，修复了其他的几个老毛病，具体这个issue提到的问题，还要看用户反馈，尽管该问题并非所有问题都出现。
 - 应用日志在 Dart 层关闭流程的最后一步就停了，而崩溃发生在日志看不见的原生退出阶段。这种时候要直接去看事件查看器的事件 1000，不要盯着自己的日志猜；
 - 出错模块是第三方注入的 DLL 时，没法去改它，能做的是不给它出错的机会。`TerminateProcess` 跳过 DLL 卸载，前提是在它之前，自己的收尾已经全部完成；
 - 快捷键的代码挂在顶层窗口上，而焦点在子窗口上。写窗口相关的原生代码时，先确认消息到底发给了谁。
 
-修复已经包含在 Simple Live v1.13.3 里。
+修复已经包含在 Simple Live v1.13.3 里，目前作为 [pre release](https://github.com/June6699/dart_simple_live/releases/tag/v1.13.3-pre-1026) 发布。
 
 ## 参考
 
