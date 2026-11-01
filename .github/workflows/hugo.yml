@@ -97,6 +97,9 @@ jobs:
           path: ./public
 
       - name: Upload site artifact
+        # 仅服务器部署需要此产物；GitHub Pages 走下面的 github-pages artifact。
+        # 当前 DEPLOY_SERVER=false，跳过可省每次构建约 130MB 的存储积累。
+        if: needs.server-deploy-config.outputs.deploy_server == 'true'
         uses: actions/upload-artifact@v4
         with:
           name: site-public
