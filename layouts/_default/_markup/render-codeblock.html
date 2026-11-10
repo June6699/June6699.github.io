@@ -1,0 +1,27 @@
+{{- /* 围栏代码块渲染钩子：在高亮代码外包裹 .code-block，并加头部工具栏。
+       语言标签与按钮的具体配色/布局由 custom.css 控制，交互由 static/js/code-block.js 接管。
+       .Inner 经 transform.ToCodeBlock 交给 Chroma 做 class 模式高亮（与 hugo.toml 配置一致）。 */ -}}
+{{- $lang := .Type | default "text" -}}
+{{- $result := transform.HighlightCodeBlock . -}}
+<div class="code-block" data-lang="{{ $lang }}">
+  <div class="code-block__header">
+    <span class="code-block__lang">{{ if .Type }}{{ .Type }}{{ else }}TEXT{{ end }}</span>
+    <div class="code-block__actions">
+      <button type="button" class="code-block__btn" data-code-action="wrap" aria-pressed="false" title="自动换行">
+        <svg viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M2 4h12M2 8h8a2.5 2.5 0 0 1 0 5H8m0 0 2-2m-2 2-2-2" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span class="code-block__btn-text">换行</span>
+      </button>
+      <button type="button" class="code-block__btn" data-code-action="collapse" aria-expanded="true" title="折叠代码">
+        <svg viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M4 6l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span class="code-block__btn-text">折叠</span>
+      </button>
+      <button type="button" class="code-block__btn" data-code-action="copy" title="复制代码">
+        <svg viewBox="0 0 16 16" aria-hidden="true" focusable="false"><rect x="5.5" y="5.5" width="8" height="8" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M3.5 10.5H3a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1h6.5a1 1 0 0 1 1 1v.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        <span class="code-block__btn-text">复制</span>
+      </button>
+    </div>
+  </div>
+  <div class="code-block__body">
+{{ $result.Wrapped }}
+  </div>
+</div>
