@@ -64,11 +64,11 @@ Windows 的应用程序崩溃会记录到事件查看器的"应用程序"日志�
 2. 左侧选择"Windows 日志 → 应用程序"；
 3. 右侧"筛选当前日志"，事件 ID 填 `1000`。
 
-![image-20261026151702188](./images/Simple Live 关闭窗口弹出 Unknown Hard Error-搜狗输入法与桌面快捷键/image-20261026151702188.png)
+![image-20261026151702188](<./images/Simple Live 关闭窗口弹出 Unknown Hard Error-搜狗输入法与桌面快捷键/image-20261026151702188.png>)
 
-![image-20261026151831261](./images/Simple Live 关闭窗口弹出 Unknown Hard Error-搜狗输入法与桌面快捷键/image-20261026151831261.png)
+![image-20261026151831261](<./images/Simple Live 关闭窗口弹出 Unknown Hard Error-搜狗输入法与桌面快捷键/image-20261026151831261.png>)
 
-![image-20261026151859453](./images/Simple Live 关闭窗口弹出 Unknown Hard Error-搜狗输入法与桌面快捷键/image-20261026151859453.png)
+![image-20261026151859453](<./images/Simple Live 关闭窗口弹出 Unknown Hard Error-搜狗输入法与桌面快捷键/image-20261026151859453.png>)
 
 项目作者 June 在自己的电脑上也复现了这个问题，筛出来的记录是这样的：
 
@@ -80,7 +80,7 @@ Windows 的应用程序崩溃会记录到事件查看器的"应用程序"日志�
 Faulting 模块路径： C:\WINDOWS\system32\SogouPY.ime
 ```
 
-![image-20261026151927859](./images/Simple Live 关闭窗口弹出 Unknown Hard Error-搜狗输入法与桌面快捷键/image-20261026151927859.png)
+![image-20261026151927859](<./images/Simple Live 关闭窗口弹出 Unknown Hard Error-搜狗输入法与桌面快捷键/image-20261026151927859.png>)
 
 出错模块不是 `simple_live_app.exe`，不是 `flutter_windows.dll`，也不是 `libmpv-2.dll`，而是搜狗拼音输入法。`0xc0000005` 是访问冲突，偏移落在搜狗自己的代码里，说明是它的代码读写了无效地址。
 
