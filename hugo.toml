@@ -50,6 +50,15 @@ ignoreLogs = ["warning-goldmark-raw-html"]
   guessSyntax = false
   tabWidth = 4
 
+# 显式挂载 content，并排除 moments bundle 内的图片目录：
+# 这些图由 sync_images.py 复制到 /images/moments/ 供页面引用，
+# 排除后 Hugo 不再把它们作为页面资源重复发布到 /moments/images/（约省 16MB）。
+[module]
+  [[module.mounts]]
+    source = "content"
+    target = "content"
+    excludeFiles = "moments/images/**"
+
 [params]
   description = "Who Changes? Who Benefits!"
   author = "June"
