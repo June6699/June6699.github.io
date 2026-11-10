@@ -23,7 +23,7 @@ googleAnalytics = "G-S7DXV0QV58"
   [security.funcs]
     getenv = ['^HUGO_', '^CI$', '^GITALK_']
 
-# 排除：文章图目录、动态目录下的位图（仅作源文件，由 scripts/sync_images.py 复制到 static/images）
+# 排除：文章图目录、动态目录下的位图（这些是源文件，图片由下方 module mounts 直挂发布）
 [build]
   ignoreFiles = [
     "content/posts/images",
@@ -50,14 +50,30 @@ ignoreLogs = ["warning-goldmark-raw-html"]
   guessSyntax = false
   tabWidth = 4
 
-# 显式挂载 content，并排除 moments bundle 内的图片目录：
-# 这些图由 sync_images.py 复制到 /images/moments/ 供页面引用，
-# 排除后 Hugo 不再把它们作为页面资源重复发布到 /moments/images/（约省 16MB）。
+# 挂载配置：
+# 1) content 照常挂载，但排除 moments bundle 内图片，避免作为页面资源重复发布到 /moments/images/
+# 2) static 显式挂载（favicon、JS、两个特殊头像等），显式挂载后需保留默认 static
+# 3) 图片源目录直挂为静态 URL，无需再经 sync 脚本复制：
+#    content/posts/images/<x>  -> /images/<x>
+#    content/moments/images/<x> -> /images/moments/<x>
 [module]
   [[module.mounts]]
     source = "content"
     target = "content"
-    excludeFiles = "moments/images/**"
+    files = ["! moments/images/**"]
+
+  [[module.mounts]]
+    source = "static"
+    target = "static"
+
+  [[module.mounts]]
+    source = "content/posts/images"
+    target = "static/images"
+
+  [[module.mounts]]
+    source = "content/moments"
+    target = "static/images/moments"
+    files = ["images/**"]
 
 [params]
   description = "Who Changes? Who Benefits!"

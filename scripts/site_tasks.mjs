@@ -43,7 +43,6 @@ if (task === "test") {
   runPython(["-m", "unittest", "discover", "-s", "scripts/tests"]);
 } else if (task === "build") {
   runPython(["scripts/normalize_markdown_image_paths.py"]);
-  runPython(["scripts/sync_images.py"]);
   runPython(["scripts/sync_icons.py"]);
   run(hugoExecutable, ["--minify", "--buildFuture", "--cleanDestinationDir"]);
   runPython(["scripts/prepare_cloudflare_assets.py"]);

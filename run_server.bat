@@ -49,17 +49,10 @@ if not "%~1"=="" (
   )
 )
 
-echo Syncing images: content/posts/images + content/moments -^> static/images ...
+echo Normalizing markdown image paths ...
 "%PYTHON_EXE%" -X utf8 scripts\normalize_markdown_image_paths.py
 if errorlevel 1 (
   echo [ERROR] normalize_markdown_image_paths.py failed.
-  pause
-  exit /b 1
-)
-
-"%PYTHON_EXE%" -X utf8 scripts\sync_images.py
-if errorlevel 1 (
-  echo [ERROR] sync_images.py failed. Check Python and paths above.
   pause
   exit /b 1
 )
