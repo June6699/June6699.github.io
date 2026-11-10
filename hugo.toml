@@ -41,6 +41,15 @@ googleAnalytics = "G-S7DXV0QV58"
   unsafe = true
 ignoreLogs = ["warning-goldmark-raw-html"]
 
+# 代码高亮：使用 class 模式（.chroma .k/.s/.c 等），由主题自带的
+# css/includes/chroma-styles.css（Catppuccin Macchiato）统一着色，
+# 各语言按词法独立配色；默认 noClasses=true 会输出内联样式，主题 CSS 无法接管。
+[markup.highlight]
+  noClasses = false
+  codeFences = true
+  guessSyntax = false
+  tabWidth = 4
+
 [params]
   description = "Who Changes? Who Benefits!"
   author = "June"
