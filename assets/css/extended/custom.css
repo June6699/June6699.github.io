@@ -1743,61 +1743,124 @@ a.sidebar-tag-nav__flat:hover {
     background: var(--code-block-bg);
 }
 
-.post-content pre {
-    border-radius: 8px;
-    padding: 1rem;
+/* ========== 代码块：头部工具栏 + 语言标签 + 复制/换行/折叠（render-codeblock 钩子） ========== */
+.code-block {
+    position: relative;
+    margin: 1.2em 0;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    background: var(--code-block-bg);
 }
 
-/* ========== 代码块语言标签（Typora 风格）：R、Python、Bash ========== */
-.post-content .highlight {
-    position: relative;
-    border-radius: 8px;
+.code-block__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 6px 10px;
+    background: var(--code-bg);
+    border-bottom: 1px solid var(--border);
+}
+
+.code-block__lang {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--secondary);
+    user-select: none;
+    white-space: nowrap;
+}
+
+.code-block__actions {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.code-block__btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 7px;
+    font-size: 0.72rem;
+    line-height: 1;
+    color: var(--secondary);
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: color 0.15s ease, background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.code-block__btn svg {
+    width: 14px;
+    height: 14px;
+    flex: none;
+}
+
+.code-block__btn:hover {
+    color: var(--primary);
+    background: var(--theme);
+    border-color: var(--border);
+}
+
+.code-block__btn[aria-pressed="true"] {
+    color: var(--primary);
+    background: var(--theme);
+    border-color: var(--tertiary);
+}
+
+/* 折叠态：箭头翻转，按钮文案由 JS 切换 */
+.code-block__btn[data-code-action="collapse"] svg {
+    transition: transform 0.2s ease;
+}
+.code-block.is-collapsed .code-block__btn[data-code-action="collapse"] svg {
+    transform: rotate(180deg);
+}
+
+.code-block__body {
+    overflow: auto;
+    transition: max-height 0.25s ease;
+}
+
+.code-block.is-collapsed .code-block__body {
+    max-height: 0;
     overflow: hidden;
 }
-.post-content .highlight::before {
-    position: absolute;
-    top: 0;
-    right: 0;
-    padding: 0.2em 0.6em;
-    font-size: 0.75rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    border-radius: 0 8px 0 6px;
-    z-index: 1;
+
+/* 代码块内部去掉重复圆角/外边距，填充交给 chroma 行内边距 */
+.code-block .highlight,
+.code-block pre {
+    margin: 0;
+    border-radius: 0;
 }
-.post-content .highlight:has(code.language-r)::before {
-    content: "R";
-    background: #276dc2;
-    color: #fff;
+.code-block pre {
+    padding: 0.6rem 0;
 }
-.post-content .highlight:has(code.language-python)::before,
-.post-content .highlight:has(code.language-py)::before {
-    content: "Python";
-    background: #3581b8;
-    color: #fff;
+
+/* 自动换行：长行折行而非横向滚动 */
+.code-block.is-wrap .code-block__body {
+    overflow-x: hidden;
 }
-.post-content .highlight:has(code.language-bash)::before,
-.post-content .highlight:has(code.language-sh)::before,
-.post-content .highlight:has(code.language-shell)::before {
-    content: "Bash";
-    background: #4a5568;
-    color: #fff;
+.code-block.is-wrap pre,
+.code-block.is-wrap code,
+.code-block.is-wrap .line,
+.code-block.is-wrap .cl {
+    white-space: pre-wrap;
+    word-break: break-word;
 }
-:root[data-theme="dark"] .post-content .highlight:has(code.language-r)::before {
-    background: #63b3ed;
-    color: #1a202c;
+
+/* 复制成功反馈 */
+.code-block__btn.is-copied {
+    color: #1a7f37;
+    border-color: rgba(26, 127, 55, 0.35);
 }
-:root[data-theme="dark"] .post-content .highlight:has(code.language-python)::before,
-:root[data-theme="dark"] .post-content .highlight:has(code.language-py)::before {
-    background: #68d391;
-    color: #1a202c;
-}
-:root[data-theme="dark"] .post-content .highlight:has(code.language-bash)::before,
-:root[data-theme="dark"] .post-content .highlight:has(code.language-sh)::before,
-:root[data-theme="dark"] .post-content .highlight:has(code.language-shell)::before {
-    background: #718096;
-    color: #e2e8f0;
+:root[data-theme="dark"] .code-block__btn.is-copied {
+    color: #56d364;
+    border-color: rgba(86, 211, 100, 0.35);
 }
 
 .post-content a {
