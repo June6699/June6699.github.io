@@ -61,6 +61,19 @@
     return (Number.isFinite(h) ? h : 60) + 18;
   }
 
+  /* scroll/resize 事件高频触发：rAF 合并，每帧最多跑一次计算 */
+  function throttleFrame(fn) {
+    var queued = false;
+    return function () {
+      if (queued) return;
+      queued = true;
+      requestAnimationFrame(function () {
+        queued = false;
+        fn();
+      });
+    };
+  }
+
   function toModeGroups(items, mode) {
     if (!items.length) return [];
     var latestYear = items[items.length - 1].year;
@@ -202,8 +215,8 @@
       });
     });
 
-    window.addEventListener("scroll", refreshByScroll, { passive: true });
-    window.addEventListener("resize", refreshByScroll, { passive: true });
+    window.addEventListener("scroll", throttleFrame(refreshByScroll), { passive: true });
+    window.addEventListener("resize", throttleFrame(refreshByScroll), { passive: true });
     render();
     refreshByScroll();
     root.dataset.vTimelineReady = "1";
@@ -345,8 +358,8 @@
       });
     }
 
-    window.addEventListener("scroll", refreshByScroll, { passive: true });
-    window.addEventListener("resize", refreshByScroll, { passive: true });
+    window.addEventListener("scroll", throttleFrame(refreshByScroll), { passive: true });
+    window.addEventListener("resize", throttleFrame(refreshByScroll), { passive: true });
     toc.dataset.tocReady = "1";
     setDrawerState(false);
     refreshByScroll();

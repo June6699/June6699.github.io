@@ -180,14 +180,19 @@
 {{- if (not site.Params.disableScrollToTop) }}
 <script>
     var mybutton = document.getElementById("top-link");
+    var topLinkTick = 0;
+    var topLinkShown = null;
+    /* scroll 事件高频触发：rAF 合并到每帧最多一次，状态未变时不重复写样式 */
     window.onscroll = function () {
-        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
-            mybutton.style.visibility = "visible";
-            mybutton.style.opacity = "1";
-        } else {
-            mybutton.style.visibility = "hidden";
-            mybutton.style.opacity = "0";
-        }
+        if (topLinkTick) return;
+        topLinkTick = window.requestAnimationFrame(function () {
+            topLinkTick = 0;
+            var show = window.scrollY > 800;
+            if (show === topLinkShown) return;
+            topLinkShown = show;
+            mybutton.style.visibility = show ? "visible" : "hidden";
+            mybutton.style.opacity = show ? "1" : "0";
+        });
     };
 
 </script>
