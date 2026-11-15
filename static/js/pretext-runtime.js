@@ -3,9 +3,6 @@
 // - data-pretext-height="1"：A：计算文本高度并设置元素高度（避免排版抖动）
 // - data-pretext-bubble="1"：B：在保持行数不变的前提下尽量收紧宽度（v1：二分搜索）
 (function () {
-  // #region agent log
-  fetch('http://127.0.0.1:7806/ingest/8df93df5-a069-4faa-8b45-eb351672274f',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'2c7a4c'},body:JSON.stringify({sessionId:'2c7a4c',runId:'run1',hypothesisId:'H1',location:'pretext-runtime.js:6',message:'runtime script executed',data:{path:location.pathname,readyState:document.readyState},timestamp:Date.now()})}).catch(()=>{});
-  // #endregion
   function qsAll(sel) {
     return Array.from(document.querySelectorAll(sel));
   }
@@ -88,15 +85,9 @@
     if (window.__pretextLayoutEngine) return window.__pretextLayoutEngine;
     try {
       const engine = await import("https://cdn.jsdelivr.net/npm/@chenglou/pretext@0.0.4/dist/layout.js");
-      // #region agent log
-      fetch('http://127.0.0.1:7806/ingest/8df93df5-a069-4faa-8b45-eb351672274f',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'2c7a4c'},body:JSON.stringify({sessionId:'2c7a4c',runId:'run1',hypothesisId:'H1',location:'pretext-runtime.js:72',message:'pretext import success',data:{hasPrepare:typeof engine.prepare==='function',hasLayout:typeof engine.layout==='function'},timestamp:Date.now()})}).catch(()=>{});
-      // #endregion
       window.__pretextLayoutEngine = engine;
       return engine;
     } catch (e) {
-      // #region agent log
-      fetch('http://127.0.0.1:7806/ingest/8df93df5-a069-4faa-8b45-eb351672274f',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'2c7a4c'},body:JSON.stringify({sessionId:'2c7a4c',runId:'run1',hypothesisId:'H1',location:'pretext-runtime.js:77',message:'pretext import failed',data:{error:String(e&&e.message||e)},timestamp:Date.now()})}).catch(()=>{});
-      // #endregion
       console.warn("[pretext-runtime] pretext import failed, fallback mode:", e);
       window.__pretextLayoutEngine = null;
       return null;
@@ -145,9 +136,6 @@
       el.style.height = h + "px";
     });
     el.dataset.pretextLines = String(lineCount);
-    // #region agent log
-    fetch('http://127.0.0.1:7806/ingest/8df93df5-a069-4faa-8b45-eb351672274f',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'2c7a4c'},body:JSON.stringify({sessionId:'2c7a4c',runId:'run1',hypothesisId:'H4',location:'pretext-runtime.js:116',message:'applyHeight computed',data:{innerWidth:Math.round(innerWidth),lineHeightPx:Math.round(lineHeightPx),height:Math.round(h),lineCount:lineCount,pretextReady:!!pretext},timestamp:Date.now()})}).catch(()=>{});
-    // #endregion
   }
 
   async function applyBubble(pretext, el) {
@@ -211,9 +199,6 @@
   async function init() {
     const heightEls = qsAll('[data-pretext-height="1"]');
     const bubbleEls = qsAll('[data-pretext-bubble="1"]');
-    // #region agent log
-    fetch('http://127.0.0.1:7806/ingest/8df93df5-a069-4faa-8b45-eb351672274f',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'2c7a4c'},body:JSON.stringify({sessionId:'2c7a4c',runId:'run1',hypothesisId:'H2',location:'pretext-runtime.js:181',message:'init selector counts',data:{heightEls:heightEls.length,bubbleEls:bubbleEls.length},timestamp:Date.now()})}).catch(()=>{});
-    // #endregion
     if (heightEls.length === 0 && bubbleEls.length === 0) return;
 
     // 避免重复渲染：同一元素只标记一次进行计算
@@ -263,9 +248,6 @@
         const slider = demoRoot.querySelector('[data-pretext-slider="1"]');
         const target = demoRoot.querySelector('[data-pretext-target="1"]');
         const stage = demoRoot.querySelector('[data-pretext-stage="1"]');
-        // #region agent log
-        fetch('http://127.0.0.1:7806/ingest/8df93df5-a069-4faa-8b45-eb351672274f',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'2c7a4c'},body:JSON.stringify({sessionId:'2c7a4c',runId:'run1',hypothesisId:'H2',location:'pretext-runtime.js:234',message:'reflow demo node binding',data:{hasSlider:!!slider,hasTarget:!!target,hasStage:!!stage},timestamp:Date.now()})}).catch(()=>{});
-        // #endregion
         if (!slider || !target || !stage) continue;
 
         const run = async function () {
@@ -284,9 +266,6 @@
           const lines = Number(target.dataset.pretextLines || 0);
           const height = target.getBoundingClientRect().height || 0;
           updateReflowMetrics(demoRoot, value, lines, height);
-          // #region agent log
-          fetch('http://127.0.0.1:7806/ingest/8df93df5-a069-4faa-8b45-eb351672274f',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'2c7a4c'},body:JSON.stringify({sessionId:'2c7a4c',runId:'run1',hypothesisId:'H3',location:'pretext-runtime.js:247',message:'slider run applied',data:{sliderValue:value,lines:lines,height:Math.round(height),targetWidth:target.style.width},timestamp:Date.now()})}).catch(()=>{});
-          // #endregion
         };
 
         slider.addEventListener("input", function () { run(); }, { passive: true });
