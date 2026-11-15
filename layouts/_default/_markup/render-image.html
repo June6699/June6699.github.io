@@ -20,4 +20,4 @@
   {{- $imageWidth = $imageConfig.Width -}}
   {{- $imageHeight = $imageConfig.Height -}}
 {{- end -}}
-<img src="{{ $src }}"{{ with .PlainText }} alt="{{ . }}"{{ end }}{{ with .Title }} title="{{ . }}"{{ end }}{{ if and (gt $imageWidth 0) (gt $imageHeight 0) }} width="{{ $imageWidth }}" height="{{ $imageHeight }}"{{ end }} loading="lazy" />
+<img src="{{ $src }}"{{ with .PlainText }} alt="{{ . }}"{{ end }}{{ with .Title }} title="{{ . }}"{{ end }}{{ if and (gt $imageWidth 0) (gt $imageHeight 0) }} width="{{ $imageWidth }}" height="{{ $imageHeight }}"{{ end }} loading="lazy" decoding="async" />
