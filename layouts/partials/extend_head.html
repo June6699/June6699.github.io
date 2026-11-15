@@ -1,3 +1,14 @@
+{{- /* color-scheme：默认跟随系统；用户用顶栏按钮固定过主题时同步到 meta。
+       页面配色实际由 :root[data-theme] 钉住，此 meta 供浏览器在 CSS 生效前参考 */ -}}
+<meta name="color-scheme" content="light dark">
+<script>
+try {
+    var __prefTheme = localStorage.getItem("pref-theme");
+    if (__prefTheme === "light" || __prefTheme === "dark") {
+        document.querySelector('meta[name="color-scheme"]').content = __prefTheme;
+    }
+} catch (e) {}
+</script>
 {{- /* PhotoSwipe 图片灯箱样式：仅 posts 正式文章页加载，其余页面不引入 */ -}}
 {{- if and (eq .Kind "page") (in site.Params.mainSections .Section) }}
 <link rel="stylesheet" href="{{ "css/photoswipe.css" | relURL }}">

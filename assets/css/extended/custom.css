@@ -1,3 +1,14 @@
+/* ========== color-scheme：默认跟随系统，显式主题由 data-theme 钉住 ========== */
+/* PaperMod 把 :root 基础值硬编码为 light；改为 light dark 让首帧前/无 JS 时跟随系统
+   偏好，显式主题仍由 :root[data-theme] 钉住（dark 在主题内已定义，light 补在下面） */
+:root {
+    color-scheme: light dark;
+}
+
+:root[data-theme="light"] {
+    color-scheme: light;
+}
+
 /* ========== 亮色：中性底 + 单一强调色；暗色：aspartate 为主 ========== */
 :root {
     --accent: #2563eb;

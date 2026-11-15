@@ -200,16 +200,47 @@
 
 {{- if (not site.Params.disableThemeToggle) }}
 <script>
-    document.getElementById("theme-toggle").addEventListener("click", () => {
-        const html = document.querySelector("html");
-        if (html.dataset.theme === "dark") {
-            html.dataset.theme = 'light';
-            localStorage.setItem("pref-theme", 'light');
-        } else {
-            html.dataset.theme = 'dark';
-            localStorage.setItem("pref-theme", 'dark');
+    (function () {
+        var html = document.documentElement;
+        var meta = document.querySelector('meta[name="color-scheme"]');
+        var systemDark = window.matchMedia('(prefers-color-scheme: dark)');
+
+        /* scheme: "light" | "dark" | null（null = 跟随系统偏好） */
+        function applyScheme(scheme) {
+            html.dataset.theme = scheme || (systemDark.matches ? 'dark' : 'light');
+            if (meta) meta.content = scheme || 'light dark';
         }
-    })
+
+        function readStored() {
+            try {
+                var v = localStorage.getItem("pref-theme");
+                return (v === 'light' || v === 'dark') ? v : null;
+            } catch (e) { return null; }
+        }
+
+        document.getElementById("theme-toggle").addEventListener("click", function () {
+            /* 目标 = 当前所见主题的反面；与系统偏好一致即回到跟随系统（移除存储值），
+               不钉死在恰好等于系统值的主题上，系统切换时站点才能跟着变 */
+            var current = html.dataset.theme === 'dark' ? 'dark'
+                : html.dataset.theme === 'light' ? 'light'
+                : (systemDark.matches ? 'dark' : 'light');
+            var target = current === 'dark' ? 'light' : 'dark';
+            var system = systemDark.matches ? 'dark' : 'light';
+            var stored;
+            try {
+                if (target === system) localStorage.removeItem("pref-theme");
+                else localStorage.setItem("pref-theme", target);
+            } catch (e) { /* 存储被禁时仅本次会话生效 */ }
+            stored = target === system ? null : target;
+            applyScheme(stored);
+        });
+
+        /* 其他标签页切换主题时保持同步 */
+        window.addEventListener('storage', function (e) {
+            if (e.key !== 'pref-theme') return;
+            applyScheme(readStored());
+        });
+    })();
 
 </script>
 {{- end }}
