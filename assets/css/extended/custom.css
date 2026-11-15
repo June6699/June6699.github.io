@@ -3636,6 +3636,13 @@ a.sidebar-tag-nav__flat:hover {
     display: block !important;
 }
 
+/* 首屏外的动态卡片延迟布局/绘制（content-visibility 不生效时自动忽略）。
+   跳过前两条避免影响首屏渲染；contain-intrinsic-size 用 auto 记住渲染后的真实高度 */
+.moments-vstage .moments-feed__item:nth-child(n + 3) {
+    content-visibility: auto;
+    contain-intrinsic-size: auto 420px;
+}
+
 /* JS 未及时写入 data-mode 时，激活按钮也要可见 */
 .moments-vtimeline__mode.is-active {
     background: #0891b2;
