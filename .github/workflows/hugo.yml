@@ -18,7 +18,7 @@ on:
           - "true"
 
 permissions:
-  contents: read
+  contents: write
   pages: write
   id-token: write
 
@@ -81,11 +81,27 @@ jobs:
       - name: Fetch VerCount page views
         run: npm run fetch-pv
 
+      - name: Snapshot PV history
+        run: npm run snapshot-pv
+
       - name: Rebuild site with page views
         env:
           HUGO_MOMENTS_PASSWORD_HASH: ${{ secrets.HUGO_MOMENTS_PASSWORD_HASH }}
           HUGO_MOMENTS_RECOVERY_EMAIL: ${{ secrets.HUGO_MOMENTS_RECOVERY_EMAIL }}
         run: npm run build
+
+      - name: Commit PV history
+        # 快照有变化才提交；[skip ci] 避免本次 push 再触发一轮完整构建部署
+        run: |
+          if git diff --quiet data/pv_history.json; then
+            echo "PV history unchanged, skip commit"
+          else
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add data/pv_history.json
+            git commit -m "chore(data): 每日阅读量快照 [skip ci]"
+            git push
+          fi
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
