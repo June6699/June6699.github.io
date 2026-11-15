@@ -45,8 +45,6 @@ DEPLOY_SERVER=true
 
 GitHub Actions 里需要配置的 Secrets：
 
-- `GITALK_CLIENT_ID`
-- `GITALK_CLIENT_SECRET`
 - `HUGO_MOMENTS_PASSWORD_HASH`
 - `HUGO_MOMENTS_RECOVERY_EMAIL`
 - `SERVER_SSH_HOST`
@@ -69,16 +67,11 @@ GitHub Actions 里需要配置的 Secrets：
 
 `npm run build` 会先自动修正包含空格的 Markdown 图片目标，再同步图片和图标、清理旧构建产物，并用 `https://june6699.github.io/` 作为 Hugo `baseURL` 构建。任务启动器在 Windows 使用 `py -3.11`，在 GitHub Actions 使用 `python3`。视频转 ASCII 页面只在进入该工具页时从 `unpkg` 下载 ffmpeg wasm，不会在进入博客其它页面时加载，也不再提交本地 `ffmpeg-core.wasm`。
 
-### Gitalk 评论（环境变量）
+### 评论：giscus（GitHub Discussions）
 
-`clientID` / `clientSecret` **不要**写入 `hugo.toml` 或提交到仓库。构建前请设置：
+评论区基于 [giscus](https://giscus.app/zh)，数据存在本仓库的 Discussions 中。所用配置（repo / category ID 等）均为公开标识，**无需任何 secret**，也不要把 secret 类凭据写回 `hugo.toml` 或仓库文件。模板在 `layouts/partials/comments.html`，主题跟随站点明暗切换。
 
-- **PowerShell**：`$env:GITALK_CLIENT_ID="..."`；`$env:GITALK_CLIENT_SECRET="..."`
-- **cmd**：`set GITALK_CLIENT_ID=...` 与 `set GITALK_CLIENT_SECRET=...`
-
-GitHub Actions 已在工作流中读取仓库 **Secrets**：`GITALK_CLIENT_ID`、`GITALK_CLIENT_SECRET`。若未配置，线上构建仍会成功，但评论区不会加载。
-
-若密钥曾出现在历史提交中，请在 [GitHub OAuth App](https://github.com/settings/developers) 中**轮换 Client secrets**。长期更稳妥可考虑改用 Giscus 等方案。
+管理评论：仓库 **Discussions** → 「文章评论」分类。
 
 变量名示例见仓库根目录 `.env.example`。
 

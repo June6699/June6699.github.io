@@ -2491,11 +2491,6 @@ a.sidebar-tag-nav__flat:hover {
     text-decoration: underline;
 }
 
-.comments-gitalk-missing {
-    margin-top: 1rem;
-    color: var(--secondary);
-}
-
 /* =========================
    Pretext Demo（仅作用于 .pretext-demo）
    ========================= */

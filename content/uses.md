@@ -21,4 +21,4 @@ draft: true
 
 - 静态站：[Hugo](https://gohugo.io/) + [PaperMod](https://github.com/adityatelange/hugo-PaperMod)  
 - 托管：GitHub Pages  
-- 评论：Gitalk（OAuth 密钥经环境变量注入构建）
+- 评论：giscus（GitHub Discussions，配置为公开标识，无需 secret）

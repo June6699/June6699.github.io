@@ -21,7 +21,7 @@ googleAnalytics = "G-S7DXV0QV58"
 
 [security]
   [security.funcs]
-    getenv = ['^HUGO_', '^CI$', '^GITALK_']
+    getenv = ['^HUGO_', '^CI$']
 
 # 排除：文章图目录、动态目录下的位图（这些是源文件，图片由下方 module mounts 直挂发布）
 [build]
@@ -102,20 +102,6 @@ ignoreLogs = ["warning-goldmark-raw-html"]
 [params.cover]
   # 首页/列表不展示文章封面图，仅标题与摘要
   hiddenInList = true
-
-# Gitalk：clientSecret 仅通过环境变量注入（勿写入仓库）。
-# 本地：set GITALK_CLIENT_ID=... & set GITALK_CLIENT_SECRET=...（PowerShell 用 $env:）
-# CI：在仓库 Settings → Secrets 中配置 GITALK_CLIENT_ID、GITALK_CLIENT_SECRET
-# 注意：Gitalk 架构决定 clientSecret 会随渲染后的 HTML 下发到前端，
-# 旧值已随历史提交公开，请务必在 GitHub OAuth App 中轮换 client secret。
-[params.gitalk]
-  enable = true
-  # clientID 本身是公开标识，可留在配置；clientSecret 一律走 GITALK_CLIENT_SECRET 环境变量。
-  clientID = "Ov23lip1sLnFPYK622n1"
-  repo = "June6699.github.io"
-  owner = "June6699"
-  admin = ["June6699"]
-  distractionFreeMode = true
 
 [[params.homeQuickLinks]]
   name = "我的项目"
