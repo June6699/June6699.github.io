@@ -225,6 +225,20 @@
   {{- end -}}
   {{- $pvBaseMap := site.Data.pv_base | default dict -}}
   {{- $pvSince := site.Params.pvSince | default "2026-10-04" -}}
+  {{- /* 逐日快照：data/pv_history.json 由 CI 每日存档（date, total）；
+        相邻两天的差值即当日真实新增，首日为基线计 0。无历史时回退均摊估算 */ -}}
+  {{- $pvDaily := slice -}}
+  {{- with site.Data.pv_history -}}
+    {{- $histDays := .days -}}
+    {{- range $i, $d := $histDays -}}
+      {{- $delta := 0 -}}
+      {{- if gt $i 0 -}}
+        {{- $diff := sub $d.total (index $histDays (sub $i 1)).total -}}
+        {{- if gt $diff 0 -}}{{ $delta = $diff }}{{ end -}}
+      {{- end -}}
+      {{- $pvDaily = $pvDaily | append (dict "date" $d.date "pv" $delta) -}}
+    {{- end -}}
+  {{- end -}}
   {{- $pvItems := slice -}}
   {{- range $posts }}
     {{- $live := index $pvCounts .RelPermalink | default 0 -}}
@@ -424,8 +438,11 @@
       <h3>阅读量日期分布</h3>
       <div
         class="stat-pv-daily"
-        data-pv-daily='{{ dict "since" $pvSince "fetchedAt" $pvFetchedAt "items" $pvItems | jsonify }}'></div>
-      <p class="stat-pie-note">每日数值为估算：接入以来的阅读量按抓取区间逐日均摊（VerCount 不提供逐日明细）。数据抓取：{{ with $pvFetchedAt }}{{ dateFormat "2006-01-02 15:04" . }} UTC{{ else }}尚未抓取{{ end }}，每日由 GitHub Actions 自动更新。</p>
+        data-pv-daily='{{ dict "since" $pvSince "fetchedAt" $pvFetchedAt "items" $pvItems "history" $pvDaily | jsonify }}'></div>
+      <p class="stat-pie-note">
+        {{- if gt (len $pvDaily) 0 }}每日数值为真实快照差值：GitHub Actions 每天存档 VerCount 累计数，相邻两天相减即当日新增（首日为基线）。
+        {{- else }}每日数值为估算：接入以来的阅读量按抓取区间逐日均摊（VerCount 不提供逐日明细）。
+        {{- end }}数据抓取：{{ with $pvFetchedAt }}{{ dateFormat "2006-01-02 15:04" . }} UTC{{ else }}尚未抓取{{ end }}，每日由 GitHub Actions 自动更新。</p>
     </section>
 
     <section class="stat-section" id="stat-tags">
@@ -773,6 +790,16 @@
       if (it.bFrom !== null) it.bDays = Math.round((it.bTo - it.bFrom) / DAY) + 1;
     });
 
+    /* 真实快照模式：data.history=[{date,pv}]（相邻两天累计的差值），存在时用真实逐日数据 */
+    var history = data.history || [];
+    var real = history.length > 0;
+    var series = [];
+    if (real) {
+      history.forEach(function (d) {
+        var pv = +d.pv || 0;
+        series.push({ ms: parseDay(d.date), base: 0, live: pv, total: pv });
+      });
+    } else {
     var today = parseDay(dayStr(Date.now()));
     var since = parseDay(data.since || dayStr(today));
     var fetched = data.fetchedAt ? parseDay(data.fetchedAt) : today;
@@ -782,7 +809,6 @@
     if (end - start > 120 * DAY) start = end - 120 * DAY + DAY;
     var nLive = Math.max(1, Math.round((fetched - since) / DAY) + 1);
 
-    var series = [];
     for (var ms = start; ms <= end; ms += DAY) {
       var baseV = 0, liveV = 0;
       items.forEach(function (it) {
@@ -791,17 +817,18 @@
       });
       series.push({ ms: ms, base: baseV, live: liveV, total: baseV + liveV });
     }
+    }
     var max = 0;
     series.forEach(function (d) { if (d.total > max) max = d.total; });
 
     var hasBase = items.some(function (it) { return it.base > 0; });
     var html = '<div class="stat-pv-daily__meta"><div class="stat-pv-daily__legend">'
-      + '<span><i class="stat-pv-daily__seg stat-pv-daily__seg--live" aria-hidden="true"></i>实时计数</span>'
+      + '<span><i class="stat-pv-daily__seg stat-pv-daily__seg--live" aria-hidden="true"></i>' + (real ? '当日新增（快照差值）' : '实时计数') + '</span>'
       + (hasBase ? '<span><i class="stat-pv-daily__seg stat-pv-daily__seg--base" aria-hidden="true"></i>历史基线</span>' : '')
       + '</div><span>峰值 ' + Math.round(max) + '/天</span></div>'
       + '<div class="stat-pv-daily__plot">';
     if (!max) {
-      el.innerHTML = html + '</div><p class="stat-pv-empty">暂无阅读量数据，等待每日定时抓取。</p>';
+      el.innerHTML = html + '</div><p class="stat-pv-empty">' + (real ? '已启用每日快照，待积累出逐日差值后展示。' : '暂无阅读量数据，等待每日定时抓取。') + '</p>';
       el.classList.add('is-inview');
       return;
     }
@@ -828,7 +855,7 @@
         var d = series[+col.getAttribute('data-i')];
         tooltip.hidden = false;
         tooltip.innerHTML = '<strong>' + dayStr(d.ms) + '</strong>'
-          + '<span>阅读 ≈ ' + Math.round(d.total) + '</span>'
+          + '<span>' + (real ? '当日新增 ' : '阅读 ≈ ') + Math.round(d.total) + '</span>'
           + (d.base ? '<span>基线 ' + Math.round(d.base) + ' + 实时 ' + Math.round(d.live) + '</span>' : '');
         var cr = col.getBoundingClientRect();
         var er = el.getBoundingClientRect();
