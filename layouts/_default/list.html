@@ -10,9 +10,21 @@
     {{- if .IsHome }}
       {{- $img := site.Params.homeHeroImage | default "" -}}
       {{- if $img }}
+      {{- /* 首屏大图是 LCP 候选：fetchpriority=high 提升加载优先级、禁用 lazy；
+             宽高读自源文件以预留布局空间。站点标题覆盖在图上，按装饰图置空 alt。 */ -}}
+      {{- $heroPath := strings.TrimPrefix "/images/" $img -}}
+      {{- $heroW := 0 -}}
+      {{- $heroH := 0 -}}
+      {{- $heroSource := path.Join "content" "posts" "images" $heroPath -}}
+      {{- if os.FileExists $heroSource -}}
+        {{- with images.Config $heroSource -}}
+          {{- $heroW = .Width -}}
+          {{- $heroH = .Height -}}
+        {{- end -}}
+      {{- end -}}
       <section class="home-hero">
         <div class="home-hero-inner">
-          <img class="home-hero-img" src="{{ $img | relURL }}" alt="home hero" loading="lazy" />
+          <img class="home-hero-img" src="{{ $img | relURL }}" alt="" fetchpriority="high"{{ with $heroW }} width="{{ . }}"{{ end }}{{ with $heroH }} height="{{ . }}"{{ end }} />
           <div class="home-hero-text">
             <h1 class="home-hero-title">{{ site.Params.homeHeroTitle | default site.Title }}</h1>
             {{- with site.Params.homeHeroSubtitle }}
